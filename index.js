@@ -19,17 +19,26 @@ app.listen(app.get('port'), function() {
 
 // connects to the database
 var pg = require('pg');
-var pool = new pg.Pool()
+pg.defaults.ssl = true;
 
 app.get('/db', function (request, response) {
-  pool.connect(process.env.DATABASE_URL, function(err, client, done) {
+
+  console.log('Get /db');
+  console.log(process.env.DATABASE_URL);
+
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    console.log('Connecting to db...');
     client.query('SELECT * FROM test_table', function(err, result) {
+
+      console.log('Getting data from test_table');
+
       done();
       if (err)
        { console.error(err); response.send("Error " + err); }
       else
        { response.render('pages/db', {results: result.rows} ); }
     });
-  });
-  pool.end();
+
+  });	
+
 });
