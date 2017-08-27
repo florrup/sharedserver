@@ -1,6 +1,6 @@
 # Shared Server
 
-https://travis-ci.org/florrup/sharedserver.svg?branch=master
+[![Build Status](https://travis-ci.org/florrup/sharedserver.svg?branch=master)](https://travis-ci.org/florrup/sharedserver)
 
 ## Running Locally
 
