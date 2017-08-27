@@ -42,3 +42,13 @@ app.get('/db', function (request, response) {
   });	
 
 });
+
+// testing coveralls
+
+function getStringToPrint() {
+  return "Hello World!";
+}
+ 
+console.log(getStringToPrint());
+ 
+module.exports = { getStringToPrint: getStringToPrint };
