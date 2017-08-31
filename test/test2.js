@@ -1,3 +1,7 @@
+//! @package test
+//! @file test2.js
+//! Testing Coveralls
+
 const assert = require('assert');
 
 describe('Array', function() {
@@ -10,6 +14,12 @@ describe('Array', function() {
 
 var index = require('../index.js');
 
+
+/**
+ * Compares getStringToPrint result with a String
+ *
+ * @return {boolean}
+ */
 describe('Index', function () {
   it('should print Hello World!', function () {
     assert.equal(index.getStringToPrint(), "Hello World!");

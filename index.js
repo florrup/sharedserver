@@ -1,3 +1,6 @@
+//! @file index.js
+//! Starts the app
+
 var express = require('express');
 var app = express();
 
@@ -43,9 +46,13 @@ app.get('/db', function (request, response) {
 
 });
 
-// testing coveralls
 
-function getStringToPrint() {
+/**
+ * Returns "Hello World!" in order to test Coveralls
+ *
+ * @return {string}
+ */
+ function getStringToPrint() {
   return "Hello World!";
 }
  
