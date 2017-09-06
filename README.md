@@ -26,6 +26,14 @@ or
 
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
+## Docker
+
+```
+$ sudo docker build -t fiuba/sharedserver .
+$ sudo docker run -p 5000:5000 -d fiuba/sharedserver
+$ curl -i localhost:5000/
+```
+
 ## Generating Doxygen Documentation
 
 ```
