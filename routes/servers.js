@@ -13,6 +13,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done) {
   query.on('end', () => { client.end(); });
 });	
 */
+// TODO: Fix deprecation warning
 
 /**
  *  Da de alta un server.
@@ -88,9 +89,8 @@ router.put('/:serverId', function(request, response) {
   });
 });
 
-
 /**
- *  Da de baja un servidor
+ *  Da de baja un servidor.
  *
  */
 router.delete('/:serverId', function(request, response) {

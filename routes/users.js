@@ -13,6 +13,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done) {
     query.on('end', () => { client.end(); });
 }); 
 */
+// TODO: Fix deprecation warning
 
 /**
  *  Devuelve toda la información acerca de todos los users indicados.
@@ -21,7 +22,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 router.get('/', function(request, response) {
   const results = [];
   // Get a Postgres client from the connection pool
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 
     // Handle connection errors
     if (err) {
@@ -84,23 +85,101 @@ router.post('/', function(request, response) {
   });
 });
 
-
-  
-
-
-// edits an existing user
-router.put('/:userid', function(request, response) {
-
+/**
+ *  Da de baja un usuario.
+ *
+ */
+router.delete('/:userId', function(request, response) {
+  const results = [];
+  // Grab data from the URL parameters
+  const userId = request.params.userId;
+  // Get a Postgres client from the connection pool
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    // Handle connection errors
+    if(err) {
+      done();
+      console.log(err);
+      return response.status(500).json({success: false, data: err});
+    }
+    // SQL Query > Delete Data
+    client.query('DELETE FROM users WHERE id=($1)', [userId]);
+    // SQL Query > Select Data
+    var query = client.query('SELECT * FROM users ORDER BY id ASC');
+    // Stream results back one row at a time
+    query.on('row', (row) => {
+      results.push(row);
+    });
+    // After all data is returned, close connection and return results
+    query.on('end', () => {
+      done();
+      return response.json(results);
+    });
+  });
 });
 
-// deletes a user
-router.delete('/:userid', function(request, response) {
-
+/**
+ *  Devuelve toda la información del usuario.
+ *
+ */
+router.get('/:userId', function(request, response) {
+  const results = [];
+  // Grab data from the URL parameters
+  const userId = request.params.userId;
+  // Get a Postgres client from the connection pool
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    // Handle connection errors
+    if(err) {
+      done();
+      console.log(err);
+      return response.status(500).json({success: false, data: err});
+    }
+    // SQL Query > Select Data
+    const query = client.query('SELECT * FROM users WHERE id=($1)', [userId]);
+    // Stream results back one row at a time
+    query.on('row', (row) => {
+      results.push(row);
+    });
+    // After all data is returned, close connection and return results
+    query.on('end', () => {
+      done();
+      return response.json(results);
+    });
+  });
 });
 
-// gets a user
-router.get('/:userid', function(request, response) {
-
+/**
+ *  Modifica los datos de un usuario.
+ *
+ */
+router.put('/:userId', function(request, response) {
+  const results = [];
+  // Grab data from the URL parameters
+  const userId = request.params.userId;
+  // Grab data from http request
+  const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
+  // Get a Postgres client from the connection pool
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    // Handle connection errors
+    if(err) {
+      done();
+      console.log(err);
+      return response.status(500).json({success: false, message: "Unexpected error"});
+    }
+    // SQL Query > Update Data
+    client.query('UPDATE users SET name=($1), surname=($2) WHERE id=($3)',
+    [data.name, data.surname, userId]);
+    // SQL Query > Select Data
+    const query = client.query("SELECT * FROM users ORDER BY id ASC");
+    // Stream results back one row at a time
+    query.on('row', (row) => {
+      results.push(row);
+    });
+    // After all data is returned, close connection and return results
+    query.on('end', function() {
+      done();
+      return response.json(results);
+    });
+  });
 });
 
 // always return router
