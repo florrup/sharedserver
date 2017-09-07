@@ -8,8 +8,8 @@ pg.defaults.ssl = true;
  *
  */
 pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-	const query = client.query('CREATE TABLE IF NOT EXISTS users(id INT PRIMARY KEY, name VARCHAR(40) not null, surname VARCHAR(40) not null, complete BOOLEAN)');
-  	query.on('end', () => { client.end(); });
+  const query = client.query('CREATE TABLE IF NOT EXISTS users(id INT PRIMARY KEY, name VARCHAR(40) not null, surname VARCHAR(40) not null, complete BOOLEAN)');
+  query.on('end', () => { client.end(); });
 });	
 
 /**
@@ -19,7 +19,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 router.get('/', function(request, response) {
   const results = [];
   // Get a Postgres client from the connection pool
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 
     // Handle connection errors
     if (err) {
@@ -48,7 +48,7 @@ router.get('/', function(request, response) {
  *
  */
 router.post('/', function(request, response) {
-	const results = [];
+  const results = [];
   // Grab data from http request
   const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
 
