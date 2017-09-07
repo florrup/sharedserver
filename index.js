@@ -29,6 +29,33 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
+// connects to the database
+var pg = require('pg');
+pg.defaults.ssl = true;
+
+app.get('/db', function (request, response) {
+
+  console.log('Get /db');
+  console.log(process.env.DATABASE_URL);
+
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    console.log('Connecting to db...');
+    client.query('SELECT * FROM test_table', function(err, result) {
+
+      console.log('Getting data from test_table');
+
+      done();
+      if (err)
+       { console.error(err); response.send("Error " + err); }
+      else
+       { response.render('pages/db', {results: result.rows} ); }
+    });
+
+  });	
+
+});
+
+
 /**
  * Returns "Hello World!" in order to test Coveralls
  *
