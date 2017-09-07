@@ -7,10 +7,12 @@ pg.defaults.ssl = true;
  *  Conecta a la base de datos y crea la tabla 'users' de ser necesario.
  *
  */
+ /*
 pg.connect(process.env.DATABASE_URL, function(err, client, done) {
   const query = client.query('CREATE TABLE IF NOT EXISTS users(id INT PRIMARY KEY, name VARCHAR(40) not null, surname VARCHAR(40) not null, complete BOOLEAN)');
     query.on('end', () => { client.end(); });
 }); 
+*/
 
 /**
  *  Devuelve toda la información acerca de todos los users indicados.

@@ -7,10 +7,12 @@ pg.defaults.ssl = true;
  *  Conecta a la base de datos y crea la tabla 'servers' de ser necesario.
  *
  */
+ /*
 pg.connect(process.env.DATABASE_URL, function(err, client, done) {
   const query = client.query('CREATE TABLE IF NOT EXISTS servers(id INT PRIMARY KEY, createdBy text, name text)');
   query.on('end', () => { client.end(); });
 });	
+*/
 
 /**
  *  Da de alta un server.
