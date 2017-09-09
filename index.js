@@ -35,26 +35,18 @@ pg.defaults.ssl = true;
 
 app.get('/db', function (request, response) {
 
-  console.log('Get /db');
-  console.log(process.env.DATABASE_URL);
+  var client = new pg.Client(process.env.DATABASE_URL);
 
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    console.log('Connecting to db...');
-    client.query('SELECT * FROM test_table', function(err, result) {
-
-      console.log('Getting data from test_table');
-
-      done();
-      if (err)
-       { console.error(err); response.send("Error " + err); }
-      else
-       { response.render('pages/db', {results: result.rows} ); }
-    });
-
-  });	
-
+  client.connect();
+  console.log('Connecting to db...');
+  var query = client.query('SELECT * FROM users', function(err, result) {
+    if (err) {
+      console.error(err); response.send("Error " + err);
+    } else {
+      response.render('pages/db', {results: result.rows} );
+    }
+  });
 });
-
 
 /**
  * Returns "Hello World!" in order to test Coveralls

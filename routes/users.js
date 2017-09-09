@@ -21,28 +21,28 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done) {
  */
 router.get('/', function(request, response) {
   const results = [];
-  // Get a Postgres client from the connection pool
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 
-    // Handle connection errors
-    if (err) {
-      done();
+  // Get a Postgres client from the connection pool
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
+    if(err) {
       console.log(err);
       return response.status(500).json({success: false, message: "Unexpected error"});
     }
+  });
 
-    // SQL Query > Select Data
-    const query = client.query('SELECT * FROM users ORDER BY id ASC;');
-    // Stream results back one row at a time
-    query.on('row', (row) => {
-      results.push(row);
-    });
+  // SQL Query > Select Data
+  const Query = require('pg').Query;
+  const query = new Query('SELECT * FROM users ORDER BY id ASC;');
+  const result = client.query(query);
+  // Stream results back one row at a time
+  query.on('row', (row) => {
+    results.push(row);
+  });
 
-    // After all data is returned, close connection and return results
-    query.on('end', () => {
-      done();
-      return response.json(results);
-    });
+  // After all data is returned, close connection and return results
+  query.on('end', () => {
+    return response.json(results);
   });
 });
 
@@ -52,36 +52,33 @@ router.get('/', function(request, response) {
  */
 router.post('/', function(request, response) {
   const results = [];
+
   // Grab data from http request
   const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
 
   // Get a Postgres client from the connection pool
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    console.log("Connected to db from router.post in users.js");
-
-    // Handle connection errors
-    if (err) {
-      done();
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
+    if(err) {
       console.log(err);
       return response.status(500).json({success: false, message: "Unexpected error"});
     }
+  });
 
-    // SQL Query > Insert Data
-    client.query('INSERT INTO users(id, name, surname, complete) values($1, $2, $3, $4)',
-    [data.id, data.name, data.surname, data.complete]);
+  // SQL Query > Insert Data
+  const Query = require('pg').Query;
+  const query = new Query('INSERT INTO users(id, name, surname, complete) values($1, $2, $3, $4)',
+  	[data.id, data.name, data.surname, data.complete]);
+  const result = client.query(query);
+  
+  // Stream results back one row at a time
+  query.on('row', (row) => {
+    results.push(row);
+  });
 
-    // SQL Query > Select Data
-    const query = client.query('SELECT * FROM users ORDER BY id ASC');
-    // Stream results back one row at a time
-    query.on('row', (row) => {
-      results.push(row);
-    });
-
-    // After all data is returned, close connection and return results
-    query.on('end', () => {
-      done();
-      return response.json(results);
-    });
+  // After all data is returned, close connection and return results
+  query.on('end', () => {
+    return response.json(results);
   });
 });
 
@@ -91,29 +88,32 @@ router.post('/', function(request, response) {
  */
 router.delete('/:userId', function(request, response) {
   const results = [];
+
   // Grab data from the URL parameters
   const userId = request.params.userId;
+
   // Get a Postgres client from the connection pool
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    // Handle connection errors
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
     if(err) {
-      done();
       console.log(err);
-      return response.status(500).json({success: false, data: err});
+      return response.status(500).json({success: false, message: "Unexpected error"});
     }
-    // SQL Query > Delete Data
-    client.query('DELETE FROM users WHERE id=($1)', [userId]);
-    // SQL Query > Select Data
-    var query = client.query('SELECT * FROM users ORDER BY id ASC');
-    // Stream results back one row at a time
-    query.on('row', (row) => {
-      results.push(row);
-    });
-    // After all data is returned, close connection and return results
-    query.on('end', () => {
-      done();
-      return response.json(results);
-    });
+  });
+
+  // SQL Query > Delete Data
+  const Query = require('pg').Query;
+  const query = new Query('DELETE FROM users WHERE id=($1)', [userId]);
+  const result = client.query(query);
+
+  // Stream results back one row at a time
+  query.on('row', (row) => {
+    results.push(row);
+  });
+
+  // After all data is returned, close connection and return results
+  query.on('end', () => {
+    return response.json(results);
   });
 });
 
@@ -123,27 +123,32 @@ router.delete('/:userId', function(request, response) {
  */
 router.get('/:userId', function(request, response) {
   const results = [];
+
   // Grab data from the URL parameters
   const userId = request.params.userId;
+
   // Get a Postgres client from the connection pool
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    // Handle connection errors
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
     if(err) {
-      done();
       console.log(err);
-      return response.status(500).json({success: false, data: err});
+      return response.status(500).json({success: false, message: "Unexpected error"});
     }
-    // SQL Query > Select Data
-    const query = client.query('SELECT * FROM users WHERE id=($1)', [userId]);
-    // Stream results back one row at a time
-    query.on('row', (row) => {
-      results.push(row);
-    });
-    // After all data is returned, close connection and return results
-    query.on('end', () => {
-      done();
-      return response.json(results);
-    });
+  });
+
+  // SQL Query > Select Data
+  const Query = require('pg').Query;
+  const query = new Query('SELECT * FROM users WHERE id=($1)', [userId]);
+  const result = client.query(query);
+
+  // Stream results back one row at a time
+  query.on('row', (row) => {
+    results.push(row);
+  });
+
+  // After all data is returned, close connection and return results
+  query.on('end', () => {
+    return response.json(results);
   });
 });
 
@@ -153,32 +158,36 @@ router.get('/:userId', function(request, response) {
  */
 router.put('/:userId', function(request, response) {
   const results = [];
+
   // Grab data from the URL parameters
   const userId = request.params.userId;
+
   // Grab data from http request
   const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
+
   // Get a Postgres client from the connection pool
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    // Handle connection errors
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
     if(err) {
-      done();
       console.log(err);
       return response.status(500).json({success: false, message: "Unexpected error"});
     }
-    // SQL Query > Update Data
-    client.query('UPDATE users SET name=($1), surname=($2) WHERE id=($3)',
+  });
+
+  // SQL Query > Update Data
+  const Query = require('pg').Query;
+  const query = new Query('UPDATE users SET name=($1), surname=($2) WHERE id=($3)',
     [data.name, data.surname, userId]);
-    // SQL Query > Select Data
-    const query = client.query("SELECT * FROM users ORDER BY id ASC");
-    // Stream results back one row at a time
-    query.on('row', (row) => {
-      results.push(row);
-    });
-    // After all data is returned, close connection and return results
-    query.on('end', function() {
-      done();
-      return response.json(results);
-    });
+  const result = client.query(query);
+
+  // Stream results back one row at a time
+  query.on('row', (row) => {
+    results.push(row);
+  });
+
+  // After all data is returned, close connection and return results
+  query.on('end', function() {
+    return response.json(results);
   });
 });
 
