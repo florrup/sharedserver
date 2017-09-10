@@ -203,5 +203,32 @@ router.get('/:serverId', function(request, response) {
 });
 
 
+function clearServersTable() {
+  // Get a Postgres client from the connection pool
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
+    if(err) {
+      console.log(err);
+      return response.status(500).json({code: 0, message: "Unexpected error"});
+    }
+  });
+
+  // SQL Query > Select Data
+  var Query = require('pg').Query;
+  var query = new Query('DELETE FROM servers');
+  var result = client.query(query);
+/*
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM servers');
+  result = client.query(query);
+  var count = 0;
+  query.on('row', (row) => {
+    count++;
+  });
+  console.log("Count is " + count);
+*/
+}
+
 // always return router
 module.exports = router;
+module.exports.clearServersTable = clearServersTable;

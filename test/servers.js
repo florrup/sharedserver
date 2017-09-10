@@ -19,6 +19,7 @@ describe('Servers', function()  {
 	describe('/GET servers', function() {
 	  	it('it should GET servers', function(done) {
 		    this.timeout(15000);
+		    serversAPI.clearServersTable();
 
 		    chai.request(baseUrl)
 		        .get('/servers/')
@@ -33,6 +34,8 @@ describe('Servers', function()  {
 
 	describe('/POST server', function() {
 	  	it('it should POST a server', function(done) {
+		    serversAPI.clearServersTable();
+
 	  		var newServer = {
 		    	id: 1,
 		        createdBy: 'testCreator',
@@ -53,6 +56,8 @@ describe('Servers', function()  {
 
 	describe('/DELETE server', function() {
 	  	it('it should DELETE a server', function(done) {
+	  		serversAPI.clearServersTable();
+
 	  		var serverToDelete = {
 		    	id: 2,
 		        createdBy: 'testCreator',
@@ -72,33 +77,6 @@ describe('Servers', function()  {
 	            .send(serverToDelete)
 	            .end((err, res) => {
 	                res.should.have.status(204);
-	              done();
-	            });
-	    });
-	 });
-
-	describe('/GET server', function() {
-	  	it('it should GET a server', function(done) {
-	  		var serverToGet = {
-		    	id: 3,
-		        createdBy: 'testCreator',
-		        name: 'testName'
-		    };
-		    this.timeout(15000);
-
-	        chai.request(baseUrl)
-	            .post('/servers/')
-	            .send(serverToGet)
-	            .end((err, res) => {
-	                res.should.have.status(201);
-	                res.body.length.should.be.eql(1);
-	            });
-	        chai.request(baseUrl)
-	            .get('/servers/3')
-	            .send(serverToGet)
-	            .end((err, res) => {
-	                res.should.have.status(200);
-	                //res.body.length.should.be.eql(1);
 	              done();
 	            });
 	    });

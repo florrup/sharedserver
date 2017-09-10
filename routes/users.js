@@ -212,7 +212,7 @@ function clearUsersTable() {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
