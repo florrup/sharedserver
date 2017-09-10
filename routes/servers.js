@@ -156,5 +156,42 @@ router.delete('/:serverId', function(request, response) {
   });
 });
 
+
+/**
+ *  Devuelve toda la información del servidor.
+ *
+ */
+router.get('/:serverId', function(request, response) {
+  const results = [];
+
+  // Grab data from the URL parameters
+  const serverId = request.params.serverId;
+
+  // Get a Postgres client from the connection pool
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
+    if(err) {
+      console.log(err);
+      return response.status(500).json({success: false, message: "Unexpected error"});
+    }
+  });
+
+  // SQL Query > Select Data
+  const Query = require('pg').Query;
+  const query = new Query('SELECT * FROM servers WHERE id=($1)', [serverId]);
+  const result = client.query(query);
+
+  // Stream results back one row at a time
+  query.on('row', (row) => {
+    results.push(row);
+  });
+
+  // After all data is returned, close connection and return results
+  query.on('end', () => {
+    return response.json(results);
+  });
+});
+
+
 // always return router
 module.exports = router;
