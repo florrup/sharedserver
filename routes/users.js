@@ -27,14 +27,15 @@ router.get('/', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
   // SQL Query > Select Data
-  const Query = require('pg').Query;
-  const query = new Query('SELECT * FROM users ORDER BY id ASC;');
-  const result = client.query(query);
+  var Query = require('pg').Query;
+  var query = new Query('SELECT * FROM users ORDER BY id ASC;');
+  var result = client.query(query);
+
   // Stream results back one row at a time
   query.on('row', (row) => {
     results.push(row);
@@ -42,7 +43,7 @@ router.get('/', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(200).json(results);
   });
 });
 
@@ -53,6 +54,8 @@ router.get('/', function(request, response) {
 router.post('/', function(request, response) {
   const results = [];
 
+  const userId = request.body.id;
+
   // Grab data from http request
   const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
 
@@ -61,16 +64,20 @@ router.post('/', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
   // SQL Query > Insert Data
-  const Query = require('pg').Query;
-  const query = new Query('INSERT INTO users(id, name, surname, complete) values($1, $2, $3, $4)',
+  var Query = require('pg').Query;
+  var query = new Query('INSERT INTO users(id, name, surname, complete) values($1, $2, $3, $4)',
   	[data.id, data.name, data.surname, data.complete]);
-  const result = client.query(query);
-  
+  var result = client.query(query);
+
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM users WHERE id=($1)', [userId]);
+  result = client.query(query);
+
   // Stream results back one row at a time
   query.on('row', (row) => {
     results.push(row);
@@ -78,7 +85,7 @@ router.post('/', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(201).json(results);
   });
 });
 
@@ -97,14 +104,18 @@ router.delete('/:userId', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
   // SQL Query > Delete Data
-  const Query = require('pg').Query;
-  const query = new Query('DELETE FROM users WHERE id=($1)', [userId]);
-  const result = client.query(query);
+  var Query = require('pg').Query;
+  var query = new Query('DELETE FROM users WHERE id=($1)', [userId]);
+  var result = client.query(query);
+
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM users ORDER BY id ASC;');
+  result = client.query(query);
 
   // Stream results back one row at a time
   query.on('row', (row) => {
@@ -113,7 +124,7 @@ router.delete('/:userId', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(204).json(results);
   });
 });
 
@@ -132,14 +143,14 @@ router.get('/:userId', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
   // SQL Query > Select Data
-  const Query = require('pg').Query;
-  const query = new Query('SELECT * FROM users WHERE id=($1)', [userId]);
-  const result = client.query(query);
+  var Query = require('pg').Query;
+  var query = new Query('SELECT * FROM users WHERE id=($1)', [userId]);
+  var result = client.query(query);
 
   // Stream results back one row at a time
   query.on('row', (row) => {
@@ -148,7 +159,7 @@ router.get('/:userId', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(200).json(results);
   });
 });
 
@@ -175,10 +186,14 @@ router.put('/:userId', function(request, response) {
   });
 
   // SQL Query > Update Data
-  const Query = require('pg').Query;
-  const query = new Query('UPDATE users SET name=($1), surname=($2) WHERE id=($3)',
+  var Query = require('pg').Query;
+  var query = new Query('UPDATE users SET name=($1), surname=($2) WHERE id=($3)',
     [data.name, data.surname, userId]);
-  const result = client.query(query);
+  var result = client.query(query);
+
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM users WHERE id=($1)', [userId]);
+  result = client.query(query);
 
   // Stream results back one row at a time
   query.on('row', (row) => {
@@ -187,9 +202,36 @@ router.put('/:userId', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', function() {
-    return response.json(results);
+    return response.status(200).json(results);
   });
 });
 
+function clearUsersTable() {
+  // Get a Postgres client from the connection pool
+  var client = new pg.Client(process.env.DATABASE_URL);
+  client.connect(function(err) {
+    if(err) {
+      console.log(err);
+      return response.status(500).json({success: false, message: "Unexpected error"});
+    }
+  });
+
+  // SQL Query > Select Data
+  var Query = require('pg').Query;
+  var query = new Query('DELETE FROM users');
+  var result = client.query(query);
+/*
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM users');
+  result = client.query(query);
+  var count = 0;
+  query.on('row', (row) => {
+    count++;
+  });
+  console.log("Count is " + count);
+*/
+}
+
 // always return router
 module.exports = router;
+module.exports.clearUsersTable = clearUsersTable;

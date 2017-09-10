@@ -14,7 +14,6 @@ describe('Array', function() {
 
 var index = require('../index.js');
 
-
 /**
  * Compares getStringToPrint result with a String
  *

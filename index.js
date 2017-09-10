@@ -53,7 +53,7 @@ app.get('/db', function (request, response) {
  *
  * @return {string}
  */
- function getStringToPrint() {
+function getStringToPrint() {
   return "Hello World!";
 }
  

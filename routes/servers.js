@@ -27,7 +27,7 @@ router.get('/', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
@@ -43,7 +43,7 @@ router.get('/', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(200).json(results);
   });
 });
 
@@ -54,6 +54,8 @@ router.get('/', function(request, response) {
 router.post('/', function(request, response) {
   const results = [];
 
+  const serverId = request.body.id;
+
   // Grab data from http request
   const data = {id: request.body.id, createdBy: request.body.createdBy, name: request.body.name};
 
@@ -62,15 +64,19 @@ router.post('/', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
   // SQL Query > Insert Data
-  const Query = require('pg').Query;
-  const query = new Query('INSERT INTO servers(id, createdBy, name) values($1, $2, $3)',
+  var Query = require('pg').Query;
+  var query = new Query('INSERT INTO servers(id, createdBy, name) values($1, $2, $3)',
     [data.id, data.createdBy, data.name]);
-  const result = client.query(query);
+  var result = client.query(query);
+
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM servers WHERE id=($1)', [serverId]);
+  result = client.query(query);
   
   // Stream results back one row at a time
   query.on('row', (row) => {
@@ -79,7 +85,7 @@ router.post('/', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(201).json(results);
   });
 });
 
@@ -101,15 +107,19 @@ router.put('/:serverId', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
   // SQL Query > Update Data
-  const Query = require('pg').Query;
-  const query = new Query('UPDATE servers SET createdBy=($1), name=($2) WHERE id=($3)',
+  var Query = require('pg').Query;
+  var query = new Query('UPDATE servers SET createdBy=($1), name=($2) WHERE id=($3)',
     [data.createdBy, data.name, serverId]);
-  const result = client.query(query);
+  var result = client.query(query);
+
+  // SQL Query > Select Data
+  query = new Query('SELECT * FROM servers WHERE id=($1)', [serverId]);
+  result = client.query(query);
   
   query.on('row', (row) => {
     results.push(row);
@@ -117,7 +127,7 @@ router.put('/:serverId', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', function() {
-    return response.json(results);
+    return response.status(200).json(results);
   });
 });
 
@@ -136,14 +146,14 @@ router.delete('/:serverId', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });    
 
   // SQL Query > Delete Data
-  const Query = require('pg').Query;
-  const query = new Query('DELETE FROM servers WHERE id=($1)', [serverId]);
-  const result = client.query(query);
+  var Query = require('pg').Query;
+  var query = new Query('DELETE FROM servers WHERE id=($1)', [serverId]);
+  var result = client.query(query);
 
   // Stream results back one row at a time
   query.on('row', (row) => {
@@ -152,7 +162,7 @@ router.delete('/:serverId', function(request, response) {
   
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(204).json(results);
   });
 });
 
@@ -172,7 +182,7 @@ router.get('/:serverId', function(request, response) {
   client.connect(function(err) {
     if(err) {
       console.log(err);
-      return response.status(500).json({success: false, message: "Unexpected error"});
+      return response.status(500).json({code: 0, message: "Unexpected error"});
     }
   });
 
@@ -188,7 +198,7 @@ router.get('/:serverId', function(request, response) {
 
   // After all data is returned, close connection and return results
   query.on('end', () => {
-    return response.json(results);
+    return response.status(200).json(results);
   });
 });
 
