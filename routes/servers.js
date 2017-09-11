@@ -3,6 +3,16 @@ var router = express.Router();
 var pg = require('pg');
 pg.defaults.ssl = true;
 
+const Pool = require('pg').Pool;
+
+const pool = new Pool({
+  user: process.env.USER,
+  host: process.env.HOST,
+  database: process.env.DATABASE,
+  password: process.env.PASS,
+  port: 5432,
+} || process.env.DATABASE_URL);
+
 /**
  *  Conecta a la base de datos y crea la tabla 'servers' de ser necesario.
  *
@@ -22,28 +32,23 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 router.get('/', function(request, response) {
   const results = [];
 
-  // Get a Postgres client from the connection pool
-  var client = new pg.Client(process.env.DATABASE_URL);
-  client.connect(function(err) {
-    if(err) {
+  pool.connect((err, client, release) => {
+
+    if (err) {
       console.log(err);
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-  });
 
-  // SQL Query > Select Data
-  const Query = require('pg').Query;
-  const query = new Query('SELECT * FROM servers ORDER BY id ASC;');
-  const result = client.query(query);
-
-  // Stream results back one row at a time
-  query.on('row', (row) => {
-    results.push(row);
-  });
-
-  // After all data is returned, close connection and return results
-  query.on('end', () => {
-    return response.status(200).json(results);
+    client.query('SELECT * FROM servers ORDER BY id ASC;', (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+      results.push(result.rows);
+      console.log(result.rows);
+      return response.status(200).json(results);
+    });
   });
 });
 
@@ -59,33 +64,32 @@ router.post('/', function(request, response) {
   // Grab data from http request
   const data = {id: request.body.id, createdBy: request.body.createdBy, name: request.body.name};
 
-  // Get a Postgres client from the connection pool
-  var client = new pg.Client(process.env.DATABASE_URL);
-  client.connect(function(err) {
-    if(err) {
+  pool.connect((err, client, release) => {
+
+    if (err) {
       console.log(err);
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-  });
 
-  // SQL Query > Insert Data
-  var Query = require('pg').Query;
-  var query = new Query('INSERT INTO servers(id, createdBy, name) values($1, $2, $3)',
-    [data.id, data.createdBy, data.name]);
-  var result = client.query(query);
+    client.query('INSERT INTO servers(id, createdBy, name) values($1, $2, $3)',
+    [data.id, data.createdBy, data.name], (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+    });
 
-  // SQL Query > Select Data
-  query = new Query('SELECT * FROM servers WHERE id=($1)', [serverId]);
-  result = client.query(query);
-  
-  // Stream results back one row at a time
-  query.on('row', (row) => {
-    results.push(row);
-  });
-
-  // After all data is returned, close connection and return results
-  query.on('end', () => {
-    return response.status(201).json(results);
+    client.query('SELECT * FROM servers WHERE id=($1)', [serverId], (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+      results.push(result.rows);
+      console.log(result.rows);
+      return response.status(201).json(results);
+    });
   });
 });
 
@@ -102,32 +106,32 @@ router.put('/:serverId', function(request, response) {
   // Grab data from http request
   const data = {id: request.body.id, createdBy: request.body.createdBy, name: request.body.name};
 
-  // Get a Postgres client from the connection pool
-  var client = new pg.Client(process.env.DATABASE_URL);
-  client.connect(function(err) {
-    if(err) {
+  pool.connect((err, client, release) => {
+
+    if (err) {
       console.log(err);
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-  });
 
-  // SQL Query > Update Data
-  var Query = require('pg').Query;
-  var query = new Query('UPDATE servers SET createdBy=($1), name=($2) WHERE id=($3)',
-    [data.createdBy, data.name, serverId]);
-  var result = client.query(query);
+    client.query('UPDATE servers SET createdBy=($1), name=($2) WHERE id=($3)',
+    [data.createdBy, data.name, serverId], (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+    });
 
-  // SQL Query > Select Data
-  query = new Query('SELECT * FROM servers WHERE id=($1)', [serverId]);
-  result = client.query(query);
-  
-  query.on('row', (row) => {
-    results.push(row);
-  });
-
-  // After all data is returned, close connection and return results
-  query.on('end', function() {
-    return response.status(200).json(results);
+    client.query('SELECT * FROM servers WHERE id=($1)', [serverId], (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+      results.push(result.rows);
+      console.log(result.rows);
+      return response.status(200).json(results);
+    });
   });
 });
 
@@ -141,31 +145,25 @@ router.delete('/:serverId', function(request, response) {
   // Grab data from the URL parameters
   const serverId = request.params.serverId;
 
-  // Get a Postgres client from the connection pool
-  var client = new pg.Client(process.env.DATABASE_URL);
-  client.connect(function(err) {
-    if(err) {
+  pool.connect((err, client, release) => {
+
+    if (err) {
       console.log(err);
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-  });    
 
-  // SQL Query > Delete Data
-  var Query = require('pg').Query;
-  var query = new Query('DELETE FROM servers WHERE id=($1)', [serverId]);
-  var result = client.query(query);
-
-  // Stream results back one row at a time
-  query.on('row', (row) => {
-    results.push(row);
-  });
-  
-  // After all data is returned, close connection and return results
-  query.on('end', () => {
-    return response.status(204).json(results);
+    client.query('DELETE FROM servers WHERE id=($1)', [serverId], (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+      results.push(result.rows);
+      console.log(result.rows);
+      return response.status(204).json(results);
+    });
   });
 });
-
 
 /**
  *  Devuelve toda la información del servidor.
@@ -177,56 +175,40 @@ router.get('/:serverId', function(request, response) {
   // Grab data from the URL parameters
   const serverId = request.params.serverId;
 
-  // Get a Postgres client from the connection pool
-  var client = new pg.Client(process.env.DATABASE_URL);
-  client.connect(function(err) {
-    if(err) {
+  pool.connect((err, client, release) => {
+
+    if (err) {
       console.log(err);
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-  });
-
-  // SQL Query > Select Data
-  const Query = require('pg').Query;
-  const query = new Query('SELECT * FROM servers WHERE id=($1)', [serverId]);
-  const result = client.query(query);
-
-  // Stream results back one row at a time
-  query.on('row', (row) => {
-    results.push(row);
-  });
-
-  // After all data is returned, close connection and return results
-  query.on('end', () => {
-    return response.status(200).json(results);
+    client.query('SELECT * FROM servers WHERE id=($1)', [serverId], (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+      results.push(result.rows);
+      console.log(result.rows);
+      return response.status(200).json(results);
+    });
   });
 });
 
-
 function clearServersTable() {
-  // Get a Postgres client from the connection pool
-  var client = new pg.Client(process.env.DATABASE_URL);
-  client.connect(function(err) {
-    if(err) {
+  pool.connect((err, client, release) => {
+
+    if (err) {
       console.log(err);
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
+    client.query('DELETE FROM servers;', (err, result) => {
+      release();
+      if (err) {
+        console.log(err);
+        return response.status(500).json({code: 0, message: "Unexpected error"});
+      }
+    });
   });
-
-  // SQL Query > Select Data
-  var Query = require('pg').Query;
-  var query = new Query('DELETE FROM servers');
-  var result = client.query(query);
-/*
-  // SQL Query > Select Data
-  query = new Query('SELECT * FROM servers');
-  result = client.query(query);
-  var count = 0;
-  query.on('row', (row) => {
-    count++;
-  });
-  console.log("Count is " + count);
-*/
 }
 
 // always return router

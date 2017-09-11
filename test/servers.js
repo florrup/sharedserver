@@ -3,6 +3,11 @@
 
 process.env.DATABASE_URL = 'postgres://nvvgpxztxxdugy:794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281@ec2-23-23-234-118.compute-1.amazonaws.com:5432/de2pgllaiv55c3';
 
+process.env.USER='nvvgpxztxxdugy';
+process.env.HOST='ec2-23-23-234-118.compute-1.amazonaws.com';
+process.env.DATABASE='de2pgllaiv55c3';
+process.env.PASS='794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281';
+
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var baseUrl = 'http://localhost:5000/api';
@@ -77,6 +82,35 @@ describe('Servers', function()  {
 	            .send(serverToDelete)
 	            .end((err, res) => {
 	                res.should.have.status(204);
+	              done();
+	            });
+	    });
+	 });
+
+	describe('/GET server', function() {
+	  	it('it should GET a server', function(done) {
+	  		serversAPI.clearServersTable();
+
+	  		var serverToGet = {
+		    	id: 3,
+		        createdBy: 'testCreator',
+		        name: 'testName'
+		    };
+		    this.timeout(15000);
+
+	        chai.request(baseUrl)
+	            .post('/servers/')
+	            .send(serverToGet)
+	            .end((err, res) => {
+	                res.should.have.status(201);
+	                res.body.length.should.be.eql(1);
+	            });
+	        chai.request(baseUrl)
+	            .get('/servers/3')
+	            .send(serverToGet)
+	            .end((err, res) => {
+	                res.should.have.status(200);
+	                //res.body.length.should.be.eql(1);
 	              done();
 	            });
 	    });

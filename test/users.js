@@ -3,11 +3,17 @@
 
 process.env.DATABASE_URL = 'postgres://nvvgpxztxxdugy:794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281@ec2-23-23-234-118.compute-1.amazonaws.com:5432/de2pgllaiv55c3';
 
+process.env.USER='nvvgpxztxxdugy';
+process.env.HOST='ec2-23-23-234-118.compute-1.amazonaws.com';
+process.env.DATABASE='de2pgllaiv55c3';
+process.env.PASS='794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281';
+
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var baseUrl = 'http://localhost:5000/api';
 var api = require('../routes/api');
 var should = chai.should();
+var expect = chai.expect;
 var util = require('util');
 
 var usersAPI = require('../routes/users');
@@ -89,9 +95,9 @@ describe('Users', function()  {
 			usersAPI.clearUsersTable();
 
 	  		var userToGet = {
-		    	id: 95,
-		        name: 'testName',
-		        surname: 'testSurname',
+		    	id: 16,
+		        name: 'testName16',
+		        surname: 'testSurname16',
 		        complete: false
 		    };
 		    this.timeout(15000);
@@ -104,8 +110,7 @@ describe('Users', function()  {
 	                res.body.length.should.be.eql(1);
 	            });
 	        chai.request(baseUrl)
-	            .get('/users/95')
-	            .send(userToGet)
+	            .get('/users/16')
 	            .end((err, res) => {
 	                res.should.have.status(200);
 	                //res.body.length.should.be.eql(1);

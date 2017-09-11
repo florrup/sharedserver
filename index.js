@@ -30,22 +30,34 @@ app.listen(app.get('port'), function() {
 });
 
 // connects to the database
-var pg = require('pg');
-pg.defaults.ssl = true;
+//var pg = require('pg');
+//pg.defaults.ssl = true;
 
 app.get('/db', function (request, response) {
 
-  var client = new pg.Client(process.env.DATABASE_URL);
+  const Pool = require('pg').Pool;
 
-  client.connect();
-  console.log('Connecting to db...');
-  var query = client.query('SELECT * FROM users', function(err, result) {
+  const pool = new Pool({
+    user: 'yvnmgtvwznipcx',
+    host: 'ec2-184-73-249-56.compute-1.amazonaws.com',
+    database: 'd2gv0cr5bou448',
+    password: 'd2158d028efa41843d2788c28396c02b4bb47b9e2b0c207ad99f1c1dc266466e',
+    port: 5432,
+  } || process.env.DATABASE_URL);
+
+  pool.connect((err, client, release) => {
     if (err) {
-      console.error(err); response.send("Error " + err);
-    } else {
-      response.render('pages/db', {results: result.rows} );
+      return console.error('Error acquiring client', err.stack);
     }
+    client.query('SELECT * FROM users', (err, result) => {
+      release();
+      if (err) {
+        return console.error('Error executing query', err.stack);
+      }
+      response.render('pages/db', {results: result.rows} );
+    });
   });
+
 });
 
 /**
