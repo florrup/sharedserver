@@ -118,4 +118,42 @@ describe('Users', function()  {
 	            });
 	    });
 	 });
+
+
+	describe('/PUT user', function() {
+	  	it('it should GET a user', function(done) {
+			usersAPI.clearUsersTable();
+
+	  		var userToModify = {
+		    	id: 17,
+		        name: 'testName17',
+		        surname: 'testSurname17',
+		        complete: false
+		    };
+		    this.timeout(15000);
+
+	        chai.request(baseUrl)
+	            .post('/users/')
+	            .send(userToModify)
+	            .end((err, res) => {
+	                res.should.have.status(201);
+	                res.body.length.should.be.eql(1);
+	            });
+	        var userToModify = {
+		    	id: 17,
+		        name: 'newName17',
+		        surname: 'newSurname17',
+		        complete: false
+		    };
+
+	        chai.request(baseUrl)
+	            .put('/users/17')
+	            .send(userToModify)
+	            .end((err, res) => {
+	                res.should.have.status(200);
+	                //res.body.length.should.be.eql(1);
+	              done();
+	            });
+	    });
+	 });
 });
