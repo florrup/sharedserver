@@ -7,6 +7,9 @@ var bodyParser = require('body-parser');
 var app = express();
 app.use(express.static(__dirname + '/public'));
 
+// winston logger
+var logger = require('./utils/logger');
+
 // views is directory for all template files
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -40,9 +43,10 @@ app.get('/db', function (request, response) {
 
   pg.connect(process.env.DATABASE_URL, function(err, client, done) {
     console.log('Connecting to db...');
-    client.query('SELECT * FROM test_table', function(err, result) {
+    client.query('SELECT * FROM users', function(err, result) {
 
-      console.log('Getting data from test_table');
+      console.log('Getting data from users');
+      logger.info('Getting data from users');
 
       done();
       if (err)
