@@ -6,7 +6,7 @@ var sequelize = require("./db.js").sequelize;
 const User = sequelize.define('user', {
     id: {
       type: Sequelize.STRING,
-	  primaryKey: true
+	    primaryKey: true
     },
     name: {
       type: Sequelize.STRING

@@ -1,7 +1,5 @@
 var express = require('express');
 var router = express.Router();
-// var pg = require('pg'); // Old code with direct DB access
-// pg.defaults.ssl = true; // Old code with direct DB access
 
 const Sequelize = require('sequelize');
 var User = require('../models/user.js');
@@ -21,115 +19,37 @@ router.get('/initAndWriteDummyUser', function(request, response){
 })
 
 /**
- * Get full users list
-*/
-router.get('/', function(request, response) {
-	const results = [];
-	User.findAll()
-		.then(users => {
-			console.log(users);
-			results.push(users);
-			console.log(results.rows);
-			return response.status(201).json(results);
-		})
-})
-
-module.exports = router;
-
-// -------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------
-// Old code with direct DB access:
-/*
-const Pool = require('pg').Pool;
-
-const pool = new Pool({
-  user: process.env.USER,
-  host: process.env.HOST,
-  database: process.env.DATABASE,
-  password: process.env.PASS,
-  port: 5432,
-} || process.env.DATABASE_URL);
-*/
-/**
- *  Conecta a la base de datos y crea la tabla 'users' de ser necesario.
- *
- */
- /*
-pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-  const query = client.query('CREATE TABLE IF NOT EXISTS users(id INT PRIMARY KEY, name VARCHAR(40) not null, surname VARCHAR(40) not null, complete BOOLEAN)');
-    query.on('end', () => { client.end(); });
-}); 
-*/
-// TODO: Fix deprecation warning
-/*
-/**
  *  Devuelve toda la información acerca de todos los users indicados.
  *
  */ 
- /*
+
 router.get('/', function(request, response) {
-  const results = [];
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+	User.findAll({
+    attributes: ['id', 'name', 'surname', 'complete']
+  }).then(users => {
+    if (!users) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('SELECT * FROM users ORDER BY id ASC;', (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(200).json(results);
-    });
-  });
+		return response.status(200).json(users);
+	})
 });
 
 /**
  *  Da de alta un usuario.
  *
  */
- /*
+
 router.post('/', function(request, response) {
-  const results = [];
-
-  const userId = request.body.id;
-
-  // Grab data from http request
-  const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  User.create({
+    id: request.body.id,
+    name: request.body.name,
+    surname: request.body.surname,
+    complete: request.body.complete
+  }).then(user => {
+    if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('INSERT INTO users(id, name, surname, complete) values($1, $2, $3, $4)',
-    [data.id, data.name, data.surname, data.complete], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-    });
-
-    client.query('SELECT * FROM users WHERE id=($1)', [userId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(201).json(results);
-    });
+    response.status(201).json(user);
   });
 });
 
@@ -137,37 +57,25 @@ router.post('/', function(request, response) {
  *  Da de baja un usuario.
  *
  */
- /*
+
 router.delete('/:userId', function(request, response) {
-  const results = [];
-
-  // Grab data from the URL parameters
-  const userId = request.params.userId;
-
- pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  User.destroy({
+    where: {
+      id: request.params.userId
+    }
+  }).then(user => {
+    if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
 
-    client.query('DELETE FROM users WHERE id=($1)', [userId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
+    User.findAll({ // must return all users
+      attributes: ['id', 'name', 'surname', 'complete']
+    })
+    .then(users => {
+      if (!users) {
         return response.status(500).json({code: 0, message: "Unexpected error"});
       }
-    });
-
-    client.query('SELECT * FROM users ORDER BY id ASC;', (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(204).json(results);
+      return response.status(204).json(users);
     });
   });
 });
@@ -176,29 +84,17 @@ router.delete('/:userId', function(request, response) {
  *  Devuelve toda la información del usuario.
  *
  */
- /*
+
 router.get('/:userId', function(request, response) {
-  const results = [];
-
-  // Grab data from the URL parameters
-  const userId = request.params.userId;
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  User.find({
+    where: {
+      id: request.params.userId
+    }
+  }).then(user => {
+    if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('SELECT * FROM users WHERE id=($1)', [userId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(200).json(results);
-    });
+    return response.status(200).json(user);
   });
 });
 
@@ -206,45 +102,31 @@ router.get('/:userId', function(request, response) {
  *  Modifica los datos de un usuario.
  *
  */
- /*
+
 router.put('/:userId', function(request, response) {
-  const results = [];
-
-  // Grab data from the URL parameters
-  const userId = request.params.userId;
-
-  // Grab data from http request
-  const data = {id: request.body.id, name: request.body.name, surname: request.body.surname, complete: false};
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  User.find({
+    where: {
+      id: request.params.userId
+    }
+  }).then(user => {
+    if (user) {
+      user.updateAttributes({
+        id: request.body.id,
+        name: request.body.name,
+        surname: request.body.surname,
+        complete: request.body.complete
+      }).then(updatedUser => {
+        return response.status(200).json(updatedUser);
+      });
+    } else {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('UPDATE users SET name=($1), surname=($2) WHERE id=($3)',
-    [data.name, data.surname, userId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-    });
-
-    client.query('SELECT * FROM users WHERE id=($1)', [userId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(200).json(results);
-    });
   });
 });
 
+module.exports = router;
+
+/*
 function clearUsersTable() {
   pool.connect((err, client, release) => {
 
@@ -262,8 +144,5 @@ function clearUsersTable() {
     });
   });
 }
-
-// always return router
-module.exports = router;
 module.exports.clearUsersTable = clearUsersTable;
 */

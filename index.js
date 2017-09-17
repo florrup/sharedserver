@@ -68,7 +68,7 @@ app.get('/db', function (request, response) {
 // --------------------------------------------------------------------------
 // Sequelize Module: Instantiation and connection to Database 
 var pg = require('pg');
-const sequielize = require('./models/db');
+const sequelize = require('./models/db');
 // --------------------------------------------------------------------------
 
 /**

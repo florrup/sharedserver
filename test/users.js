@@ -21,7 +21,7 @@ var usersAPI = require('../routes/users');
 chai.use(chaiHttp);
 
 describe('Users', function()  {
-
+/*
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
 		    this.timeout(15000);
@@ -156,4 +156,5 @@ describe('Users', function()  {
 	            });
 	    });
 	 });
+*/
 });
