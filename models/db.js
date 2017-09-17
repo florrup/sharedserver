@@ -7,6 +7,7 @@ const sequelize = new Sequelize('d2gv0cr5bou448', 'yvnmgtvwznipcx', 'd2158d028ef
   host: 'ec2-184-73-249-56.compute-1.amazonaws.com',
   port: '5432',
   dialect: 'postgres',
+  // freezeTableName: true, //prevent sequelize from pluralizing table names
   pool: {
     max: 5,
     min: 0,
@@ -15,9 +16,14 @@ const sequelize = new Sequelize('d2gv0cr5bou448', 'yvnmgtvwznipcx', 'd2158d028ef
 });
 
 sequelize.authenticate()
-	.then(function(err) {
-		if (err) console.log('Unable to connect to the PostgreSQL database:', err);
-		console.log('Sequelize Module: Connection to Database has been established successfully.');
-	});
+    .then(function(err) {
+        if (err) {
+            // Error logging into the Database
+            console.log('Unable to connect to the PostgreSQL database:', err);
+        } else {
+            // Databese connection successful
+            console.log('Sequelize Module: Connection to Database has been established successfully.');
+        }
+    })
 
 module.exports.sequelize = sequelize;
