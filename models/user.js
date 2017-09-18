@@ -8,14 +8,26 @@ const User = sequelize.define('user', {
       type: Sequelize.STRING,
 	    primaryKey: true
     },
+    username: {
+      type: Sequelize.STRING
+    },
+    password: {
+      type: Sequelize.STRING
+    },
     name: {
       type: Sequelize.STRING
     },
     surname: {
       type: Sequelize.STRING
     },
-    complete: {
-      type: Sequelize.BOOLEAN
+    country: {
+      type: Sequelize.STRING
+    },
+    email: {
+      type: Sequelize.STRING
+    },
+    birthdate: {
+      type: Sequelize.STRING
     }
   });
   

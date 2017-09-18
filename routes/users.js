@@ -4,16 +4,21 @@ var router = express.Router();
 const Sequelize = require('sequelize');
 var User = require('../models/user.js');
 
-router.get('/initAndWriteDummyUser', function(request, response){
+// CREATE TABLE users(id INT PRIMARY KEY, username VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
+
+router.get('/initAndWriteDummyUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
 	User.sync({force: true}).then(() => {
 	  // Table created
 	  return User.create({
 		id: 0,
+    username: 'johnny',
 		name: 'John',
 		surname: 'Hancock',
-		complete: false
+    country: 'Argentina',
+    email: 'johnny123@gmail.com',
+    birthdate: '24/05/1992'
 	  })
 	})
 })
@@ -25,7 +30,7 @@ router.get('/initAndWriteDummyUser', function(request, response){
 
 router.get('/', function(request, response) {
 	User.findAll({
-    attributes: ['id', 'name', 'surname', 'complete']
+    attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
   }).then(users => {
     if (!users) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -42,9 +47,12 @@ router.get('/', function(request, response) {
 router.post('/', function(request, response) {
   User.create({
     id: request.body.id,
+    username: request.body.username,
     name: request.body.name,
     surname: request.body.surname,
-    complete: request.body.complete
+    country: request.body.country,
+    email: request.body.email,
+    birthdate: request.body.birthdate
   }).then(user => {
     if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -69,7 +77,7 @@ router.delete('/:userId', function(request, response) {
     }
 
     User.findAll({ // must return all users
-      attributes: ['id', 'name', 'surname', 'complete']
+      attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
     })
     .then(users => {
       if (!users) {
