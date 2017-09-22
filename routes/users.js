@@ -21,7 +21,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
     birthdate: '24/05/1992'
 	  })
 	})
-})
+});
 
 /**
  *  Devuelve toda la información acerca de todos los users indicados.

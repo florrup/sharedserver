@@ -1,95 +1,61 @@
 var express = require('express');
 var router = express.Router();
-var pg = require('pg');
-pg.defaults.ssl = true;
 
-const Pool = require('pg').Pool;
+const Sequelize = require('sequelize');
+var Server = require('../models/server.js');
 
-const pool = new Pool({
-  user: process.env.USER,
-  host: process.env.HOST,
-  database: process.env.DATABASE,
-  password: process.env.PASS,
-  port: 5432,
-} || process.env.DATABASE_URL);
+// CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
-/**
- *  Conecta a la base de datos y crea la tabla 'servers' de ser necesario.
- *
- */
- /*
-pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-  const query = client.query('CREATE TABLE IF NOT EXISTS servers(id INT PRIMARY KEY, createdBy text, name text)');
-  query.on('end', () => { client.end(); });
-});	
-*/
-// TODO: Fix deprecation warning
+router.get('/initAndWriteDummyServer', function(request, response) {
+  // Test code: dummy register and table initialization:
+  // force: true will drop the table if it already exists
+  Server.sync({force: true}).then(() => {
+    // Table created
+    return Server.create({
+    id: 0,
+    _ref: 'abc',
+    createdBy: 66,
+    createdTime: 'abc',
+    name: 'DummyServer',
+    lastConnection: 2
+    })
+  })
+})
 
 /**
  *  Devuelve toda la información acerca de todos los application servers indicados.
  *
  */
+
 router.get('/', function(request, response) {
-  const results = [];
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  Server.findAll({
+    attributes: ['id', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
+  }).then(servers => {
+    if (!servers) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('SELECT * FROM servers ORDER BY id ASC;', (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(200).json(results);
-    });
-  });
+    return response.status(200).json(servers);
+  })
 });
 
 /**
  *  Da de alta un server.
  *
  */
+ 
 router.post('/', function(request, response) {
-  const results = [];
-
-  const serverId = request.body.id;
-
-  // Grab data from http request
-  const data = {id: request.body.id, createdBy: request.body.createdBy, name: request.body.name};
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  Server.create({
+    id: request.body.id,
+    _ref: request.body._ref,
+    createdBy: request.body.createdBy,
+    createdTime: request.body.createdTime,
+    name: request.body.name,
+    lastConnection: request.body.lastConnection
+  }).then(server => {
+    if (!server) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('INSERT INTO servers(id, createdBy, name) values($1, $2, $3)',
-    [data.id, data.createdBy, data.name], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-    });
-
-    client.query('SELECT * FROM servers WHERE id=($1)', [serverId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(201).json(results);
-    });
+    response.status(201).json(server);
   });
 });
 
@@ -97,41 +63,28 @@ router.post('/', function(request, response) {
  *  Modifica los datos de un servidor.
  *
  */
+
 router.put('/:serverId', function(request, response) {
-  const results = [];
-
-  // Grab data from the URL parameters
-  const serverId = request.params.serverId;
-
-  // Grab data from http request
-  const data = {id: request.body.id, createdBy: request.body.createdBy, name: request.body.name};
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  Server.find({
+    where: {
+      id: request.params.serverId
+    }
+  }).then(server => {
+    if (server) {
+      server.updateAttributes({
+        id: request.body.id,
+        _ref: request.body._ref,
+        name: request.body.name,
+        createdBy: request.body.createdBy,
+        createdTime: request.body.createdTime,
+        name: request.body.name,
+        lastConnection: request.body.lastConnection
+      }).then(updatedServer => {
+        return response.status(200).json(updatedServer);
+      });
+    } else {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-
-    client.query('UPDATE servers SET createdBy=($1), name=($2) WHERE id=($3)',
-    [data.createdBy, data.name, serverId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-    });
-
-    client.query('SELECT * FROM servers WHERE id=($1)', [serverId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(200).json(results);
-    });
   });
 });
 
@@ -139,28 +92,25 @@ router.put('/:serverId', function(request, response) {
  *  Da de baja un servidor.
  *
  */
+
 router.delete('/:serverId', function(request, response) {
-  const results = [];
-
-  // Grab data from the URL parameters
-  const serverId = request.params.serverId;
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  Server.destroy({
+    where: {
+      id: request.params.serverId
+    }
+  }).then(server => {
+    if (!server) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
 
-    client.query('DELETE FROM servers WHERE id=($1)', [serverId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
+    Server.findAll({ // must return all servers
+      attributes: ['id', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
+    })
+    .then(servers => {
+      if (!servers) {
         return response.status(500).json({code: 0, message: "Unexpected error"});
       }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(204).json(results);
+      return response.status(204).json(servers);
     });
   });
 });
@@ -169,32 +119,22 @@ router.delete('/:serverId', function(request, response) {
  *  Devuelve toda la información del servidor.
  *
  */
+ 
 router.get('/:serverId', function(request, response) {
-  const results = [];
-
-  // Grab data from the URL parameters
-  const serverId = request.params.serverId;
-
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
+  Server.find({
+    where: {
+      id: request.params.serverId
+    }
+  }).then(server => {
+    if (!server) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-    client.query('SELECT * FROM servers WHERE id=($1)', [serverId], (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      results.push(result.rows);
-      console.log(result.rows);
-      return response.status(200).json(results);
-    });
+    return response.status(200).json(server);
   });
 });
 
-function clearServersTable() {
+
+/*function clearServersTable() {
   pool.connect((err, client, release) => {
 
     if (err) {
@@ -209,8 +149,8 @@ function clearServersTable() {
       }
     });
   });
-}
+}*/
 
 // always return router
 module.exports = router;
-module.exports.clearServersTable = clearServersTable;
+//module.exports.clearServersTable = clearServersTable;

@@ -13,6 +13,9 @@ const sequelize = new Sequelize('d2gv0cr5bou448', 'yvnmgtvwznipcx', 'd2158d028ef
     min: 0,
     idle: 10000
   },
+  dialectOptions: {
+    ssl: true
+  }
 });
 
 sequelize.authenticate()

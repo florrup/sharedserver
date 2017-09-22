@@ -1,6 +1,7 @@
 //! @package test
 //! @file servers.js
 
+/*
 process.env.DATABASE_URL = 'postgres://nvvgpxztxxdugy:794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281@ec2-23-23-234-118.compute-1.amazonaws.com:5432/de2pgllaiv55c3';
 
 process.env.USER='nvvgpxztxxdugy';
@@ -117,3 +118,4 @@ describe('Servers', function()  {
 	 });
 
 });
+*/
