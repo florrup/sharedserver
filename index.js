@@ -11,6 +11,10 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+// Load any undefined ENV variables form a specified file. 
+var env = require('node-env-file');
+  env(__dirname + '/.env');
+
 app.get('/', function(request, response) {
   response.render('pages/index');
   //response.send('Hello World');
