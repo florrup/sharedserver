@@ -40,3 +40,19 @@ $ curl -i localhost:5000/
 $ apt-get install doxygen
 $ doxygen
 ```
+
+## Running Database commands
+
+Read: https://devcenter.heroku.com/articles/heroku-postgresql#local-setup
+Login to heroku from terminal
+Set remote heroku
+get database connection
+```
+$heroku login
+$heroku git:remote -a serene-peak-94842
+$heroku pg:psql
+```
+
+# Running built-in tests
+
+$npm test
