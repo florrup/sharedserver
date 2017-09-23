@@ -120,9 +120,12 @@ router.put('/:userId', function(request, response) {
     if (user) {
       user.updateAttributes({
         id: request.body.id,
+        username: request.body.username,
         name: request.body.name,
         surname: request.body.surname,
-        complete: request.body.complete
+        country: request.body.country,
+        email: request.body.email,
+        birthdate: request.body.birthdate
       }).then(updatedUser => {
         return response.status(200).json(updatedUser);
       });
@@ -134,23 +137,11 @@ router.put('/:userId', function(request, response) {
 
 module.exports = router;
 
-/*
 function clearUsersTable() {
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
-      return response.status(500).json({code: 0, message: "Unexpected error"});
-    }
-    client.query('DELETE FROM users;', (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-
-    });
+  User.destroy({
+    where: {},
+    truncate: true
   });
 }
+
 module.exports.clearUsersTable = clearUsersTable;
-*/

@@ -3,10 +3,10 @@
 
 process.env.DATABASE_URL = 'postgres://nvvgpxztxxdugy:794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281@ec2-23-23-234-118.compute-1.amazonaws.com:5432/de2pgllaiv55c3';
 
-process.env.USER='nvvgpxztxxdugy';
-process.env.HOST='ec2-23-23-234-118.compute-1.amazonaws.com';
+process.env.DATABASE_USER='nvvgpxztxxdugy';
+process.env.DATABASE_HOST='ec2-23-23-234-118.compute-1.amazonaws.com';
 process.env.DATABASE='de2pgllaiv55c3';
-process.env.PASS='794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281';
+process.env.DATABASE_PASS='794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281';
 
 var chai = require('chai');
 var chaiHttp = require('chai-http');
@@ -21,7 +21,7 @@ var usersAPI = require('../routes/users');
 chai.use(chaiHttp);
 
 describe('Users', function()  {
-/*
+
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
 		    this.timeout(15000);
@@ -32,7 +32,7 @@ describe('Users', function()  {
 		        .end((err, res) => {
 			        res.should.have.status(200);
 			        res.body.should.be.a('array');
-			        //res.body.length.should.be.eql(0);
+			        res.body.length.should.be.eql(0);
 			        done();
 		        });
 	    });
@@ -43,10 +43,13 @@ describe('Users', function()  {
 	  		usersAPI.clearUsersTable();
 
 	  		var newUser = {
-		    	id: 95,
-		        name: 'testName',
-		        surname: 'testSurname',
-		        complete: false
+		        id: 0,
+    			username: 'johnny',
+				name: 'John',
+				surname: 'Hancock',
+    			country: 'Argentina',
+    			email: 'johnny123@gmail.com',
+    			birthdate: '24/05/1992'
 		    };
 		    this.timeout(15000);
 
@@ -55,7 +58,8 @@ describe('Users', function()  {
 	            .send(newUser)
 	            .end((err, res) => {
 	                res.should.have.status(201);
-	                res.body.length.should.be.eql(1);
+      				res.body.should.have.property('surname');
+      				res.body.should.have.property('id');
 	              done();
 	            });
 	    });
@@ -66,10 +70,13 @@ describe('Users', function()  {
 	  		usersAPI.clearUsersTable();
 
 	  		var userToDelete = {
-		    	id: 15,
-		        name: 'testName',
-		        surname: 'testSurname',
-		        complete: false
+		        id: 15,
+    			username: 'testUsername',
+				name: 'testName',
+				surname: 'testSurname',
+    			country: 'Argentina',
+    			email: 'testEmail@gmail.com',
+    			birthdate: '24/05/1992'
 		    };
 		    this.timeout(15000);
 
@@ -77,28 +84,29 @@ describe('Users', function()  {
 	            .post('/users/')
 	            .send(userToDelete)
 	            .end((err, res) => {
-	                res.should.have.status(201);
-	                res.body.length.should.be.eql(1);
-	            });
-	        chai.request(baseUrl)
-	            .delete('/users/15')
-	            .send(userToDelete)
-	            .end((err, res) => {
-	                res.should.have.status(204);
-	              done();
+	            	chai.request(baseUrl)
+		            	.delete('/users/' + userToDelete.id)
+			            .send(userToDelete)
+		            	.end((err, res) => {
+		              		res.should.have.status(204);
+		            		done();
+		           		});
 	            });
 	    });
 	 });
 
 	describe('/GET user', function() {
-	  	it('it should GET a user', function(done) {
+	  	it('it should GET an existing user', function(done) {
 			usersAPI.clearUsersTable();
 
 	  		var userToGet = {
-		    	id: 16,
-		        name: 'testName16',
-		        surname: 'testSurname16',
-		        complete: false
+		        id: 10,
+    			username: 'testUsername10',
+				name: 'testName10',
+				surname: 'testSurname10',
+    			country: 'Argentina10',
+    			email: 'testEmail10@gmail.com',
+    			birthdate: '24/05/1992'
 		    };
 		    this.timeout(15000);
 
@@ -106,29 +114,28 @@ describe('Users', function()  {
 	            .post('/users/')
 	            .send(userToGet)
 	            .end((err, res) => {
-	                res.should.have.status(201);
-	                res.body.length.should.be.eql(1);
-	            });
-	        chai.request(baseUrl)
-	            .get('/users/16')
-	            .end((err, res) => {
-	                res.should.have.status(200);
-	                //res.body.length.should.be.eql(1);
-	              done();
+	            	chai.request(baseUrl)
+			            .get('/users/' + userToGet.id)
+			            .end((err, res) => {
+			                res.should.have.status(200);
+			            	done();
+			            });
 	            });
 	    });
 	 });
 
-
 	describe('/PUT user', function() {
-	  	it('it should GET a user', function(done) {
+	  	it('it should PUT a modified user', function(done) {
 			usersAPI.clearUsersTable();
 
 	  		var userToModify = {
-		    	id: 17,
-		        name: 'testName17',
-		        surname: 'testSurname17',
-		        complete: false
+		        id: 11,
+    			username: 'testUsername11',
+				name: 'testName11',
+				surname: 'testSurname11',
+    			country: 'Argentina11',
+    			email: 'testEmail11@gmail.com',
+    			birthdate: '24/05/1992'
 		    };
 		    this.timeout(15000);
 
@@ -136,25 +143,26 @@ describe('Users', function()  {
 	            .post('/users/')
 	            .send(userToModify)
 	            .end((err, res) => {
-	                res.should.have.status(201);
-	                res.body.length.should.be.eql(1);
-	            });
-	        var userToModify = {
-		    	id: 17,
-		        name: 'newName17',
-		        surname: 'newSurname17',
-		        complete: false
-		    };
+					userToModify = {
+				        id: 11,
+		    			username: 'modifiedUsername',
+						name: 'testName11',
+						surname: 'testSurname11',
+		    			country: 'Argentina11',
+		    			email: 'testEmail11@gmail.com',
+		    			birthdate: '24/05/1992'
+				    };			
 
-	        chai.request(baseUrl)
-	            .put('/users/17')
-	            .send(userToModify)
-	            .end((err, res) => {
-	                res.should.have.status(200);
-	                //res.body.length.should.be.eql(1);
-	              done();
-	            });
+				    chai.request(baseUrl)
+			            .put('/users/' + userToModify.id)
+			            .send(userToModify)
+			            .end((err, res) => {
+			                res.should.have.status(200);
+          					res.body.username.should.equal('modifiedUsername');
+			              	done();
+			            });
+		        });
 	    });
 	 });
-*/
+
 });
