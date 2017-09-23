@@ -71,9 +71,9 @@ router.delete('/:userId', function(request, response) {
     where: {
       id: request.params.userId
     }
-  }).then(user => {
-    if (!user) {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
+  }).then(affectedRows => {
+    if (affectedRows == 0) {
+      return response.status(500).json({code: 0, message: "Unexpected error: didn't find target user "});
     }
 
     User.findAll({ // must return all users
@@ -137,11 +137,19 @@ router.put('/:userId', function(request, response) {
 
 module.exports = router;
 
-function clearUsersTable() {
-  User.destroy({
-    where: {},
-    truncate: true
-  });
-}
+var clearUsersTable = new Promise(
+	function (resolve, reject) {
+	  User.destroy({
+		where: {},
+		truncate: true
+	  })
+	  .then(affectedRows => {
+			if (affectedRows == 0) {
+			  // database was already empty
+			}
+			resolve(true);
+	  })
+	  // .catch(reject(false));
+})
 
 module.exports.clearUsersTable = clearUsersTable;
