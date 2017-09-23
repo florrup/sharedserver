@@ -16,11 +16,11 @@ var should = chai.should();
 var expect = chai.expect;
 var util = require('util');
 
-var usersAPI = require('../routes/users');
-
 chai.use(chaiHttp);
 
 describe('Users', function()  {
+
+	var usersAPI = require('../routes/users');
 
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
@@ -173,6 +173,120 @@ describe('Users', function()  {
 							.end((err, res) => {
 								res.should.have.status(200);
 								res.body.username.should.equal('modifiedUsername');
+								done();
+							});
+					});
+			});
+	    });
+	 });
+
+});
+
+
+describe('Servers', function()  {
+
+	var serversAPI = require('../routes/servers');
+
+	describe('/GET servers', function() {
+	  	it('it should GET no servers from empty database', function(done) {
+		    this.timeout(15000);
+		    serversAPI.clearServersTable
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+					.get('/servers/')
+					.end((err, res) => {
+						res.should.have.status(200);
+						res.body.should.be.a('array');
+						res.body.length.should.be.eql(0);
+						done();
+					});
+			});
+	    });
+	  });
+
+	describe('/POST server', function() {
+	  	it('it should POST a server', function(done) {
+			this.timeout(15000);
+	  		serversAPI.clearServersTable.
+			then( function(fulfilled){
+
+				var newServer = {
+				    id: 10,
+				    _ref: 'abc10',
+				    createdBy: 10,
+				    createdTime: 'abc10',
+				    name: 'Dummy10',
+				    lastConnection: 10
+				};
+
+				chai.request(baseUrl)
+					.post('/servers/')
+					.send(newServer)
+					.end((err, res) => {
+						res.should.have.status(201);
+						res.body.should.have.property('createdBy');
+						res.body.should.have.property('id');
+					  done();
+					});
+			});
+	    });
+	 });
+
+	describe('/DELETE server', function() {
+	  	it('it should DELETE a server', function(done) {
+	  		this.timeout(15000);
+	  		serversAPI.clearServersTable.
+			then( function(fulfilled){
+
+				var serverToDelete = {
+				    id: 11,
+				    _ref: 'abc11',
+				    createdBy: 11,
+				    createdTime: 'testTime11',
+				    name: 'Test11',
+				    lastConnection: 11
+				};
+
+				chai.request(baseUrl)
+					.post('/servers/')
+					.send(serverToDelete)
+					.end((err, res) => {
+						chai.request(baseUrl)
+							.delete('/servers/' + serverToDelete.id)
+							.send(serverToDelete)
+							.end((err, res) => {
+								res.should.have.status(204);
+								done();
+							});
+					});
+			});
+	    });
+	 });
+
+	describe('/GET server', function() {
+	  	it('it should GET a server', function(done) {
+			this.timeout(15000);
+			
+			serversAPI.clearServersTable.
+			then( function(fulfilled){
+
+				var serverToGet = {
+				    id: 12,
+				    _ref: 'abc12',
+				    createdBy: 12,
+				    createdTime: 'testTime12',
+				    name: 'Test12',
+				    lastConnection: 12
+				};
+
+				chai.request(baseUrl)
+					.post('/servers/')
+					.send(serverToGet)
+					.end((err, res) => {
+						chai.request(baseUrl)
+							.get('/servers/' + serverToGet.id)
+							.end((err, res) => {
+								res.should.have.status(200);
 								done();
 							});
 					});
