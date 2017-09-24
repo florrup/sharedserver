@@ -207,8 +207,9 @@ describe('Servers', function()  {
 	describe('/POST server', function() {
 	  	it('it should POST a server', function(done) {
 			this.timeout(15000);
-	  		serversAPI.clearServersTable().
-			then( function(fulfilled){
+
+	  		serversAPI.clearServersTable()
+			.then( function(fulfilled){
 
 				var newServer = {
 				    id: 10,
@@ -235,8 +236,8 @@ describe('Servers', function()  {
 	describe('/DELETE server', function() {
 	  	it('it should DELETE a server', function(done) {
 	  		this.timeout(15000);
-	  		serversAPI.clearServersTable().
-			then( function(fulfilled){
+	  		serversAPI.clearServersTable()
+			.then( function(fulfilled){
 
 				var serverToDelete = {
 				    id: 11,
@@ -266,9 +267,9 @@ describe('Servers', function()  {
 	describe('/GET server', function() {
 	  	it('it should GET a server', function(done) {
 			this.timeout(15000);
-			
-			serversAPI.clearServersTable().
-			then( function(fulfilled){
+
+			serversAPI.clearServersTable()
+			.then( function(fulfilled){
 
 				var serverToGet = {
 				    id: 12,
