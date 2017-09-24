@@ -133,24 +133,23 @@ router.get('/:serverId', function(request, response) {
   });
 });
 
-
-/*function clearServersTable() {
-  pool.connect((err, client, release) => {
-
-    if (err) {
-      console.log(err);
-      return response.status(500).json({code: 0, message: "Unexpected error"});
-    }
-    client.query('DELETE FROM servers;', (err, result) => {
-      release();
-      if (err) {
-        console.log(err);
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-    });
-  });
-}*/
-
-// always return router
 module.exports = router;
-//module.exports.clearServersTable = clearServersTable;
+
+function clearServersTable(){
+	return new Promise(
+	  function (resolve, reject) {
+		Server.destroy({
+		where: {},
+		truncate: true
+		})
+		.then(affectedRows => {
+		  if (affectedRows == 0) {
+			// database was already empty
+		  }
+		  resolve(true);
+		})
+		// .catch(reject(false));
+	});
+}
+
+module.exports.clearServersTable = clearServersTable;
