@@ -137,19 +137,21 @@ router.put('/:userId', function(request, response) {
 
 module.exports = router;
 
-var clearUsersTable = new Promise(
-	function (resolve, reject) {
-	  User.destroy({
-		where: {},
-		truncate: true
-	  })
-	  .then(affectedRows => {
-			if (affectedRows == 0) {
-			  // database was already empty
-			}
-			resolve(true);
-	  })
-	  // .catch(reject(false));
-})
+function clearUsersTable(){
+	return new Promise(
+		function (resolve, reject) {
+		  User.destroy({
+			where: {},
+			truncate: true
+		  })
+		  .then(affectedRows => {
+				if (affectedRows == 0) {
+				  // database was already empty
+				}
+				resolve(true);
+		  })
+		  // .catch(reject(false));
+	})
+};
 
 module.exports.clearUsersTable = clearUsersTable;

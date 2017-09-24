@@ -25,7 +25,7 @@ describe('Users', function()  {
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
 		    this.timeout(15000);
-		    usersAPI.clearUsersTable.
+		    usersAPI.clearUsersTable().
 			then( function(fulfilled){
 
 				chai.request(baseUrl)
@@ -43,7 +43,7 @@ describe('Users', function()  {
 	describe('/POST user', function() {
 	  	it('it should POST a user', function(done) {
 			this.timeout(15000);
-	  		usersAPI.clearUsersTable.
+	  		usersAPI.clearUsersTable().
 			then( function(fulfilled){
 
 				var newUser = {
@@ -72,7 +72,7 @@ describe('Users', function()  {
 	describe('/DELETE user', function() {
 	  	it('it should DELETE a user', function(done) {
 			this.timeout(15000);
-	  		usersAPI.clearUsersTable.
+	  		usersAPI.clearUsersTable().
 			then( function(fulfilled){
 
 				var userToDelete = {
@@ -106,7 +106,7 @@ describe('Users', function()  {
 	  	it('it should GET an existing user', function(done) {
 			this.timeout(15000);
 			
-			usersAPI.clearUsersTable.
+			usersAPI.clearUsersTable().
 			then( function(fulfilled){
 
 				var userToGet = {
@@ -139,7 +139,7 @@ describe('Users', function()  {
 	  	it('it should PUT a modified user', function(done) {
 			this.timeout(15000);
 			
-			usersAPI.clearUsersTable.
+			usersAPI.clearUsersTable().
 			then( function(fulfilled){
 
 				var userToModify = {
