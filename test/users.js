@@ -182,7 +182,6 @@ describe('Users', function()  {
 
 });
 
-
 describe('Servers', function()  {
 
 	var serversAPI = require('../routes/servers');
@@ -295,4 +294,85 @@ describe('Servers', function()  {
 	    });
 	 });
 
+});
+
+describe('BusinessUsers', function()  {
+
+	var businessUsersAPI = require('../routes/business-users');
+
+	describe('/GET business user', function() {
+	  	it('it should GET no business users from empty database', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+					.get('/business-users/')
+					.end((err, res) => {
+						res.should.have.status(200);
+						res.body.should.be.a('array');
+						res.body.length.should.be.eql(0);
+						done();
+					});
+			});
+	    });
+	  });
+
+	describe('/POST business user', function() {
+	  	it('it should POST a business user', function(done) {
+			this.timeout(15000);
+
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				var newBusinessUser = {
+				    id: 2,
+				    _ref: 'a2',
+				    username: 'carlossanchez',
+				    password: 'carlos123',
+				    name: 'Carlos',
+				    surname: 'Sanchez'
+				};
+
+				chai.request(baseUrl)
+					.post('/business-users/')
+					.send(newBusinessUser)
+					.end((err, res) => {
+						res.should.have.status(201);
+						res.body.should.have.property('username');
+						res.body.should.have.property('surname');
+					  done();
+					});
+			});
+	    });
+	 });
+
+	describe('/DELETE business user', function() {
+	  	it('it should DELETE a business user', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				var businessUserToDelete = {
+				    id: 3,
+				    _ref: 'a3',
+				    username: 'johnBlack',
+				    name: 'John',
+				    surname: 'Black'
+				};
+
+				chai.request(baseUrl)
+					.post('/business-users/')
+					.send(businessUserToDelete)
+					.end((err, res) => {
+						chai.request(baseUrl)
+							.delete('/business-users/' + businessUserToDelete.id)
+							.send(businessUserToDelete)
+							.end((err, res) => {
+								res.should.have.status(204);
+								done();
+							});
+					});
+			});
+	    });
+	 });
 });
