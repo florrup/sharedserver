@@ -69,23 +69,35 @@ describe('Users', function()  {
 	    });
 	 });
 
+	var userToDelete = {
+		id: 15,
+		username: 'testUsername',
+		name: 'testName',
+		surname: 'testSurname',
+		country: 'Argentina',
+		email: 'testEmail@gmail.com',
+		birthdate: '24/05/1992'
+	};
+
 	describe('/DELETE user', function() {
+		it('it shouldnt DELETE a user that doesnt exist', function(done) {
+			this.timeout(15000);
+	  		usersAPI.clearUsersTable().
+			then( function(fulfilled){
+				chai.request(baseUrl)
+					.delete('/users/' + userToDelete.id)
+					.send(userToDelete)
+					.end((err, res) => {
+						res.should.have.status(404);
+						done();
+					});
+			});
+		});
+
 	  	it('it should DELETE a user', function(done) {
 			this.timeout(15000);
 	  		usersAPI.clearUsersTable().
 			then( function(fulfilled){
-
-				var userToDelete = {
-					id: 15,
-					username: 'testUsername',
-					name: 'testName',
-					surname: 'testSurname',
-					country: 'Argentina',
-					email: 'testEmail@gmail.com',
-					birthdate: '24/05/1992'
-				};
-				
-
 				chai.request(baseUrl)
 					.post('/users/')
 					.send(userToDelete)
@@ -135,7 +147,33 @@ describe('Users', function()  {
 	    });
 	 });
 
+	var userToModify = {
+		id: 11,
+		username: 'testUsername11',
+		name: 'testName11',
+		surname: 'testSurname11',
+		country: 'Argentina11',
+		email: 'testEmail11@gmail.com',
+		birthdate: '24/05/1992'
+	};
+
 	describe('/PUT user', function() {
+
+		it('it shouldnt PUT a user that doesnt exist', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable().
+			then( function(fulfilled){
+				chai.request(baseUrl)
+					.put('/users/' + userToModify.id)
+					.send(userToModify)
+					.end((err, res) => {
+						res.should.have.status(404);
+						done();
+					});
+			});
+	    });
+
 	  	it('it should PUT a modified user', function(done) {
 			this.timeout(15000);
 			

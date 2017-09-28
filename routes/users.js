@@ -73,18 +73,11 @@ router.delete('/:userId', function(request, response) {
     }
   }).then(affectedRows => {
     if (affectedRows == 0) {
-      return response.status(500).json({code: 0, message: "Unexpected error: didn't find target user "});
+      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
     }
-
-    User.findAll({ // must return all users
-      attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
-    })
-    .then(users => {
-      if (!users) {
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      return response.status(204).json(users);
-    });
+    return response.status(204).json({});
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
 
@@ -130,8 +123,10 @@ router.put('/:userId', function(request, response) {
         return response.status(200).json(updatedUser);
       });
     } else {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
+      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
     }
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
 
