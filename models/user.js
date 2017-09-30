@@ -1,15 +1,19 @@
 var Sequelize = require("sequelize");
 var sequelize = require("./db.js").sequelize;
 
-// module.exports = function(sequelize, DataTypes) {
-  // var User = sequelize.define('user', {
+/**
+ *  Define la estructura de datos de un usuario cliente de la aplicación android
+ *  Usuarios de aplicación son típicamente pasajeros y conductores
+ *
+ */
 const User = sequelize.define('user', {
     id: {
       type: Sequelize.STRING,
 	    primaryKey: true
     },
     username: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+	  unique: true
     },
     password: {
       type: Sequelize.STRING

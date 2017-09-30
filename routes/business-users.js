@@ -6,6 +6,27 @@ var BusinessUser = require('../models/businessuser.js');
 
 // CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40));
 
+
+/**
+ *  Método dummy para ensayos locales, será eliminado a futuro
+ *  TODO eliminar este método cuando no se necesite más o pasar a un test local
+ */ 
+router.get('/initAndWriteDummyBusinessUser', function(request, response) {
+	// Test code: dummy register and table initialization:
+	// force: true will drop the table if it already exists
+	BusinessUser.sync({force: true}).then(() => {
+	  // Table created
+	  return BusinessUser.create({
+		id: 0,
+		username: 'johnny',
+		password: 'aaa',
+		name: 'John',
+		surname: 'Hancock',
+		roles: ['admin', 'manager', 'user']
+	  })
+	})
+});
+
 /**
  *  Devuelve toda la información acerca de los usuarios de negocio indicados.
  *
@@ -13,7 +34,7 @@ var BusinessUser = require('../models/businessuser.js');
 
 router.get('/', function(request, response) {
 	BusinessUser.findAll({
-		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname']
+		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
 		}).then(businessusers => {
 	    if (!businessusers) {
 	      return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -33,7 +54,8 @@ router.post('/', function(request, response) {
 		username: request.body.username,
 		password: request.body.password,
 		name: request.body.name,
-		surname: request.body.surname
+		surname: request.body.surname,
+		roles: request.body.roles
 	}).then(businessuser => {
 		if (!businessuser) {
 		  return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -58,7 +80,7 @@ router.delete('/:businessuserId', function(request, response) {
     }
 
     BusinessUser.findAll({ // must return all businessusers
-		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname']
+		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
     })
     .then(users => {
       if (!users) {

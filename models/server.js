@@ -20,7 +20,14 @@ const Server = sequelize.define('server', {
     },
     lastConnection: {
       type: Sequelize.INTEGER
-    }
+    },
+	username: { // field automatically added otherwise by passport-local-sequelize
+		type: Sequelize.STRING,
+		unique: true
+	},
+	password: { // field automatically added otherwise by passport-local-sequelize
+		type: Sequelize.STRING
+	}
   });
   
 module.exports = Server;
