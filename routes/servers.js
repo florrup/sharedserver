@@ -13,6 +13,8 @@ router.get('/initAndWriteDummyServer', function(request, response) {
     // Table created
     return Server.create({
     id: 0,
+	username: 'myDummyAppServer',
+    password: 'aaa',
     _ref: 'abc',
     createdBy: 66,
     createdTime: 'abc',
@@ -29,7 +31,7 @@ router.get('/initAndWriteDummyServer', function(request, response) {
 
 router.get('/', function(request, response) {
   Server.findAll({
-    attributes: ['id', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
+    attributes: ['id', 'username', 'password', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
   }).then(servers => {
     if (!servers) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -50,7 +52,9 @@ router.post('/', function(request, response) {
     createdBy: request.body.createdBy,
     createdTime: request.body.createdTime,
     name: request.body.name,
-    lastConnection: request.body.lastConnection
+    lastConnection: request.body.lastConnection,
+    username: request.body.username,
+    password: request.body.password
   }).then(server => {
     if (!server) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -78,7 +82,9 @@ router.put('/:serverId', function(request, response) {
         createdBy: request.body.createdBy,
         createdTime: request.body.createdTime,
         name: request.body.name,
-        lastConnection: request.body.lastConnection
+        lastConnection: request.body.lastConnection,
+		username: request.body.username,
+		password: request.body.password
       }).then(updatedServer => {
         return response.status(200).json(updatedServer);
       });
@@ -104,7 +110,7 @@ router.delete('/:serverId', function(request, response) {
     }
 
     Server.findAll({ // must return all servers
-      attributes: ['id', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
+      attributes: ['id', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection', 'username', 'password']
     })
     .then(servers => {
       if (!servers) {

@@ -49,6 +49,7 @@ describe('Users', function()  {
 				var newUser = {
 					id: 0,
 					username: 'johnny',
+					password: 'aaaa',
 					name: 'John',
 					surname: 'Hancock',
 					country: 'Argentina',
@@ -72,6 +73,7 @@ describe('Users', function()  {
 	var userToDelete = {
 		id: 15,
 		username: 'testUsername',
+		password: 'fakepasswd',
 		name: 'testName',
 		surname: 'testSurname',
 		country: 'Argentina',
@@ -124,6 +126,7 @@ describe('Users', function()  {
 				var userToGet = {
 					id: 10,
 					username: 'testUsername10',
+					password: 'aaa',
 					name: 'testName10',
 					surname: 'testSurname10',
 					country: 'Argentina10',
@@ -150,6 +153,7 @@ describe('Users', function()  {
 	var userToModify = {
 		id: 11,
 		username: 'testUsername11',
+		password: 'aaa',
 		name: 'testName11',
 		surname: 'testSurname11',
 		country: 'Argentina11',
@@ -254,7 +258,8 @@ describe('Servers', function()  {
 				    createdBy: 10,
 				    createdTime: 'abc10',
 				    name: 'Dummy10',
-				    lastConnection: 10
+				    lastConnection: 10,
+					username: 'myAppServer'
 				};
 
 				chai.request(baseUrl)
@@ -282,7 +287,8 @@ describe('Servers', function()  {
 				    createdBy: 11,
 				    createdTime: 'testTime11',
 				    name: 'Test11',
-				    lastConnection: 11
+				    lastConnection: 11,
+					username: 'myAppServer'
 				};
 
 				chai.request(baseUrl)
@@ -314,7 +320,9 @@ describe('Servers', function()  {
 				    createdBy: 12,
 				    createdTime: 'testTime12',
 				    name: 'Test12',
-				    lastConnection: 12
+				    lastConnection: 12,
+					username: 'myAppServer',
+					password: 'aa'
 				};
 
 				chai.request(baseUrl)
@@ -368,7 +376,8 @@ describe('BusinessUsers', function()  {
 				    username: 'carlossanchez',
 				    password: 'carlos123',
 				    name: 'Carlos',
-				    surname: 'Sanchez'
+				    surname: 'Sanchez',
+					roles: ['admin', 'user']
 				};
 
 				chai.request(baseUrl)
@@ -395,7 +404,8 @@ describe('BusinessUsers', function()  {
 				    _ref: 'a3',
 				    username: 'johnBlack',
 				    name: 'John',
-				    surname: 'Black'
+				    surname: 'Black',
+					roles: ['admin', 'user']
 				};
 
 				chai.request(baseUrl)
