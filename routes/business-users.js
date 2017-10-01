@@ -16,14 +16,17 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 	// force: true will drop the table if it already exists
 	BusinessUser.sync({force: true}).then(() => {
 	  // Table created
-	  return BusinessUser.create({
+	  
+	  var dummyBusinessUser = {
 		id: 0,
 		username: 'johnny',
 		password: 'aaa',
 		name: 'John',
 		surname: 'Hancock',
 		roles: ['admin', 'manager', 'user']
-	  })
+	  };
+	  BusinessUser.create(dummyBusinessUser);
+	  return response.status(200).json(dummyBusinessUser);
 	})
 });
 

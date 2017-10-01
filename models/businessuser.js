@@ -13,7 +13,8 @@ var sequelize = require("./db.js").sequelize;
 const BusinessUser = sequelize.define('businessuser', {
     id: {
       type: Sequelize.STRING,
-	    primaryKey: true
+	    primaryKey: true,
+		unique: true
     },
     _ref: {
       type: Sequelize.STRING
