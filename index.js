@@ -15,6 +15,11 @@ app.set('view engine', 'ejs');
 var env = require('node-env-file');
   env(__dirname + '/.env');
 
+// Get environment variables from config file is as follows...
+var path = require("path");
+var environment = process.env.NODE_ENV || "development"; // default is development
+var config = require(path.join(__dirname, 'config', 'config.json'))[environment];
+
 app.get('/', function(request, response) {
   response.render('pages/index');
   //response.send('Hello World');
