@@ -49,7 +49,8 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
  *  Devuelve toda la información acerca de los usuarios de negocio indicados.
  *
  */ 
-router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+
+router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
 		}).then(businessusers => {
@@ -64,7 +65,8 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  *  Da de alta un usuario de negocio.
  *
  */
-router.post('/', function(request, response) {
+
+router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	Server.usernameExists(request.body.username, function(res, next) {
 		if (res) {
 			return response.status(400).json({code: 0, message: "Existe un servidor con este nombre de usuario"});
@@ -91,7 +93,7 @@ router.post('/', function(request, response) {
  *  Da de baja un usuario de negocio.
  *
  */
-router.delete('/:businessuserId', function(request, response) {
+router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
   BusinessUser.destroy({
     where: {
       id: request.params.businessuserId

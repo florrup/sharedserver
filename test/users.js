@@ -31,7 +31,7 @@ describe('Users', function()  {
 
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
-		    this.timeout(15000);
+		    this.timeout(16000);
 		    usersAPI.clearUsersTable().
 			then( function(fulfilled){
 
@@ -385,22 +385,22 @@ describe('BusinessUsers', function()  {
 						console.log('Is this body w token?: ', res.body);
 						var token = res.body.token.token;
 
-							chai.request(baseUrl)
-							.get('/business-users/')
-							.set(token_header_flag, token)
-							.end((err, res) => {
-								res.should.have.status(200);
-								res.body.should.be.a('array');
-								res.body.length.should.be.eql(1);
-								done();
-							});
+						chai.request(baseUrl)
+						.get('/business-users/')
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							res.should.have.status(200);
+							res.body.should.be.a('array');
+							res.body.length.should.be.eql(1);
+							done();
+						});
 
 					});				
-				})
+				});
 				
 			});
 	    });
-	  });
+	});
 
 	describe('/POST business user', function() {
 	  	it('it should POST a business user', function(done) {
@@ -420,17 +420,33 @@ describe('BusinessUsers', function()  {
 				};
 
 				chai.request(baseUrl)
-					.post('/business-users/')
-					.send(newBusinessUser)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
-						res.should.have.status(201);
-						res.body.should.have.property('username');
-						res.body.should.have.property('surname');
-					  done();
-					});
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(newBusinessUser)
+						.end((err, res) => {
+							res.should.have.status(201);
+							res.body.should.have.property('username');
+							res.body.should.have.property('surname');
+						  done();
+						});
+
+					});				
+				});
 			});
 	    });
-	 });
+	});
 
 	describe('/DELETE business user', function() {
 	  	it('it should DELETE a business user', function(done) {
@@ -448,18 +464,35 @@ describe('BusinessUsers', function()  {
 				};
 
 				chai.request(baseUrl)
-					.post('/business-users/')
-					.send(businessUserToDelete)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
 						chai.request(baseUrl)
-							.delete('/business-users/' + businessUserToDelete.id)
-							.send(businessUserToDelete)
-							.end((err, res) => {
-								res.should.have.status(204);
-								done();
-							});
-					});
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(businessUserToDelete)
+						.end((err, res) => {
+							chai.request(baseUrl)
+								.delete('/business-users/' + businessUserToDelete.id)
+								.set(token_header_flag, token)
+								.send(businessUserToDelete)
+								.end((err, res) => {
+									res.should.have.status(204);
+									done();
+								});
+						});
+
+					});				
+				});
 			});
 	    });
-	 });
+	});
 });
