@@ -3,8 +3,9 @@ var router = express.Router();
 
 const Sequelize = require('sequelize');
 var BusinessUser = require('../models/businessuser.js');
+var Server = require('../routes/servers.js');
 
-var Verify    = require('./verify');
+var Verify = require('./verify');
 
 // CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40));
 
@@ -54,19 +55,26 @@ router.get('/', Verify.verifyOrdinaryUser,  function(request, response) {
  */
 
 router.post('/', function(request, response) {
-	BusinessUser.create({
-		id: request.body.id,
-		username: request.body.username,
-		password: request.body.password,
-		name: request.body.name,
-		surname: request.body.surname,
-		roles: request.body.roles
-	}).then(businessuser => {
-		if (!businessuser) {
-		  return response.status(500).json({code: 0, message: "Unexpected error"});
+	Server.usernameExists(request.body.username, function(res, next) {
+		if (res) {
+			return response.status(400).json({code: 0, message: "Existe un servidor con este nombre de usuario"});
 		}
-		response.status(201).json(businessuser);
-	});
+
+		console.log("Before creating a businessuser - username doesn't exist in server table");
+			BusinessUser.create({
+			id: request.body.id,
+			username: request.body.username,
+			password: request.body.password,
+			name: request.body.name,
+			surname: request.body.surname,
+			roles: request.body.roles
+		}).then(businessuser => {
+			if (!businessuser) {
+			  return response.status(500).json({code: 0, message: "Unexpected error"});
+			}
+			response.status(201).json(businessuser);
+		});
+	});	
 });
 
 /**

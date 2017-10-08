@@ -4,15 +4,15 @@ var sequelize = require("./db.js").sequelize;
 const Server = sequelize.define('server', {
     id: {
       type: Sequelize.STRING,
-	  primaryKey: true
+	    primaryKey: true
     },
     username: { // field automatically added otherwise by passport-local-sequelize
-        type: Sequelize.STRING,
-        unique: true
-	},
-	password: { // field automatically added otherwise by passport-local-sequelize
-		type: Sequelize.STRING
-	},
+      type: Sequelize.STRING,
+      unique: true
+	  },
+	  password: { // field automatically added otherwise by passport-local-sequelize
+		  type: Sequelize.STRING
+	  },
     _ref: {
       type: Sequelize.STRING
     },

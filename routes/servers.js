@@ -141,6 +141,23 @@ router.get('/:serverId', function(request, response) {
 
 module.exports = router;
 
+function usernameExists(businessUserUsername, callback) {
+  Server.find({
+    where: {
+      username: businessUserUsername
+    }
+  }).then(server => {
+    if (!server) {
+      console.log("No server has this username");
+      return callback(false); 
+    }
+    console.log("A server has this username");
+    return callback(true);
+  });
+}
+
+module.exports.usernameExists = usernameExists;
+
 function clearServersTable(){
 	return new Promise(
 	  function (resolve, reject) {
