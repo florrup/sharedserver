@@ -17,20 +17,30 @@ var Verify = require('./verify');
 router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
-	BusinessUser.sync({force: true}).then(() => {
-	  // Table created
-	  
-	  var dummyBusinessUser = {
-		id: 0,
-		username: 'johnny',
-		password: 'aaa',
-		name: 'John',
-		surname: 'Hancock',
-		roles: ['admin', 'manager', 'user']
-	  };
-	  BusinessUser.create(dummyBusinessUser);
-	  return response.status(200).json(dummyBusinessUser);
-	})
+	// It is only available in development environment
+	if (process.env.NODE_ENV === 'development'){
+		BusinessUser.sync({force: true}).then(() => {
+		  // Table created
+		  
+		  var dummyBusinessUser = {
+			id: 0,
+			username: 'johnny',
+			password: 'aaa',
+			name: 'John',
+			surname: 'Hancock',
+			roles: ['admin', 'manager', 'user']
+		  };
+		  BusinessUser.create(dummyBusinessUser)
+		  .then(() => {
+			return response.status(200).json(dummyBusinessUser);
+		  })
+		  .catch(error => {
+			  return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
+			// mhhh, wth!
+		  })
+		  
+		})
+	}
 });
 
 /**
