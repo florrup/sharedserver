@@ -102,3 +102,17 @@ exports.verifyUserOrAppRole = function (req, res, next) {
 		return next(err);
 	}
 };
+
+exports.verifyManagerOrAppRole = function (req, res, next) {
+	var appOk = req.decoded.appOk;
+	var managerOk = req.decoded.managerOk;
+	
+	if (appOk || managerOk){
+		return next();
+	}
+	else{
+		var err = new Error('No MANAGER or APP privileges for this user!');
+		err.status = 403;
+		return next(err);
+	}
+};

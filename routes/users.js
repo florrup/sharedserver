@@ -4,6 +4,8 @@ var router = express.Router();
 const Sequelize = require('sequelize');
 var User = require('../models/user.js');
 
+var Verify = require('./verify');
+
 // CREATE TABLE users(id INT PRIMARY KEY, username VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
 router.get('/initAndWriteDummyUser', function(request, response) {
