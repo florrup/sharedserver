@@ -6,29 +6,37 @@ var Server = require('../models/server.js');
 
 // CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
+
+/**
+ * Test method to empty the servers database and create a dummy app server in order to make further tests
+ * This method is available only when the ENVIRONMENT is set as 'development'
+ * 
+ * PRE: process.env.ENV_NODE has 'development' value
+ */
 router.get('/initAndWriteDummyServer', function(request, response) {
   // Test code: dummy register and table initialization:
   // force: true will drop the table if it already exists
-  Server.sync({force: true}).then(() => {
-    // Table created
-    return Server.create({
-    id: 0,
-	username: 'myDummyAppServer',
-    password: 'aaa',
-    _ref: 'abc',
-    createdBy: 66,
-    createdTime: 'abc',
-    name: 'DummyServer',
-    lastConnection: 2
-    })
-  })
+  if (process.env.NODE_ENV === 'development'){
+	  Server.sync({force: true}).then(() => {
+		// Table created
+		return Server.create({
+		id: 0,
+		username: 'myDummyAppServer',
+		password: 'aaa',
+		_ref: 'abc',
+		createdBy: 66,
+		createdTime: 'abc',
+		name: 'DummyServer',
+		lastConnection: 2
+		})
+	  })
+  }
 })
 
 /**
  *  Devuelve toda la información acerca de todos los application servers indicados.
  *
  */
-
 router.get('/', function(request, response) {
   Server.findAll({
     attributes: ['id', 'username', 'password', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
@@ -44,7 +52,6 @@ router.get('/', function(request, response) {
  *  Da de alta un server.
  *
  */
- 
 router.post('/', function(request, response) {
   Server.create({
     id: request.body.id,
@@ -67,7 +74,6 @@ router.post('/', function(request, response) {
  *  Modifica los datos de un servidor.
  *
  */
-
 router.put('/:serverId', function(request, response) {
   Server.find({
     where: {
@@ -98,7 +104,6 @@ router.put('/:serverId', function(request, response) {
  *  Da de baja un servidor.
  *
  */
-
 router.delete('/:serverId', function(request, response) {
   Server.destroy({
     where: {
@@ -125,7 +130,6 @@ router.delete('/:serverId', function(request, response) {
  *  Devuelve toda la información del servidor.
  *
  */
- 
 router.get('/:serverId', function(request, response) {
   Server.find({
     where: {
@@ -141,6 +145,12 @@ router.get('/:serverId', function(request, response) {
 
 module.exports = router;
 
+
+/**
+ *  Method that verifies if a username has a server associated with it.
+ * 
+ * This method is useful to avoid application users take a username that already has a server associated to it, wich is forbidden
+ */
 function usernameExists(businessUserUsername, callback) {
   Server.find({
     where: {
@@ -158,6 +168,10 @@ function usernameExists(businessUserUsername, callback) {
 
 module.exports.usernameExists = usernameExists;
 
+
+/**
+ *  This method clears the servers database, leaving blank the servers table
+ */
 function clearServersTable(){
 	return new Promise(
 	  function (resolve, reject) {

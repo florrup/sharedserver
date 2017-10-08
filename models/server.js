@@ -1,6 +1,11 @@
 var Sequelize = require("sequelize");
 var sequelize = require("./db.js").sequelize;
 
+
+/**
+ * Server format data declaration with sequelize ORM
+ * Servers or app's refer to the application server
+ */
 const Server = sequelize.define('server', {
     id: {
       type: Sequelize.STRING,

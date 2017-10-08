@@ -2,12 +2,21 @@ var BusinessUser = require('../models/businessuser');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 // var config = require('../config.js');
 
+
+/**
+ * Method for token generation. It consumes token secret and token expiration time from env configuration.
+**/
 exports.getToken = function (businessuser) {
     return jwt.sign(businessuser, process.env.TOKEN_SECRET_KEY,{
-        expiresIn: 3600
+        expiresIn: process.env.TOKEN_LIFETIME_IN_SECONDS // 3600
     });
 };
 
+
+/**
+ * Verifies the token existance in the request body, the request query or the request header
+ * The information from the token is extracted and saved in the request itself, in the field decoded, to pass the request to the next middleware calls
+**/
 exports.verifyToken = function (req, res, next) {
     // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers[process.env.TOKEN_HEADER_FLAG];
@@ -37,6 +46,14 @@ exports.verifyToken = function (req, res, next) {
     }
 };
 
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable userOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
 exports.verifyUserRole = function (req, res, next) {
 	var userOk = req.decoded.userOk;
 	
@@ -50,6 +67,14 @@ exports.verifyUserRole = function (req, res, next) {
 	}
 };
 
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable appOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
 exports.verifyAppRole = function (req, res, next) {
 	var appOk = req.decoded.appOk;
 	
@@ -63,6 +88,14 @@ exports.verifyAppRole = function (req, res, next) {
 	}
 };
 
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable mangerOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
 exports.verifyManagerRole = function (req, res, next) {
 	var managerOk = req.decoded.managerOk;
 	
@@ -76,6 +109,14 @@ exports.verifyManagerRole = function (req, res, next) {
 	}
 };
 
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable adminOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
 exports.verifyAdminRole = function (req, res, next) {
 	var adminOk = req.decoded.adminOk;
 	
@@ -89,6 +130,14 @@ exports.verifyAdminRole = function (req, res, next) {
 	}
 };
 
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable userOk OR the variable appOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
 exports.verifyUserOrAppRole = function (req, res, next) {
 	var appOk = req.decoded.appOk;
 	var userOk = req.decoded.userOk;
