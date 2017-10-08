@@ -4,6 +4,8 @@ var router = express.Router();
 const Sequelize = require('sequelize');
 var BusinessUser = require('../models/businessuser.js');
 
+var Verify    = require('./verify');
+
 // CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40));
 
 
@@ -35,7 +37,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
  *
  */ 
 
-router.get('/', function(request, response) {
+router.get('/', Verify.verifyOrdinaryUser,  function(request, response) {
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
 		}).then(businessusers => {

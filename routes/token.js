@@ -34,13 +34,15 @@ router.post('/', function (request, response){
 					 username: businessUser.username
 				};
 				var localToken = verify.getToken(payload);
-				return response.status(201).json({
+				response.writeHead(201, {"Content-Type": "application/json"});
+				var responseJson = JSON.stringify({
 					metadata: {version: api.apiVersion},
 					token: {
 						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
 						token: localToken
 					}
 				});
+				return response.end(responseJson);
 			}
 		}
 	});
