@@ -7,8 +7,10 @@ var path = require("path");
 var environment = process.env.NODE_ENV || "development"; // default is development
 var config = require(path.join(__dirname, '..', 'config', 'config.json'))[environment];
 
-//DB CONNECTION: instance (starts with minus s)
-// const sequelize = new Sequelize('d2gv0cr5bou448', 'yvnmgtvwznipcx', 'd2158d028efa41843d2788c28396c02b4bb47b9e2b0c207ad99f1c1dc266466e', {
+
+/**
+ *  Database initialization with Sequelize ORM over postgresql
+ */
 const sequelize = new Sequelize(config.DATABASE, config.DATABASE_USER, config.DATABASE_PASS, {
   host: config.DATABASE_HOST,
   port: config.DATABASE_PORT,
@@ -24,6 +26,9 @@ const sequelize = new Sequelize(config.DATABASE, config.DATABASE_USER, config.DA
   }
 });
 
+/**
+ *  Sequelize authentication method
+ */
 sequelize.authenticate()
     .then(function(err) {
         if (err) {
@@ -33,6 +38,6 @@ sequelize.authenticate()
             // Databese connection successful
             console.log('Sequelize Module: Connection to Database has been established successfully.');
         }
-    })
+    });
 
 module.exports.sequelize = sequelize;

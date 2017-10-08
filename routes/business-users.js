@@ -11,9 +11,11 @@ var Verify = require('./verify');
 
 
 /**
- *  Método dummy para ensayos locales, será eliminado a futuro
- *  TODO eliminar este método cuando no se necesite más o pasar a un test local
- */ 
+ * Test method to empty the business users database and create a dummy business user in order to make further tests
+ * This method is available only when the ENVIRONMENT is set as 'development'
+ * 
+ * PRE: process.env.ENV_NODE has 'development' value
+ */
 router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
@@ -47,7 +49,6 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
  *  Devuelve toda la información acerca de los usuarios de negocio indicados.
  *
  */ 
-
 router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
@@ -63,7 +64,6 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  *  Da de alta un usuario de negocio.
  *
  */
-
 router.post('/', function(request, response) {
 	Server.usernameExists(request.body.username, function(res, next) {
 		if (res) {
@@ -91,7 +91,6 @@ router.post('/', function(request, response) {
  *  Da de baja un usuario de negocio.
  *
  */
-
 router.delete('/:businessuserId', function(request, response) {
   BusinessUser.destroy({
     where: {
@@ -116,6 +115,9 @@ router.delete('/:businessuserId', function(request, response) {
 
 module.exports = router;
 
+/**
+ * Method to clean the business users table
+**/
 function clearBusinessUsersTable() {
 	return new Promise(
 	  function (resolve, reject) {

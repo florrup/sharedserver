@@ -19,6 +19,12 @@ var token_header_flag = 'x-access-token';
 
 chai.use(chaiHttp);
 
+
+/**
+ *  Test methods for application users endpoints
+ *
+ * Application users are the drivers or passangers that use the system and have a profile in this database
+ */
 describe('Users', function()  {
 
 	var usersAPI = require('../routes/users');
@@ -225,6 +231,13 @@ describe('Users', function()  {
 
 });
 
+
+/**
+ *  Test methods for application servers management endpoints
+ *
+ * Servers or application servers are the programs that run the system and operate with the client applications run by application users
+ * These methods test endpoints for servers management
+ */
 describe('Servers', function()  {
 
 	var serversAPI = require('../routes/servers');
@@ -343,6 +356,13 @@ describe('Servers', function()  {
 
 });
 
+
+/**
+ *  Test methods for business users management endpoints
+ *
+ * Business users are the persons that manage the system with different levels of authorization
+ * These methods test endpoints for business users management
+ */
 describe('BusinessUsers', function()  {
 
 	var businessUsersAPI = require('../routes/business-users');

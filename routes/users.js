@@ -6,28 +6,36 @@ var User = require('../models/user.js');
 
 // CREATE TABLE users(id INT PRIMARY KEY, username VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
+
+/**
+ * Test method to empty the users database and create a dummy user in order to make further tests
+ * This method is available only when the ENVIRONMENT is set as 'development'
+ * 
+ * PRE: process.env.ENV_NODE has 'development' value
+ */
 router.get('/initAndWriteDummyUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
-	User.sync({force: true}).then(() => {
-	  // Table created
-	  return User.create({
-		id: 0,
-    username: 'johnny',
-		name: 'John',
-		surname: 'Hancock',
-    country: 'Argentina',
-    email: 'johnny123@gmail.com',
-    birthdate: '24/05/1992'
-	  })
-	})
+	if (process.env.NODE_ENV === 'development'){
+		User.sync({force: true}).then(() => {
+		  // Table created
+		  return User.create({
+			id: 0,
+		username: 'johnny',
+			name: 'John',
+			surname: 'Hancock',
+		country: 'Argentina',
+		email: 'johnny123@gmail.com',
+		birthdate: '24/05/1992'
+		  })
+		})
+	}
 });
 
 /**
  *  Devuelve toda la información acerca de todos los users indicados.
  *
  */ 
-
 router.get('/', function(request, response) {
 	User.findAll({
     attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
@@ -43,7 +51,6 @@ router.get('/', function(request, response) {
  *  Da de alta un usuario.
  *
  */
-
 router.post('/', function(request, response) {
   User.create({
     id: request.body.id,
@@ -65,7 +72,6 @@ router.post('/', function(request, response) {
  *  Da de baja un usuario.
  *
  */
-
 router.delete('/:userId', function(request, response) {
   User.destroy({
     where: {
@@ -85,7 +91,6 @@ router.delete('/:userId', function(request, response) {
  *  Devuelve toda la información del usuario.
  *
  */
-
 router.get('/:userId', function(request, response) {
   User.find({
     where: {
@@ -103,7 +108,6 @@ router.get('/:userId', function(request, response) {
  *  Modifica los datos de un usuario.
  *
  */
-
 router.put('/:userId', function(request, response) {
   User.find({
     where: {
@@ -132,6 +136,9 @@ router.put('/:userId', function(request, response) {
 
 module.exports = router;
 
+/**
+ *  This method clears the application users database, leaving blank the servers table
+ */
 function clearUsersTable(){
 	return new Promise(
 		function (resolve, reject) {
