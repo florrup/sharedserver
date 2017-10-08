@@ -30,9 +30,9 @@ router.post('/', function (request, response){
 			}
 			else {
 				console.log('User ', businessUser.username, 'logged successfully');
-				var adminOk = businessUser.roles.includes(process.env.TAG_ADMIN);
-				var managerOk = businessUser.roles.includes(process.env.TAG_MANAGER);
-				var appOk = businessUser.roles.includes(process.env.TAG_APP);
+				var adminOk = businessUser.roles.indexOf(process.env.TAG_ADMIN) !== -1;
+				var managerOk = businessUser.roles.indexOf(process.env.TAG_MANAGER) !== -1;
+				var appOk = businessUser.roles.indexOf(process.env.TAG_APP) !== -1;
 				var payload = {
 					 username: businessUser.username,
 					 userOk: true,
