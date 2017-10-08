@@ -346,27 +346,26 @@ describe('Servers', function()  {
 describe('BusinessUsers', function()  {
 
 	var businessUsersAPI = require('../routes/business-users');
-/*
+
 	describe('/GET business user', function() {
-	  	it('it should GET no business users from empty database', function(done) {
+	  	it('it should GET business users from database', function(done) {
 		    this.timeout(15000);
 		    businessUsersAPI.clearBusinessUsersTable()
 			.then( function(fulfilled){
 				
-				// This next call is not working??
 				chai.request(baseUrl)
-				.get('/initAndWriteDummyBusinessUser/') // ... this one
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
 				.end((err, res) => {
 					console.log('1st res: ', res.body);
 					if(err){console.log('***** ASDFASDFASF ****** ')};
-					// We get errors here and not users created for test
+
 					chai.request(baseUrl)
 					.post('/token/')
 					.set('content-type', 'application/json')
 					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
 						console.log('Is this body w token?: ', res.body);
-						var token = res.body.token;
+						var token = res.body.token.token;
 
 							chai.request(baseUrl)
 							.get('/business-users/')
@@ -374,7 +373,7 @@ describe('BusinessUsers', function()  {
 							.end((err, res) => {
 								res.should.have.status(200);
 								res.body.should.be.a('array');
-								res.body.length.should.be.eql(0);
+								res.body.length.should.be.eql(1);
 								done();
 							});
 
@@ -384,7 +383,7 @@ describe('BusinessUsers', function()  {
 			});
 	    });
 	  });
-*/
+
 	describe('/POST business user', function() {
 	  	it('it should POST a business user', function(done) {
 			this.timeout(15000);
