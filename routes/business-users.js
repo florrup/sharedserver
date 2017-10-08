@@ -38,7 +38,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
  *
  */ 
 
-router.get('/', Verify.verifyOrdinaryUser,  function(request, response) {
+router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
 		}).then(businessusers => {

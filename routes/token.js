@@ -30,8 +30,15 @@ router.post('/', function (request, response){
 			}
 			else {
 				console.log('User ', businessUser.username, 'logged successfully');
+				var adminOk = businessUser.roles.includes(process.env.TAG_ADMIN);
+				var managerOk = businessUser.roles.includes(process.env.TAG_MANAGER);
+				var appOk = businessUser.roles.includes(process.env.TAG_APP);
 				var payload = {
-					 username: businessUser.username
+					 username: businessUser.username,
+					 userOk: true,
+					 appOk: appOk,
+					 managerOk: managerOk,
+					 adminOk: adminOk
 				};
 				var localToken = verify.getToken(payload);
 				response.writeHead(201, {"Content-Type": "application/json"});
