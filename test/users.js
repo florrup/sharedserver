@@ -475,4 +475,98 @@ describe('BusinessUsers', function()  {
 			});
 	    });
 	});
+
+	describe('/PUT business user', function() {
+
+		var businessuserToModify = {
+		    id: 3,
+		    _ref: 'a3',
+		    username: 'johnBlack',
+		    password: 'abc',
+		    name: 'John',
+		    surname: 'Black',
+			roles: ['user']
+		};
+
+		it('it shouldnt PUT a business user that doesnt exist', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(businessuserToModify)
+						.end((err, res) => {
+							businessuserToModify = {
+							    id: 3,
+							    _ref: 'a3',
+							    username: 'johnBlack',
+							    password: 'abc',
+							    name: 'Tom',
+							    surname: 'White',
+								roles: ['user']
+							};
+							chai.request(baseUrl)
+							.put('/business-users/' + businessuserToModify.id)
+							.set(token_header_flag, token)
+							.send(businessuserToModify)
+							.end((err, res) => {
+								res.should.have.status(200);
+								res.body.username.should.equal('johnBlack');
+								res.body.name.should.equal('Tom');
+								done();
+							});
+						});
+
+					});				
+				});
+			});
+	    });
+/*
+	  	it('it should PUT a modified business user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable().
+			then( function(fulfilled){
+
+				chai.request(baseUrl)
+					.post('/users/')
+					.send(businessuserToModify)
+					.end((err, res) => {
+						businessuserToModify = {
+							id: 11,
+							username: 'modifiedUsername',
+							name: 'testName11',
+							surname: 'testSurname11',
+							country: 'Argentina11',
+							email: 'testEmail11@gmail.com',
+							birthdate: '24/05/1992'
+						};			
+
+						chai.request(baseUrl)
+							.put('/users/' + businessuserToModify.id)
+							.send(businessuserToModify)
+							.end((err, res) => {
+								res.should.have.status(200);
+								res.body.username.should.equal('modifiedUsername');
+								done();
+							});
+					});
+			});
+	    });
+*/
+	});
 });

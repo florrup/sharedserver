@@ -105,12 +105,42 @@ router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, fu
     BusinessUser.findAll({ // must return all businessusers
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
     })
-    .then(users => {
-      if (!users) {
+    .then(businessusers => {
+      if (!businessusers) {
         return response.status(500).json({code: 0, message: "Unexpected error"});
       }
-      return response.status(204).json(users);
+      return response.status(204).json(businessusers);
     });
+  });
+});
+
+/**
+ *  Modifica los datos de un usuario de negocio.
+ *
+ */
+
+router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole,function(request, response) {
+  BusinessUser.find({
+    where: {
+      id: request.params.businessuserId
+    }
+  }).then(businessuser => {
+    if (businessuser) {
+      businessuser.updateAttributes({
+        username: request.body.username,
+        name: request.body.name,
+        surname: request.body.surname,
+        country: request.body.country,
+        email: request.body.email,
+        birthdate: request.body.birthdate
+      }).then(updatedUser => {
+        return response.status(200).json(updatedUser);
+      });
+    } else {
+      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+    }
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
 
