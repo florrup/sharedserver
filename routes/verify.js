@@ -8,7 +8,7 @@ exports.getToken = function (businessuser) {
     });
 };
 
-exports.verifyOrdinaryUser = function (req, res, next) {
+exports.verifyToken = function (req, res, next) {
     // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers[process.env.TOKEN_HEADER_FLAG];
 
@@ -35,4 +35,70 @@ exports.verifyOrdinaryUser = function (req, res, next) {
         err.status = 400; // in this cases 403 is also used, API specified 400
         return next(err);
     }
+};
+
+exports.verifyUserRole = function (req, res, next) {
+	var userOk = req.decoded.userOk;
+	
+	if (userOk){
+		return next();
+	}
+	else{
+		var err = new Error('No BUSINESS USER privileges for this user!');
+		err.status = 403;
+		return next(err);
+	}
+};
+
+exports.verifyAppRole = function (req, res, next) {
+	var appOk = req.decoded.appOk;
+	
+	if (appOk){
+		return next();
+	}
+	else{
+		var err = new Error('No APP privileges for this user!');
+		err.status = 403;
+		return next(err);
+	}
+};
+
+exports.verifyManagerRole = function (req, res, next) {
+	var managerOk = req.decoded.managerOk;
+	
+	if (managerOk){
+		return next();
+	}
+	else{
+		var err = new Error('No MANAGER privileges for this user!');
+		err.status = 403;
+		return next(err);
+	}
+};
+
+exports.verifyAdminRole = function (req, res, next) {
+	var adminOk = req.decoded.adminOk;
+	
+	if (adminOk){
+		return next();
+	}
+	else{
+		var err = new Error('No ADMIN privileges for this user!');
+		err.status = 403;
+		return next(err);
+	}
+};
+
+exports.verifyUserOrAppRole = function (req, res, next) {
+	var appOk = req.decoded.appOk;
+	var userOk = req.decoded.userOk;
+	
+	if (appOk || userOk){
+		return next();
+	}
+	else{
+		var err = new Error('No USER or APP privileges for this user!');
+		err.status = 403;
+		return next(err);
+	}
 };

@@ -356,8 +356,6 @@ describe('BusinessUsers', function()  {
 				chai.request(baseUrl)
 				.get('/business-users/initAndWriteDummyBusinessUser/') 
 				.end((err, res) => {
-					console.log('1st res: ', res.body);
-					if(err){console.log('***** ASDFASDFASF ****** ')};
 
 					chai.request(baseUrl)
 					.post('/token/')
