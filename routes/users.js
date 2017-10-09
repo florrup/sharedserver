@@ -62,7 +62,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  *  Da de alta un usuario.
  *
  */
-router.post('/', function(request, response) {
+router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
   User.create({
     id: request.body.id,
     username: request.body.username,
@@ -102,7 +102,7 @@ router.delete('/:userId', Verify.verifyToken, Verify.verifyManagerOrAppRole, fun
  *  Devuelve toda la información del usuario.
  *
  */
-router.get('/:userId', function(request, response) {
+router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
   User.find({
     where: {
       id: request.params.userId

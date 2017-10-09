@@ -45,6 +45,7 @@ describe('Users', function()  {
 					.end((err, res) => {
 						console.log('Is this body w token?: ', res.body);
 						var token = res.body.token.token;
+
 						chai.request(baseUrl)
 						.get('/users/')
 						.set(token_header_flag, token)
@@ -78,17 +79,31 @@ describe('Users', function()  {
 				};
 
 				chai.request(baseUrl)
-					.post('/users/')
-					.send(newUser)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
-						res.should.have.status(201);
-						res.body.should.have.property('surname');
-						res.body.should.have.property('id');
-					  done();
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/users/')
+						.set(token_header_flag, token)
+						.send(newUser)
+						.end((err, res) => {
+							res.should.have.status(201);
+							res.body.should.have.property('surname');
+							res.body.should.have.property('id');
+						  done();
+						});
 					});
+				});
 			});
 	    });
-	 });
+	});
 
 	var userToDelete = {
 		id: 15,
@@ -185,21 +200,36 @@ describe('Users', function()  {
 					birthdate: '24/05/1992'
 				};
 				
-
 				chai.request(baseUrl)
-					.post('/users/')
-					.send(userToGet)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+	
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
 						chai.request(baseUrl)
+						.post('/users/')
+						.set(token_header_flag, token)
+						.send(userToGet)
+						.end((err, res) => {
+							chai.request(baseUrl)
 							.get('/users/' + userToGet.id)
+							.set(token_header_flag, token)
 							.end((err, res) => {
 								res.should.have.status(200);
 								done();
 							});
+						});
 					});
+				});
 			});
 	    });
-	 });
+	});
 
 	var userToModify = {
 		id: 11,
@@ -245,36 +275,49 @@ describe('Users', function()  {
 					birthdate: '24/05/1992'
 				};
 				
-
 				chai.request(baseUrl)
-					.post('/users/')
-					.send(userToModify)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
-						userToModify = {
-							id: 11,
-							username: 'modifiedUsername',
-							name: 'testName11',
-							surname: 'testSurname11',
-							country: 'Argentina11',
-							email: 'testEmail11@gmail.com',
-							birthdate: '24/05/1992'
-						};			
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
 
 						chai.request(baseUrl)
+						.post('/users/')
+						.set(token_header_flag, token)
+						.send(userToModify)
+						.end((err, res) => {
+							userToModify = {
+								id: 11,
+								username: 'modifiedUsername',
+								name: 'testName11',
+								surname: 'testSurname11',
+								country: 'Argentina11',
+								email: 'testEmail11@gmail.com',
+								birthdate: '24/05/1992'
+							};			
+
+							chai.request(baseUrl)
 							.put('/users/' + userToModify.id)
+							.set(token_header_flag, token)
 							.send(userToModify)
 							.end((err, res) => {
 								res.should.have.status(200);
 								res.body.username.should.equal('modifiedUsername');
 								done();
 							});
+						});
 					});
+				});
 			});
 	    });
-	 });
-
+	});
 });
-
 
 /**
  *  Test methods for application servers management endpoints
