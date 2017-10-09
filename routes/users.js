@@ -41,6 +41,9 @@ router.get('/initAndWriteDummyUser', function(request, response) {
       })
 		})
 	}
+	else {
+		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
+	}
 });
 
 /**

@@ -4,6 +4,7 @@ var router = express.Router();
 const Sequelize = require('sequelize');
 var BusinessUser = require('../models/businessuser.js');
 var Server = require('../routes/servers.js');
+var api = require('./api.js');
 
 var Verify = require('./verify');
 
@@ -43,13 +44,15 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 		  
 		})
 	}
+	else {
+		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
+	}
 });
 
 /**
  *  Devuelve toda la información acerca de los usuarios de negocio indicados.
  *
  */ 
-
 router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
@@ -65,7 +68,6 @@ router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, re
  *  Da de alta un usuario de negocio.
  *
  */
-
 router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	Server.usernameExists(request.body.username, function(res, next) {
 		if (res) {
@@ -119,7 +121,6 @@ router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, fu
  *  Modifica los datos de un usuario de negocio.
  *
  */
-
 router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
   BusinessUser.find({
     where: {
@@ -143,6 +144,52 @@ router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, funct
   }).catch(function (error) {
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
+});
+
+router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
+	var username = req.decoded.username;
+	BusinessUser.find({
+		where: {
+		username: username
+		}
+	}).then(businessuser => {
+		if (businessuser) {
+			return response.status(200).json({"metadata":{"version":api.apiVersion}, "businessUser":businessuser});
+		}
+		else{
+			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+		}
+	});
+});
+
+router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
+	var username = req.decoded.username;
+	BusinessUser.find({
+		where: {
+		username: username
+		}
+	}).then(businessuser => {
+		if (businessuser) {
+			// we don't update roles here
+			businessuser.updateAttributes({
+				username: request.body.username,
+				name: request.body.name,
+				surname: request.body.surname,
+				country: request.body.country,
+				email: request.body.email,
+				birthdate: request.body.birthdate
+			}).then(updatedUser => {
+				return response.status(200).json(updatedUser);
+			  })
+			  .catch(error => {
+				return response.status(500).json({code: 0, message: "Unexpected error while trying to update business user by itself (/me)."});
+				// mhhh, wth!
+			  })
+		}
+		else{
+			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+		}
+	});
 });
 
 module.exports = router;

@@ -19,7 +19,13 @@ router.post('/', function (request, response){
 	})
 	.then( function(businessUser){
 		if (!businessUser){
-			return response.status(400).json({code: 0, message: "Username does not exist in the database or missing username to get token"});
+			
+			/// \todo
+			// **************************************************************************************
+			// Here we should check if the username corresponds to a SERVER instead of a businessuser
+			// **************************************************************************************
+			
+			return response.status(404).json({code: 0, message: "Username does not exist in the database or missing username to get token"});
 			console.log('Username wich does not exist was used to attem log in');
 		}
 		else {
@@ -29,14 +35,16 @@ router.post('/', function (request, response){
 				console.log('Incorrect password at user log in attemp');
 			}
 			else {
-				console.log('User ', businessUser.username, 'logged successfully');
+				// console.log('User ', businessUser.username, 'logged successfully');
+				// This attributes are read from local database, not from incoming data from the user
 				var adminOk = businessUser.roles.indexOf(process.env.TAG_ADMIN) !== -1;
 				var managerOk = businessUser.roles.indexOf(process.env.TAG_MANAGER) !== -1;
 				var appOk = businessUser.roles.indexOf(process.env.TAG_APP) !== -1;
+				var userOk = businessUser.roles.indexOf(process.env.TAG_USER) !== -1;
 				var payload = {
 					 username: businessUser.username,
-					 userOk: true,
-					 appOk: appOk,
+					 userOk: userOk,
+					 appOk: appOk, // normally it would be false to business users
 					 managerOk: managerOk,
 					 adminOk: adminOk
 				};
