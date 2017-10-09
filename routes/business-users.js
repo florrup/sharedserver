@@ -30,7 +30,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 			password: 'aaa',
 			name: 'John',
 			surname: 'Hancock',
-			roles: ['admin', 'manager', 'user']
+			roles: ['admin', 'manager', 'user', 'app'] // TODO agrego rol de app temporalmente para que pase los test que necesitan verificación
 		  };
 		  BusinessUser.create(dummyBusinessUser)
 		  .then(() => {
@@ -120,7 +120,7 @@ router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, fu
  *
  */
 
-router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole,function(request, response) {
+router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
   BusinessUser.find({
     where: {
       id: request.params.businessuserId
