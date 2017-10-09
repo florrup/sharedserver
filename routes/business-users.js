@@ -73,7 +73,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, r
 		}
 
 		console.log("Before creating a businessuser - username doesn't exist in server table");
-			BusinessUser.create({
+		BusinessUser.create({
 			id: request.body.id,
 			username: request.body.username,
 			password: request.body.password,

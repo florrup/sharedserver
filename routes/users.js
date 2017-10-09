@@ -21,15 +21,24 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 	if (process.env.NODE_ENV === 'development'){
 		User.sync({force: true}).then(() => {
 		  // Table created
-		  return User.create({
-			id: 0,
-		username: 'johnny',
-			name: 'John',
-			surname: 'Hancock',
-		country: 'Argentina',
-		email: 'johnny123@gmail.com',
-		birthdate: '24/05/1992'
-		  })
+
+      var dummyUser = {
+        id: 0,
+        username: 'johnny',
+        name: 'John',
+        surname: 'Hancock',
+        country: 'Argentina',
+        email: 'johnny123@gmail.com',
+        birthdate: '24/05/1992'
+      };
+		  User.create(dummyUser)
+      .then(() => {
+        return response.status(200).json(dummyUser);
+      })
+      .catch(error => {
+        return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
+      // mhhh, wth!
+      })
 		})
 	}
 });
@@ -38,7 +47,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
  *  Devuelve toda la información acerca de todos los users indicados.
  *
  */ 
-router.get('/', function(request, response) {
+router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	User.findAll({
     attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
   }).then(users => {
@@ -74,7 +83,7 @@ router.post('/', function(request, response) {
  *  Da de baja un usuario.
  *
  */
-router.delete('/:userId', function(request, response) {
+router.delete('/:userId', Verify.verifyToken, Verify.verifyManagerOrAppRole, function(request, response) {
   User.destroy({
     where: {
       id: request.params.userId

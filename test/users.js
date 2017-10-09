@@ -31,21 +31,34 @@ describe('Users', function()  {
 
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
-		    this.timeout(16000);
-		    usersAPI.clearUsersTable().
-			then( function(fulfilled){
+		    this.timeout(20000);
+		    usersAPI.clearUsersTable()
+			.then( function(fulfilled){
 
 				chai.request(baseUrl)
-					.get('/users/')
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
-						res.should.have.status(200);
-						res.body.should.be.a('array');
-						res.body.length.should.be.eql(0);
-						done();
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+						chai.request(baseUrl)
+						.get('/users/')
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							res.should.have.status(200);
+							res.body.should.be.a('array');
+							res.body.length.should.be.eql(0);
+							done();
+						});
 					});
+				});
 			});
 	    });
-	  });
+	});
 
 	describe('/POST user', function() {
 	  	it('it should POST a user', function(done) {
@@ -94,12 +107,27 @@ describe('Users', function()  {
 	  		usersAPI.clearUsersTable().
 			then( function(fulfilled){
 				chai.request(baseUrl)
-					.delete('/users/' + userToDelete.id)
-					.send(userToDelete)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
-						res.should.have.status(404);
-						done();
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.delete('/users/' + userToDelete.id)
+						.set(token_header_flag, token)
+						.send(userToDelete)
+						.end((err, res) => {
+							res.should.have.status(404);
+							done();
+						});
 					});
+				});
 			});
 		});
 
@@ -108,20 +136,36 @@ describe('Users', function()  {
 	  		usersAPI.clearUsersTable().
 			then( function(fulfilled){
 				chai.request(baseUrl)
-					.post('/users/')
-					.send(userToDelete)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
 						chai.request(baseUrl)
+						.post('/users/')
+						.set(token_header_flag, token)
+						.send(userToDelete)
+						.end((err, res) => {
+							chai.request(baseUrl)
 							.delete('/users/' + userToDelete.id)
+							.set(token_header_flag, token)
 							.send(userToDelete)
 							.end((err, res) => {
 								res.should.have.status(204);
 								done();
 							});
+						});
+
 					});
-			})
+				});
+			});
 	    });
-	 });
+	});
 
 	describe('/GET user', function() {
 	  	it('it should GET an existing user', function(done) {
@@ -555,38 +599,5 @@ describe('BusinessUsers', function()  {
 				});
 			});
 	    });
-/*
-	  	it('it should PUT a modified business user', function(done) {
-			this.timeout(15000);
-			
-			usersAPI.clearUsersTable().
-			then( function(fulfilled){
-
-				chai.request(baseUrl)
-					.post('/users/')
-					.send(businessuserToModify)
-					.end((err, res) => {
-						businessuserToModify = {
-							id: 11,
-							username: 'modifiedUsername',
-							name: 'testName11',
-							surname: 'testSurname11',
-							country: 'Argentina11',
-							email: 'testEmail11@gmail.com',
-							birthdate: '24/05/1992'
-						};			
-
-						chai.request(baseUrl)
-							.put('/users/' + businessuserToModify.id)
-							.send(businessuserToModify)
-							.end((err, res) => {
-								res.should.have.status(200);
-								res.body.username.should.equal('modifiedUsername');
-								done();
-							});
-					});
-			});
-	    });
-*/
 	});
 });
