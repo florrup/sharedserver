@@ -23,10 +23,40 @@ router.post('/', function (request, response){
 			/// \todo
 			// **************************************************************************************
 			// Here we should check if the username corresponds to a SERVER instead of a businessuser
+			// Copié este código de abajo, fijate si te sirve de referencia... no pude con mi genio, lo vi que era igual al de abajo.
+			/*
+			BusinessUsers.find({
+				where: {
+					username: localUsername
+				}
+			})
+			.then( function(appUserName){
+				var payload = {
+					 username: appUserName,
+					 userOk: false,
+					 appOk: true,
+					 managerOk: false,
+					 adminOk: false
+				};
+				var localToken = verify.getToken(payload);
+				response.writeHead(201, {"Content-Type": "application/json"});
+				var responseJson = JSON.stringify({
+					metadata: {version: api.apiVersion},
+					token: {
+						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
+						token: localToken
+					}
+				});
+				return response.end(responseJson);
+			})
+			.catch( function(error){
+				return response.status(404).json({code: 0, message: "Username does not exist in the database or missing username to get token: " + error});
+				console.log('Username wich does not exist was used to attem log in');
+			});
+			*/
 			// **************************************************************************************
 			
-			return response.status(404).json({code: 0, message: "Username does not exist in the database or missing username to get token"});
-			console.log('Username wich does not exist was used to attem log in');
+			
 		}
 		else {
 			// console.log(businessUser);
@@ -61,43 +91,6 @@ router.post('/', function (request, response){
 			}
 		}
 	});
-	/*
-	BusinessUsers.findAll({
-	  where: {
-		username: localUsername
-	}})
-	  .then(
-		businessusers => {
-			if (!businessusers) {
-				return response.status(400).json({code: 0, message: "Username does not exist in the database or missing usernam to get token"});
-				console.log('Username wich does not exist was used to attem log in');
-			}
-			else{
-				console.log(businessusers);
-				if (businessusers[0].password != localPassword){
-					return response.status(401).json({code: 0, message: "Username's password is incorrect"});
-					console.log('Incorrect password at user log in attemp');
-				}
-				else {
-					
-					console.log('User ', businessusers[0].username, 'logged successfully');
-					return response.status(201).json({
-						metadata: {version: api.apiVersion},
-						token: {
-							expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
-							// token: verify.getToken(businessUsers[0])
-						}
-					});
-				}
-			}
-		}
-	  )*/
-	  /*
-	.catch(function(error) {
-		// defer.reject(error);
-		return response.status(500).json({code: 0, message: "Unexpected error"});
-	});
-	*/	
 });
 
 module.exports = router;
