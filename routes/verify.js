@@ -2,6 +2,11 @@ var BusinessUser = require('../models/businessuser');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 // var config = require('../config.js');
 
+/**
+ * Variable to track manually invalidated tokens
+ * In javascript / nodeJS we can't initialize here statically these variables
+**/
+var invalidatedTokens;
 
 /**
  * Method for token generation. It consumes token secret and token expiration time from env configuration.
@@ -12,6 +17,25 @@ exports.getToken = function (businessuser) {
     });
 };
 
+exports.invalidateToken = function(token){
+
+	if (typeof invalidatedTokens === "undefined") {
+		// If it has been not before, we initialize invalidTokens variable
+		invalidatedTokens = [];
+	}
+	
+	// every time we invalidate a new token we clean the list first
+	// Checking for expired tokens to remove (we start from the back of the list)
+	for(var i = invalidatedTokens.length -1; i >= 0 ; i--){
+		jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
+            if (err) {
+				invalidatedTokens.splice(i, 1);
+			}
+		});
+	};
+	
+	invalidatedTokens.push(token);
+}
 
 /**
  * Verifies the token existance in the request body, the request query or the request header
@@ -21,8 +45,13 @@ exports.verifyToken = function (req, res, next) {
     // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers[process.env.TOKEN_HEADER_FLAG];
 
+	if (typeof invalidatedTokens === "undefined") {
+		// If it has been not before, we initialize invalidTokens variable
+		invalidatedTokens = [];
+	}
+	
     // decode token
-    if (token) {
+    if (token && (invalidatedTokens.indexOf(token) === -1)) {
         // verifies secret and checks exp
         jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
             if (err) {
@@ -40,8 +69,8 @@ exports.verifyToken = function (req, res, next) {
     } else {
         // if there is no token or the signature is not from this application or token has been adulterated
         // return an error
-        var err = new Error('No token provided!');
-        err.status = 400; // in this cases 403 is also used, API specified 400
+        var err = new Error('No token provided or Token was invalidated!');
+        err.status = 401; // in this cases 403 is also used, API specified 401
         return next(err);
     }
 };
@@ -62,7 +91,7 @@ exports.verifyUserRole = function (req, res, next) {
 	}
 	else{
 		var err = new Error('No BUSINESS USER privileges for this user!');
-		err.status = 403;
+		err.status = 401;
 		return next(err);
 	}
 };
@@ -77,13 +106,12 @@ exports.verifyUserRole = function (req, res, next) {
 **/
 exports.verifyAppRole = function (req, res, next) {
 	var appOk = req.decoded.appOk;
-	
 	if (appOk){
 		return next();
 	}
 	else{
 		var err = new Error('No APP privileges for this user!');
-		err.status = 403;
+		err.status = 401;
 		return next(err);
 	}
 };
@@ -104,7 +132,7 @@ exports.verifyManagerRole = function (req, res, next) {
 	}
 	else{
 		var err = new Error('No MANAGER privileges for this user!');
-		err.status = 403;
+		err.status = 401;
 		return next(err);
 	}
 };
@@ -125,7 +153,7 @@ exports.verifyAdminRole = function (req, res, next) {
 	}
 	else{
 		var err = new Error('No ADMIN privileges for this user!');
-		err.status = 403;
+		err.status = 401;
 		return next(err);
 	}
 };
@@ -147,7 +175,7 @@ exports.verifyUserOrAppRole = function (req, res, next) {
 	}
 	else{
 		var err = new Error('No USER or APP privileges for this user!');
-		err.status = 403;
+		err.status = 401;
 		return next(err);
 	}
 };
@@ -161,7 +189,7 @@ exports.verifyManagerOrAppRole = function (req, res, next) {
 	}
 	else{
 		var err = new Error('No MANAGER or APP privileges for this user!');
-		err.status = 403;
+		err.status = 401;
 		return next(err);
 	}
 };

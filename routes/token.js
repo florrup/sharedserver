@@ -65,7 +65,6 @@ router.post('/', function (request, response){
 				console.log('Incorrect password at user log in attemp');
 			}
 			else {
-				// console.log('User ', businessUser.username, 'logged successfully');
 				// This attributes are read from local database, not from incoming data from the user
 				var adminOk = businessUser.roles.indexOf(process.env.TAG_ADMIN) !== -1;
 				var managerOk = businessUser.roles.indexOf(process.env.TAG_MANAGER) !== -1;

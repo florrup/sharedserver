@@ -9,7 +9,8 @@ var sequelize = require("./db.js").sequelize;
 const Server = sequelize.define('server', {
     id: {
       type: Sequelize.STRING,
-	    primaryKey: true
+	    primaryKey: true,
+		unique: true
     },
     username: { // field automatically added otherwise by passport-local-sequelize
       type: Sequelize.STRING,

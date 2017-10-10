@@ -19,6 +19,7 @@ var token_header_flag = 'x-access-token';
 
 chai.use(chaiHttp);
 
+var usersAPI = require('../routes/users');
 
 /**
  *  Test methods for application users endpoints
@@ -26,8 +27,6 @@ chai.use(chaiHttp);
  * Application users are the drivers or passangers that use the system and have a profile in this database
  */
 describe('Users', function()  {
-
-	var usersAPI = require('../routes/users');
 
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
@@ -230,6 +229,77 @@ describe('Users', function()  {
 			});
 	    });
 	});
+	
+	describe('/GET user with INVALIDATED TOKEN', function() {
+	  	it('it should NOT GET an existing user with INVALIDATED TOKEN', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable().
+			then( function(fulfilled){
+
+				var userToGet = {
+					id: 10,
+					username: 'testUsername10',
+					password: 'aaa',
+					name: 'testName10',
+					surname: 'testSurname10',
+					country: 'Argentina10',
+					email: 'testEmail10@gmail.com',
+					birthdate: '24/05/1992'
+				};
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+					res.should.have.status(200);
+					
+					chai.request(baseUrl)
+					.get('/servers/initAndWriteDummyServer/')
+					.end((err,res) => {
+						res.should.have.status(200);
+						var oldAppToken = res.body.serverToken;
+						//console.log('Is this body OLD APP TOKEN inside JSON?: ', res.body);
+						chai.request(baseUrl)
+						.post('/token/')
+						.set('content-type', 'application/json')
+						.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+						.end((err, res) => {
+							res.should.have.status(201);
+							var businessUserToken = res.body.token.token;
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, oldAppToken)
+							.send(userToGet)
+							.end((err, res) => {
+								res.should.have.status(201);
+								chai.request(baseUrl)
+								.post('/servers/ping/')
+								.set(token_header_flag, oldAppToken) // here still oldAppToken is OK
+								.end((err, res) => {
+									console.log(err);
+									res.should.have.status(200);
+									var newAppToken = res.body.ping.token.token;
+									chai.request(baseUrl)
+									.get('/users/' + userToGet.id)
+									.set(token_header_flag, oldAppToken) // oldAppToken has been invalidated
+									.end((err, res) => {
+										res.should.have.status(401); // unauthorized
+										chai.request(baseUrl)
+										.get('/users/' + userToGet.id)
+										.set(token_header_flag, newAppToken) // newAppToken should be ok
+										.end((err, res) => {
+											res.should.have.status(200);
+											done();
+										});
+									});
+								});
+							});
+						});
+					})
+				});
+			});
+	    });
+	});
 
 	var userToModify = {
 		id: 11,
@@ -342,7 +412,7 @@ describe('Users', function()  {
  * Servers or application servers are the programs that run the system and operate with the client applications run by application users
  * These methods test endpoints for servers management
  */
-describe('Servers', function()  {
+ describe('Servers', function()  {
 
 	var serversAPI = require('../routes/servers');
 
@@ -354,9 +424,7 @@ describe('Servers', function()  {
 				chai.request(baseUrl)
 					.get('/servers/')
 					.end((err, res) => {
-						res.should.have.status(400);
-						// res.body.should.be.a('array');
-						// res.body.length.should.be.eql(0);
+						res.should.have.status(401);
 						done();
 					});
 			});
@@ -394,8 +462,9 @@ describe('Servers', function()  {
 						.send(newServer)
 						.end((err, res) => {
 							res.should.have.status(201);
-							res.body.should.have.property('createdBy');
-							res.body.should.have.property('id');
+							res.body.should.have.property('metadata');
+							res.body.should.have.property('server');
+							res.body.should.have.property('token');
 						  done();
 						});
 					});
@@ -491,7 +560,6 @@ describe('Servers', function()  {
 	 });
 
 });
-
 
 /**
  *  Test methods for business users management endpoints
@@ -644,7 +712,7 @@ describe('BusinessUsers', function()  {
 			roles: ['user']
 		};
 
-		it('it shouldnt PUT a business user that doesnt exist', function(done) {
+		it('it shouldn\'t PUT a business user that doesnt exist', function(done) {
 	  		this.timeout(15000);
 	  		businessUsersAPI.clearBusinessUsersTable()
 			.then( function(fulfilled){

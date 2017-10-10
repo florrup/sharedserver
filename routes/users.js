@@ -78,7 +78,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
     if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-    response.status(201).json(user);
+    return response.status(201).json(user);
   });
 });
 

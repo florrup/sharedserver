@@ -1,10 +1,12 @@
 var express = require('express');
 var router = express.Router();
+// var router = express();
 
 const Sequelize = require('sequelize');
 var Server = require('../models/server.js');
 
 var Verify = require('./verify');
+var api = require('./api');
 
 // CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
@@ -21,7 +23,8 @@ router.get('/initAndWriteDummyServer', function(request, response) {
   if (process.env.NODE_ENV === 'development'){
 	  Server.sync({force: true}).then(() => {
 		// Table created
-		return Server.create({
+		
+		var dummyServer = {
 		id: 0,
 		username: 'myDummyAppServer',
 		password: 'aaa',
@@ -30,13 +33,35 @@ router.get('/initAndWriteDummyServer', function(request, response) {
 		createdTime: 'abc',
 		name: 'DummyServer',
 		lastConnection: 2
-		})
+		};
+		
+		Server.create(dummyServer)
+		.then(() => {
+			
+			var payload = {
+				username: dummyServer.username,
+				userOk: false,
+				appOk: true,
+				managerOk: false,
+				adminOk: false
+			};
+			var token = Verify.getToken(payload);
+			var responseJson = {
+				server: dummyServer,
+				serverToken: token
+			}
+			return response.status(200).json(responseJson);
+		  })
+		  .catch(error => {
+			  return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy server for testing."});
+			// mhhh, wth!
+		  });
 	  })
-  }
+	}
 	else {
 		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
 	}
-})
+});
 
 /**
  *  Devuelve toda la información acerca de todos los application servers indicados.
@@ -71,7 +96,88 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
     if (!server) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-    response.status(201).json(server);
+	else{
+		// Now we generate and return a new fresh token with full lifetime length from now
+		var payload = {
+			 username: request.decoded.username,
+			 userOk: request.decoded.userOk,
+			 appOk: request.decoded.appOk, // normally it would be false to business users
+			 managerOk: request.decoded.managerOk,
+			 adminOk: request.decoded.adminOk
+		};
+		var newToken = Verify.getToken(payload);
+		jsonInResponse = {
+			metadata: {version: api.apiVersion},
+			server:{
+				id: server.id,
+				_ref: '',
+				createdBy: request.body.createdBy,
+				createdTime: (new Date).getTime(),
+				name: request.body.name,
+				lastConnection: 0
+			},
+			token: {
+				expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
+				token: newToken
+			}
+		};
+		return response.status(201).json(jsonInResponse);
+	}
+  });
+});
+
+/**
+ * Endpoint que utiliza un servidor para dar señales de vida. 
+ * Esto tambien se usa para renovar el token de acceso. 
+ * El token devuelto podría ser el mismo que el enviado, pero si difieren, el anterior debería ser invalidado.
+ *
+ */
+router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+	Server.findOne({
+		where: {
+		  username: request.decoded.username
+		}
+	}).then(server => {
+		if (server) {
+			// First we add the incoming token to invalid token list
+			// This method also eliminates expired tokens
+			var token = request.body.token || request.query.token || request.headers[process.env.TOKEN_HEADER_FLAG];
+			Verify.invalidateToken(token);
+			
+			// Now we generate and return a new fresh token with full lifetime length from now
+			var payload = {
+				 username: request.decoded.username,
+				 userOk: request.decoded.userOk,
+				 appOk: request.decoded.appOk, // normally it would be false to business users
+				 managerOk: request.decoded.managerOk,
+				 adminOk: request.decoded.adminOk
+			};
+			var localToken = Verify.getToken(payload);
+			response.writeHead(200, {"Content-Type": "application/json"});
+			var responseJson = JSON.stringify({
+				metadata: {version: api.apiVersion},
+				ping: {
+					server: {
+						id: server.Id,
+						_ref: server._ref,
+						createdBy: server.createdBy,
+						createdTime: server.createdTime,
+						name: server.name,
+						lastConnection: server.lastConnection
+					},
+					token: {
+						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
+						token: localToken
+					}
+				}
+			});
+			return response.end(responseJson);
+		}
+		else{
+			return response.status(500).json({code: 0, message: "Username does not exist"});
+		}
+	}).catch(function (error) {
+		return response.status(500).json({code: 0, message: "Unexpected error at PING: username not found. Error: "+error});
   });
 });
 
@@ -148,21 +254,12 @@ router.get('/:serverId', Verify.verifyToken, Verify.verifyUserRole, function(req
   });
 });
 
-
 /**
  *  Endpoint para resetear el token. Debe invalidar el anterior.
  *
  */
 router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-});
-
-/**
- * Endpoint que utiliza un servidor para dar señales de vida. 
- * Esto tambien se usa para renovar el token de acceso. 
- * El token devuelto podría ser el mismo que el enviado, pero si difieren, el anterior debería ser invalidado.
- *
- */
-router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+	return response.status(500).json({code: 0, message: "Method POST /servers/:serverId NOT YET IMPLEMENTED"});;
 });
 
 module.exports = router;
