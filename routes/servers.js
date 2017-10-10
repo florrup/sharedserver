@@ -4,6 +4,8 @@ var router = express.Router();
 const Sequelize = require('sequelize');
 var Server = require('../models/server.js');
 
+var Verify = require('./verify');
+
 // CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
 
@@ -40,7 +42,7 @@ router.get('/initAndWriteDummyServer', function(request, response) {
  *  Devuelve toda la información acerca de todos los application servers indicados.
  *
  */
-router.get('/', function(request, response) {
+router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
   Server.findAll({
     attributes: ['id', 'username', 'password', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
   }).then(servers => {
@@ -55,7 +57,7 @@ router.get('/', function(request, response) {
  *  Da de alta un server.
  *
  */
-router.post('/', function(request, response) {
+router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
   Server.create({
     id: request.body.id,
     _ref: request.body._ref,
@@ -77,7 +79,7 @@ router.post('/', function(request, response) {
  *  Modifica los datos de un servidor.
  *
  */
-router.put('/:serverId', function(request, response) {
+router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
   Server.find({
     where: {
       id: request.params.serverId
@@ -107,7 +109,7 @@ router.put('/:serverId', function(request, response) {
  *  Da de baja un servidor.
  *
  */
-router.delete('/:serverId', function(request, response) {
+router.delete('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
   Server.destroy({
     where: {
       id: request.params.serverId
@@ -133,7 +135,7 @@ router.delete('/:serverId', function(request, response) {
  *  Devuelve toda la información del servidor.
  *
  */
-router.get('/:serverId', function(request, response) {
+router.get('/:serverId', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
   Server.find({
     where: {
       id: request.params.serverId
@@ -144,6 +146,23 @@ router.get('/:serverId', function(request, response) {
     }
     return response.status(200).json(server);
   });
+});
+
+
+/**
+ *  Endpoint para resetear el token. Debe invalidar el anterior.
+ *
+ */
+router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
+});
+
+/**
+ * Endpoint que utiliza un servidor para dar señales de vida. 
+ * Esto tambien se usa para renovar el token de acceso. 
+ * El token devuelto podría ser el mismo que el enviado, pero si difieren, el anterior debería ser invalidado.
+ *
+ */
+router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
 });
 
 module.exports = router;

@@ -347,16 +347,16 @@ describe('Servers', function()  {
 	var serversAPI = require('../routes/servers');
 
 	describe('/GET servers', function() {
-	  	it('it should GET no servers from empty database', function(done) {
+	  	it('it should have no permission to access servers without token', function(done) {
 		    this.timeout(15000);
 		    serversAPI.clearServersTable()
 			.then( function(fulfilled){
 				chai.request(baseUrl)
 					.get('/servers/')
 					.end((err, res) => {
-						res.should.have.status(200);
-						res.body.should.be.a('array');
-						res.body.length.should.be.eql(0);
+						res.should.have.status(400);
+						// res.body.should.be.a('array');
+						// res.body.length.should.be.eql(0);
 						done();
 					});
 			});
@@ -370,24 +370,34 @@ describe('Servers', function()  {
 	  		serversAPI.clearServersTable()
 			.then( function(fulfilled){
 
-				var newServer = {
-				    id: 10,
-				    _ref: 'abc10',
-				    createdBy: 10,
-				    createdTime: 'abc10',
-				    name: 'Dummy10',
-				    lastConnection: 10,
-					username: 'myAppServer'
-				};
+			chai.request(baseUrl)
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.token.token;
 
-				chai.request(baseUrl)
-					.post('/servers/')
-					.send(newServer)
-					.end((err, res) => {
-						res.should.have.status(201);
-						res.body.should.have.property('createdBy');
-						res.body.should.have.property('id');
-					  done();
+					var newServer = {
+						id: 10,
+						_ref: 'abc10',
+						createdBy: 10,
+						createdTime: 'abc10',
+						name: 'Dummy10',
+						lastConnection: 10,
+						username: 'myAppServer'
+					};
+
+					chai.request(baseUrl)
+						.post('/servers/')
+						.set(token_header_flag, token)
+						.send(newServer)
+						.end((err, res) => {
+							res.should.have.status(201);
+							res.body.should.have.property('createdBy');
+							res.body.should.have.property('id');
+						  done();
+						});
 					});
 			});
 	    });
@@ -398,29 +408,40 @@ describe('Servers', function()  {
 	  		this.timeout(15000);
 	  		serversAPI.clearServersTable()
 			.then( function(fulfilled){
-
-				var serverToDelete = {
-				    id: 11,
-				    _ref: 'abc11',
-				    createdBy: 11,
-				    createdTime: 'testTime11',
-				    name: 'Test11',
-				    lastConnection: 11,
-					username: 'myAppServer'
-				};
-
+				
 				chai.request(baseUrl)
-					.post('/servers/')
-					.send(serverToDelete)
-					.end((err, res) => {
-						chai.request(baseUrl)
-							.delete('/servers/' + serverToDelete.id)
-							.send(serverToDelete)
-							.end((err, res) => {
-								res.should.have.status(204);
-								done();
-							});
-					});
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.token.token;
+
+					var serverToDelete = {
+						id: 11,
+						_ref: 'abc11',
+						createdBy: 11,
+						createdTime: 'testTime11',
+						name: 'Test11',
+						lastConnection: 11,
+						username: 'myAppServer'
+					};
+
+					chai.request(baseUrl)
+						.post('/servers/')
+						.set(token_header_flag, token)
+						.send(serverToDelete)
+						.end((err, res) => {
+							chai.request(baseUrl)
+								.delete('/servers/' + serverToDelete.id)
+								.set(token_header_flag, token)
+								.send(serverToDelete)
+								.end((err, res) => {
+									res.should.have.status(204);
+									done();
+								});
+						});
+				});
 			});
 	    });
 	 });
@@ -431,29 +452,40 @@ describe('Servers', function()  {
 
 			serversAPI.clearServersTable()
 			.then( function(fulfilled){
-
-				var serverToGet = {
-				    id: 12,
-				    _ref: 'abc12',
-				    createdBy: 12,
-				    createdTime: 'testTime12',
-				    name: 'Test12',
-				    lastConnection: 12,
-					username: 'myAppServer',
-					password: 'aa'
-				};
-
+				
 				chai.request(baseUrl)
-					.post('/servers/')
-					.send(serverToGet)
-					.end((err, res) => {
-						chai.request(baseUrl)
-							.get('/servers/' + serverToGet.id)
-							.end((err, res) => {
-								res.should.have.status(200);
-								done();
-							});
-					});
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.token.token;
+
+					var serverToGet = {
+						id: 12,
+						_ref: 'abc12',
+						createdBy: 12,
+						createdTime: 'testTime12',
+						name: 'Test12',
+						lastConnection: 12,
+						username: 'myAppServer',
+						password: 'aa'
+					};
+
+					chai.request(baseUrl)
+						.post('/servers/')
+						.set(token_header_flag, token)
+						.send(serverToGet)
+						.end((err, res) => {
+							chai.request(baseUrl)
+								.get('/servers/' + serverToGet.id)
+								.set(token_header_flag, token)
+								.end((err, res) => {
+									res.should.have.status(200);
+									done();
+								});
+						});
+				});
 			});
 	    });
 	 });
