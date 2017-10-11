@@ -141,9 +141,8 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
 		if (server) {
 			// First we add the incoming token to invalid token list
 			// This method also eliminates expired tokens
-			var token = request.body.token || request.query.token || request.headers[process.env.TOKEN_HEADER_FLAG];
-			Verify.invalidateToken(token);
-			
+			var oldToken = request.body.token || request.query.token || request.headers[process.env.TOKEN_HEADER_FLAG];
+
 			// Now we generate and return a new fresh token with full lifetime length from now
 			var payload = {
 				 username: request.decoded.username,
@@ -152,7 +151,13 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
 				 managerOk: request.decoded.managerOk,
 				 adminOk: request.decoded.adminOk
 			};
-			var localToken = Verify.getToken(payload);
+			var newToken = Verify.getToken(payload);
+			
+			if (newToken != oldToken){
+				// elemntal!! We only invalidate token if newToken is different from oldToken...
+				Verify.invalidateToken(oldToken);
+			}
+			
 			response.writeHead(200, {"Content-Type": "application/json"});
 			var responseJson = JSON.stringify({
 				metadata: {version: api.apiVersion},
@@ -167,7 +172,7 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
 					},
 					token: {
 						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
-						token: localToken
+						token: newToken
 					}
 				}
 			});

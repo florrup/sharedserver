@@ -20,6 +20,7 @@ var token_header_flag = 'x-access-token';
 chai.use(chaiHttp);
 
 var usersAPI = require('../routes/users');
+var jwt = require('jsonwebtoken');
 
 /**
  *  Test methods for application users endpoints
@@ -229,10 +230,10 @@ describe('Users', function()  {
 			});
 	    });
 	});
-	
+
 	describe('/GET user with INVALIDATED TOKEN', function() {
 	  	it('it should NOT GET an existing user with INVALIDATED TOKEN', function(done) {
-			this.timeout(15000);
+			this.timeout(20000);
 			
 			usersAPI.clearUsersTable().
 			then( function(fulfilled){
@@ -272,24 +273,45 @@ describe('Users', function()  {
 							.send(userToGet)
 							.end((err, res) => {
 								res.should.have.status(201);
+								
+								// Taking a small nap to let newToken and oldToken be different in time
+								console.log('Freezing for 2 senconds to make tokens differ in end time...');
+								var milliseconds = 2000;
+								var start = new Date().getTime();
+								for (var i = 0; i < 1e7; i++) {
+									if ((new Date().getTime() - start) > milliseconds){
+									  break;
+									}
+								}
+								console.log('TOKENNN: ' + oldAppToken);
 								chai.request(baseUrl)
 								.post('/servers/ping/')
 								.set(token_header_flag, oldAppToken) // here still oldAppToken is OK
 								.end((err, res) => {
-									console.log(err);
+									/// \todo averiguar por que a veces salta 401 unaothorized acá...
+									/// El error que leemos del token es que está vencido
+									/// Podría ser un tema de la definición de tiempo en chai mocha testing
+									/// Autenticación por token es usado en todos los demás tests y no anda mal
+									/// En este test lo que queremos probar es otra cosa:
+									/// Si para este método el token aún es válido (en un escenario real debería serlo)
+									/// La anulación del token funciona correctamente. Si en cambio el token expira
+									/// como se mencionó este test llega hasta acá y termina con error 401
 									res.should.have.status(200);
 									var newAppToken = res.body.ping.token.token;
-									chai.request(baseUrl)
-									.get('/users/' + userToGet.id)
-									.set(token_header_flag, oldAppToken) // oldAppToken has been invalidated
-									.end((err, res) => {
-										res.should.have.status(401); // unauthorized
+									jwt.verify(newAppToken, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
+										// console.log('TOKEN DECODED: '+JSON.stringify(decoded));
 										chai.request(baseUrl)
 										.get('/users/' + userToGet.id)
-										.set(token_header_flag, newAppToken) // newAppToken should be ok
+										.set(token_header_flag, oldAppToken) // oldAppToken has been invalidated
 										.end((err, res) => {
-											res.should.have.status(200);
-											done();
+											res.should.have.status(401); // unauthorized
+											chai.request(baseUrl)
+											.get('/users/' + userToGet.id)
+											.set(token_header_flag, newAppToken) // newAppToken should be ok
+											.end((err, res) => {
+												res.should.have.status(200);
+												done();
+											});
 										});
 									});
 								});

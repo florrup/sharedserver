@@ -11,8 +11,13 @@ var invalidatedTokens;
 /**
  * Method for token generation. It consumes token secret and token expiration time from env configuration.
 **/
-exports.getToken = function (businessuser) {
-    return jwt.sign(businessuser, process.env.TOKEN_SECRET_KEY,{
+exports.getToken = function (payload) {
+	if (typeof invalidatedTokens === "undefined") {
+		// If it has been not before, we initialize invalidTokens variable
+		invalidatedTokens = [];
+	}
+	
+    return jwt.sign(payload, process.env.TOKEN_SECRET_KEY,{
         expiresIn: process.env.TOKEN_LIFETIME_IN_SECONDS // 3600
     });
 };
@@ -23,6 +28,7 @@ exports.invalidateToken = function(token){
 		// If it has been not before, we initialize invalidTokens variable
 		invalidatedTokens = [];
 	}
+	// console.log('111111111 INVALID TOKENS: ' + JSON.stringify(invalidatedTokens) + '*****************');
 	
 	// every time we invalidate a new token we clean the list first
 	// Checking for expired tokens to remove (we start from the back of the list)
@@ -35,6 +41,7 @@ exports.invalidateToken = function(token){
 	};
 	
 	invalidatedTokens.push(token);
+	//console.log('INVALID TOKENS: ' + JSON.stringify(invalidatedTokens) + '*****************');
 }
 
 /**
@@ -50,12 +57,20 @@ exports.verifyToken = function (req, res, next) {
 		invalidatedTokens = [];
 	}
 	
+	if (typeof invalidatedTokens === "undefined") {
+		console.log('INVALIDATEDTOKENS ARRAY STIL INVALID !!!!!!!!!!1');
+	}
+	else {
+		console.log('INVALID TOKENS: ' + JSON.stringify(invalidatedTokens) + '*********************');
+	}
     // decode token
     if (token && (invalidatedTokens.indexOf(token) === -1)) {
         // verifies secret and checks exp
         jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
             if (err) {
-                var err = new Error('You are not authenticated!');
+				console.log('TOKEN VERIFICATION ERROR: '+JSON.stringify(err));
+				var errorMessage = JSON.stringify(err);
+                var err = new Error('You are not authenticated! '+errorMessage);
                 err.status = 401;
                 return next(err);
             } else {
