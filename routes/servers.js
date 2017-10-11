@@ -264,30 +264,6 @@ router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function
 
 module.exports = router;
 
-
-/**
- *  Method that verifies if a username has a server associated with it.
- * 
- * This method is useful to avoid application users take a username that already has a server associated to it, wich is forbidden
- */
-function usernameExists(businessUserUsername, callback) {
-  Server.find({
-    where: {
-      username: businessUserUsername
-    }
-  }).then(server => {
-    if (!server) {
-      console.log("No server has this username");
-      return callback(false); 
-    }
-    console.log("A server has this username");
-    return callback(true);
-  });
-}
-
-module.exports.usernameExists = usernameExists;
-
-
 /**
  *  This method clears the servers database, leaving blank the servers table
  */

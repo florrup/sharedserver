@@ -404,6 +404,63 @@ describe('Users', function()  {
 			});
 	    });
 	});
+
+	describe('/VALIDATE user', function() {
+	  	it('it should VALIDATE an existing user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+
+				var userToValidate = {
+					id: 10,
+					username: 'testUsername10',
+					password: 'aaa',
+					name: 'testName10',
+					surname: 'testSurname10',
+					country: 'Argentina10',
+					email: 'testEmail10@gmail.com',
+					birthdate: '24/05/1992'
+				};
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/users/')
+						.set(token_header_flag, token)
+						.send(userToValidate)
+						.end((err, res) => {
+							res.body.should.have.property('username');
+							chai.request(baseUrl)
+							.get('/servers/initAndWriteDummyServer/')
+							.end((err, res) => {
+								console.log('Server has been created\n');
+								var serverToken = res.body.serverToken;
+								console.log(serverToken);
+								chai.request(baseUrl)
+								.post('/users/validate')
+								.set(token_header_flag, serverToken)
+								.send({"username":"testUsername10", "password":"aaa"})
+								.end((err, res) => {
+									res.should.have.status(200);
+									done();
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
+	});
 });
 
 /**
@@ -557,8 +614,7 @@ describe('Users', function()  {
 				});
 			});
 	    });
-	 });
-
+	});
 });
 
 /**

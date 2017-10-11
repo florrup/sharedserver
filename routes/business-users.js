@@ -69,26 +69,19 @@ router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, re
  *
  */
 router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
-	Server.usernameExists(request.body.username, function(res, next) {
-		if (res) {
-			return response.status(400).json({code: 0, message: "Existe un servidor con este nombre de usuario"});
+	BusinessUser.create({
+		id: request.body.id,
+		username: request.body.username,
+		password: request.body.password,
+		name: request.body.name,
+		surname: request.body.surname,
+		roles: request.body.roles
+	}).then(businessuser => {
+		if (!businessuser) {
+		  return response.status(500).json({code: 0, message: "Unexpected error"});
 		}
-
-		console.log("Before creating a businessuser - username doesn't exist in server table");
-		BusinessUser.create({
-			id: request.body.id,
-			username: request.body.username,
-			password: request.body.password,
-			name: request.body.name,
-			surname: request.body.surname,
-			roles: request.body.roles
-		}).then(businessuser => {
-			if (!businessuser) {
-			  return response.status(500).json({code: 0, message: "Unexpected error"});
-			}
-			response.status(201).json(businessuser);
-		});
-	});	
+		response.status(201).json(businessuser);
+	});
 });
 
 /**

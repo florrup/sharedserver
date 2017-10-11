@@ -19,44 +19,8 @@ router.post('/', function (request, response){
 	})
 	.then( function(businessUser){
 		if (!businessUser){
-			
-			/// \todo
-			// **************************************************************************************
-			// Here we should check if the username corresponds to a SERVER instead of a businessuser
-			// Copié este código de abajo, fijate si te sirve de referencia... no pude con mi genio, lo vi que era igual al de abajo.
-			/*
-			BusinessUsers.find({
-				where: {
-					username: localUsername
-				}
-			})
-			.then( function(appUserName){
-				var payload = {
-					 username: appUserName,
-					 userOk: false,
-					 appOk: true,
-					 managerOk: false,
-					 adminOk: false
-				};
-				var localToken = verify.getToken(payload);
-				response.writeHead(201, {"Content-Type": "application/json"});
-				var responseJson = JSON.stringify({
-					metadata: {version: api.apiVersion},
-					token: {
-						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
-						token: localToken
-					}
-				});
-				return response.end(responseJson);
-			})
-			.catch( function(error){
-				return response.status(404).json({code: 0, message: "Username does not exist in the database or missing username to get token: " + error});
-				console.log('Username wich does not exist was used to attem log in');
-			});
-			*/
-			// **************************************************************************************
-			
-			
+			return response.status(404).json({code: 0, message: "Username does not exist in the database or missing username to get token"});
+ 			console.log('Username wich does not exist was used to attempt log in');
 		}
 		else {
 			// console.log(businessUser);

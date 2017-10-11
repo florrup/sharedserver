@@ -5,6 +5,7 @@ const Sequelize = require('sequelize');
 var User = require('../models/user.js');
 
 var Verify = require('./verify');
+var api = require('./api');
 
 // CREATE TABLE users(id INT PRIMARY KEY, username VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
@@ -69,6 +70,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
   User.create({
     id: request.body.id,
     username: request.body.username,
+    password: request.body.password,
     name: request.body.name,
     surname: request.body.surname,
     country: request.body.country,
@@ -80,6 +82,40 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
     }
     return response.status(201).json(user);
   });
+});
+
+/**
+ *  Valida las credenciales de un usuario de aplicación.   
+ *
+ */
+router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+  User.find({
+    where: {
+      username: request.body.username,
+      password: request.body.password // TODO add facebookAuthToken
+    }
+  }).then(user => {
+    if (!user) {
+      return response.status(400).json({code: 0, message: "Faltan parámetros o validación fallida"});
+    }
+    var responseJson = JSON.stringify({
+      metadata: {version: api.apiVersion},
+      user: {
+        id: user.id,
+        _ref: user._ref,
+        username: user.username,
+        name: user.name,
+        surname: user.surname,
+        country: user.country,
+        email: user.email,
+        birthdate: user.birthdate
+      }
+    });
+    return response.status(200).json(responseJson);
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
+
 });
 
 /**
