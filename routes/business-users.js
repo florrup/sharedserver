@@ -31,7 +31,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 			password: 'aaa',
 			name: 'John',
 			surname: 'Hancock',
-			roles: ['admin', 'manager', 'user', 'app'] // TODO agrego rol de app temporalmente para que pase los test que necesitan verificación
+			roles: ['admin', 'manager', 'user']
 		  };
 		  BusinessUser.create(dummyBusinessUser)
 		  .then(() => {

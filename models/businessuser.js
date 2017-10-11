@@ -32,10 +32,10 @@ const BusinessUser = sequelize.define('businessuser', {
     surname: {
       type: Sequelize.STRING
     },
-	roles: {
-              type: Sequelize.ARRAY(Sequelize.STRING),
-              allowNull: false
-	}
+	  roles: {
+      type: Sequelize.ARRAY(Sequelize.STRING),
+      allowNull: false
+	  }
   }, {
     timestamps: false
 });
