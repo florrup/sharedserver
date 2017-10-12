@@ -1,4 +1,4 @@
-//! @file business-users.js
+//! @file servers.js
 //! Describes endpoints for servers
 
 var express = require('express');
