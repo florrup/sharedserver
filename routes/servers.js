@@ -230,7 +230,7 @@ router.delete('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, functi
     }
   }).then(server => {
     if (!server) {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
+      return response.status(404).json({code: 0, message: "Unexpected error"});
     }
 
     Server.findAll({ // must return all servers

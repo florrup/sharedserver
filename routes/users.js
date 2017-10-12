@@ -151,9 +151,11 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
     }
   }).then(user => {
     if (!user) {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
+      return response.status(404).json({code: 0, message: "User inexistente"});
     }
     return response.status(200).json(user);
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
 
