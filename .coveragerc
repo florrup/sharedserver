@@ -1,5 +1,0 @@
-[report]
-omit =  
-    models/*
-    views/*
-    public/*
