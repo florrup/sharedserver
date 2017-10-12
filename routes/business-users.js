@@ -24,7 +24,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
 	// It is only available in development environment
-	if (process.env.NODE_ENV === 'development'){
+	if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){
 		BusinessUser.sync({force: true}).then(() => {
 		  // Table created
 		  

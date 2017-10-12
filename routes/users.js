@@ -22,7 +22,7 @@ var api = require('./api');
 router.get('/initAndWriteDummyUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
-	if (process.env.NODE_ENV === 'development'){
+	if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){
 		User.sync({force: true}).then(() => {
 		  // Table created
 
