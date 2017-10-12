@@ -19,7 +19,6 @@ var token_header_flag = 'x-access-token';
 
 chai.use(chaiHttp);
 
-var usersAPI = require('../routes/users');
 var jwt = require('jsonwebtoken');
 
 /**
@@ -28,6 +27,8 @@ var jwt = require('jsonwebtoken');
  * Application users are the drivers or passangers that use the system and have a profile in this database
  */
 describe('Users', function()  {
+
+	var usersAPI = require('../routes/users');
 
 	describe('/GET users', function() {
 	  	it('it should GET no users from empty database', function(done) {
