@@ -263,11 +263,45 @@ router.get('/:serverId', Verify.verifyToken, Verify.verifyUserRole, function(req
 });
 
 /**
- *  Endpoint para resetear el token. Debe invalidar el anterior.
+ * Resetear un token de un servidor
+ * Endpoint para resetear el token. Debe invalidar el anterior.
  *
  */
 router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-	return response.status(500).json({code: 0, message: "Method POST /servers/:serverId NOT YET IMPLEMENTED"});;
+	Server.find({
+    where: {
+      id: request.params.serverId
+    }
+  }).then(server => {
+    if (!server) {
+      return response.status(500).json({code: 0, message: "Unexpected error"});
+    }
+	
+	// var oldToken = request.body.token || request.query.token || request.headers[process.env.TOKEN_HEADER_FLAG];
+	// Verify.invalidateToken(oldToken);
+	
+	// Now we generate and return a new fresh token with full lifetime length from now
+	var payload = {
+		 username: request.decoded.username,
+		 userOk: request.decoded.userOk,
+		 appOk: request.decoded.appOk, // normally it would be false to business users
+		 managerOk: request.decoded.managerOk,
+		 adminOk: request.decoded.adminOk
+	};
+	var newToken = Verify.getToken(payload);
+	
+	var response = JSON.stringify({
+		metadata: {version: api.apiVersion},
+		server: {
+					CreateServerResponse : {
+												server: JSON.stringify(server),
+												token: newToken
+					}
+				}
+	});
+
+	return response.status(200).json(response);
+  });
 });
 
 module.exports = router;
