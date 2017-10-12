@@ -1,3 +1,5 @@
+/*istanbul ignore next*/
+
 var Sequelize = require("sequelize");
 var sequelize = require("./db.js").sequelize;
 

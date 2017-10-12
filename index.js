@@ -1,3 +1,5 @@
+/*istanbul ignore next*/
+
 //! @file index.js
 //! Starts the app
 

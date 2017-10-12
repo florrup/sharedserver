@@ -1,3 +1,5 @@
+/*istanbul ignore next*/
+
 // Sequelize Module: Instantiation and connection to Database 
 var pg = require('pg');
 const Sequelize = require('sequelize'); // class: starts with mayus S
