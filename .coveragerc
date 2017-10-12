@@ -3,5 +3,3 @@ omit =
     models/*
     views/*
     public/*
-    index.js
-    routes/api.js
