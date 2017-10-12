@@ -151,9 +151,11 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
     }
   }).then(user => {
     if (!user) {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
+      return response.status(404).json({code: 0, message: "User inexistente"});
     }
     return response.status(200).json(user);
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
 
@@ -191,41 +193,50 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
  *  Devuelve toda la información acerca de todos los autos del usuario.
  *
  */
-router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+/*router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
   
 });
+*/
 
 /**
  *  Da de alta un auto de un usuario.
  *
  */
+ /*
 router.post('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
   
 });
+*/
 
 /**
  *  Da de baja un auto.
  *
  */
+/*
 router.delete('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyManagerOrAppRole, function(request, response) {
   
 });
+*/
 
 /**
  *  Devuelve toda la información del auto.
  *
  */
+ /*
 router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
   
 });
+*/
 
 /**
  *  Modifica los datos del auto.
  *
  */
+ /*
 router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   
 });
+*/
 
 module.exports = router;
 

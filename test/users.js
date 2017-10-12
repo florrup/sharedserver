@@ -112,7 +112,7 @@ describe('Users', function()  {
 	};
 
 	describe('/DELETE user', function() {
-		it('it shouldn\'t DELETE a user that doesnt exist', function(done) {
+		it('it shouldn\'t DELETE a user that doesn\'t exist', function(done) {
 			this.timeout(15000);
 	  		usersAPI.clearUsersTable().
 			then( function(fulfilled){
@@ -223,6 +223,49 @@ describe('Users', function()  {
 								});
 							});
 						});
+					});
+				});
+			});
+	    });
+
+	  	it('it shouldn\'t GET a user that doesn\'t exist', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable().
+			then( function(fulfilled){
+
+				var userToGet = {
+					id: 10,
+					username: 'testUsername10',
+					password: 'aaa',
+					name: 'testName10',
+					surname: 'testSurname10',
+					country: 'Argentina10',
+					email: 'testEmail10@gmail.com',
+					birthdate: '24/05/1992'
+				};
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+	
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+
+						console.log('Is this body w token?: ', res.body);
+						var businessToken = res.body.token.token;
+						
+						chai.request(baseUrl)
+						.get('/users/' + userToGet.id)
+						.set(token_header_flag, businessToken)
+						.end((err, res) => {
+							res.should.have.status(404);
+							res.body.should.have.property('code');
+							done();
+						});						
 					});
 				});
 			});
@@ -354,8 +397,7 @@ describe('Users', function()  {
 					.end((err, res) => {
 						res.should.have.status(404);
 						done();
-					});
-					
+					});	
 				});
 			});
 	    });
@@ -632,6 +674,42 @@ describe('Users', function()  {
 							done();
 						});
 					});
+				});
+			});
+	    });
+
+	  	it('it shouldn\'t DELETE a server that doesn\'t exist', function(done) {
+	  		this.timeout(15000);
+	  		serversAPI.clearServersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.token.token;
+
+					var serverToDelete = {
+						id: 11,
+						_ref: 'abc11',
+						createdBy: 11,
+						createdTime: 'testTime11',
+						name: 'Test11',
+						lastConnection: 11,
+						username: 'myAppServer'
+					};
+
+					chai.request(baseUrl)
+					.delete('/servers/' + serverToDelete.id)
+					.set(token_header_flag, token)
+					.send(serverToDelete)
+					.end((err, res) => {
+						res.should.have.status(404);
+						done();
+					});
+		
 				});
 			});
 	    });
