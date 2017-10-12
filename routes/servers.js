@@ -1,3 +1,6 @@
+//! @file business-users.js
+//! Describes endpoints for servers
+
 var express = require('express');
 var router = express.Router();
 // var router = express();
@@ -208,7 +211,7 @@ router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(
 		username: request.body.username,
 		password: request.body.password
       }).then(updatedServer => {
-        return response.status(200).json(updatedServer);
+        return response.status(200).json(updatedServer); // TODO Cuidado que esto devuelve solo el id del server
       });
     } else {
       return response.status(500).json({code: 0, message: "Unexpected error"});

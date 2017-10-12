@@ -1,3 +1,6 @@
+//! @file business-users.js
+//! Describes endpoints for business-users
+
 var express = require('express');
 var router = express.Router();
 

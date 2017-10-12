@@ -1,3 +1,6 @@
+//! @file users.js
+//! Describes endpoints for users
+
 var express = require('express');
 var router = express.Router();
 
