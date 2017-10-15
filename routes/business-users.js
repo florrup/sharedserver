@@ -65,6 +65,7 @@ router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, re
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
 		}).then(businessusers => {
+		/* istanbul ignore if  */
 	    if (!businessusers) {
 	      return response.status(500).json({code: 0, message: "Unexpected error"});
 	    }
@@ -85,6 +86,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, r
 		surname: request.body.surname,
 		roles: request.body.roles
 	}).then(businessuser => {
+		/* istanbul ignore if  */
 		if (!businessuser) {
 		  return response.status(500).json({code: 0, message: "Unexpected error"});
 		}
