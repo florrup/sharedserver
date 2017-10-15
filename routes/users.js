@@ -5,7 +5,12 @@ var express = require('express');
 var router = express.Router();
 
 const Sequelize = require('sequelize');
-var User = require('../models/user.js');
+//var User = require('../models/user.js');
+//var Car = require('../models/car.js');
+
+var models = require('../models/db'); // loads db.js
+var User = models.user;       // the model keyed by its name
+var Car = models.car;
 
 var Verify = require('./verify');
 var api = require('./api');
@@ -189,24 +194,49 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
   });
 });
 
+//CREATE TABLE cars(id INT PRIMARY KEY, _ref VARCHAR(20), owner VARCHAR(40), properties jsonb[]);
+
 /**
  *  Devuelve toda la información acerca de todos los autos del usuario.
  *
  */
-/*router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
-  
+router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+  Car.findAll({
+    where: {
+      owner: request.params.userId
+    }
+  }).then(function(cars) {
+    console.log(cars);
+    return response.status(200).json(cars); 
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
 });
-*/
 
 /**
  *  Da de alta un auto de un usuario.
  *
  */
- /*
-router.post('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
-  
+router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+  // Verificar acá que cada json tenga name y value nada más, antes de meterlo a la base de datos
+
+  Car.create({
+    id: request.body.id,
+    _ref: request.body._ref,
+    owner: request.body.owner, 
+    properties: request.body.properties
+  }).then(car => {
+    if (!car) {
+      console.log('Car couldn\'t be created\n\n');
+      return;
+    }
+    console.log('Car was created!!\n\n');
+    return response.status(201).json(car);
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
 });
-*/
+
 
 /**
  *  Da de baja un auto.

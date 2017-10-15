@@ -3,7 +3,11 @@ var router = express.Router();
 var verify = require('./verify');
 var api = require('./api');
 
-var BusinessUsers = require('../models/businessuser');
+//var BusinessUsers = require('../models/businessuser');
+
+var models = require('../models/db'); // loads db.js
+var BusinessUsers = models.businessuser;       // the model keyed by its name
+
 /** 
  * This endpoint creates a new token and sends it to the user if the username and password provided are valid
 **/

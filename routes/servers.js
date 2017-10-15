@@ -6,7 +6,10 @@ var router = express.Router();
 // var router = express();
 
 const Sequelize = require('sequelize');
-var Server = require('../models/server.js');
+//var Server = require('../models/server.js');
+
+var models = require('../models/db'); // loads db.js
+var Server = models.server;       // the model keyed by its name
 
 var Verify = require('./verify');
 var api = require('./api');
@@ -293,11 +296,11 @@ router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function
 	var response = JSON.stringify({
 		metadata: {version: api.apiVersion},
 		server: {
-					CreateServerResponse : {
-												server: JSON.stringify(server),
-												token: newToken
-					}
-				}
+			CreateServerResponse : {
+				server: JSON.stringify(server),
+				token: newToken
+			}
+		}
 	});
 
 	return response.status(200).json(response);

@@ -5,9 +5,14 @@ var express = require('express');
 var router = express.Router();
 
 const Sequelize = require('sequelize');
-var BusinessUser = require('../models/businessuser.js');
+//var BusinessUser = require('../models/businessuser.js');
 var Server = require('../routes/servers.js');
 var api = require('./api.js');
+
+var models = require('../models/db'); // loads db.js
+var BusinessUser = models.businessuser;       // the model keyed by its name
+
+//const BusinessUser = require('../models/db').BusinessUser;
 
 var Verify = require('./verify');
 
@@ -206,8 +211,9 @@ function clearBusinessUsersTable() {
 		  }
 		  resolve(true);
 		})
-		// .catch(reject(false));
-	});
+	}).catch(function () {
+		console.log("Promise Rejected");
+	});;
 }
 
 module.exports.clearBusinessUsersTable = clearBusinessUsersTable;
