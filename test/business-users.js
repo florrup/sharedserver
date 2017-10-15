@@ -99,8 +99,8 @@ describe('BusinessUsers', function()  {
 						.send(newBusinessUser)
 						.end((err, res) => {
 							res.should.have.status(201);
-							res.body.should.have.property('username');
-							res.body.should.have.property('surname');
+							res.body.should.have.property('metadata');
+							res.body.should.have.property('businessUser');
 						  done();
 						});
 
@@ -108,20 +108,20 @@ describe('BusinessUsers', function()  {
 				});
 			});
 	    });
-	});
 
-	describe('/DELETE business user', function() {
-	  	it('it should DELETE a business user', function(done) {
-	  		this.timeout(15000);
+	  	it('it shouldn\'t POST a business user when there\'s already one that has that username', function(done) {
+			this.timeout(15000);
+
 	  		businessUsersAPI.clearBusinessUsersTable()
 			.then( function(fulfilled){
 
-				var businessUserToDelete = {
-				    id: 3,
-				    _ref: 'a3',
-				    username: 'johnBlack',
-				    name: 'John',
-				    surname: 'Black',
+				var newBusinessUser = {
+				    id: 2,
+				    _ref: 'a2',
+				    username: 'johnny',
+				    password: 'carlos123',
+				    name: 'Carlos',
+				    surname: 'Sanchez',
 					roles: ['admin', 'user']
 				};
 
@@ -140,18 +140,85 @@ describe('BusinessUsers', function()  {
 						chai.request(baseUrl)
 						.post('/business-users/')
 						.set(token_header_flag, token)
+						.send(newBusinessUser)
+						.end((err, res) => {
+							res.should.have.status(500);
+							res.body.should.have.property('code');
+							res.body.should.have.property('message');
+						  done();
+						});
+
+					});				
+				});
+			});
+	    });
+	});
+
+	describe('/DELETE business user', function() {
+
+		var businessUserToDelete = {
+		    id: '3',
+		    _ref: 'a3',
+		    username: 'johnBlack',
+		    name: 'John',
+		    surname: 'Black',
+			roles: ['admin', 'user']
+		};
+
+	  	it('it should DELETE a business user', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						var token = res.body.token.token;
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
 						.send(businessUserToDelete)
 						.end((err, res) => {
 							chai.request(baseUrl)
-								.delete('/business-users/' + businessUserToDelete.id)
-								.set(token_header_flag, token)
-								.send(businessUserToDelete)
-								.end((err, res) => {
-									res.should.have.status(204);
-									done();
-								});
+							.delete('/business-users/' + businessUserToDelete.id)
+							.set(token_header_flag, token)
+							.end((err, res) => {
+								res.should.have.status(204);
+								done();
+							});
 						});
+					});				
+				});
+			});
+	    });
 
+	  	it('it shouldn\'t DELETE a missing business user', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						var token = res.body.token.token;
+						chai.request(baseUrl)
+						.delete('/business-users/' + businessUserToDelete.id)
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							res.should.have.status(404);
+							done();
+						});
 					});				
 				});
 			});
@@ -192,6 +259,7 @@ describe('BusinessUsers', function()  {
 						.set(token_header_flag, token)
 						.send(businessuserToModify)
 						.end((err, res) => {
+
 							businessuserToModify = {
 							    id: 3,
 							    _ref: 'a3',
@@ -201,18 +269,20 @@ describe('BusinessUsers', function()  {
 							    surname: 'White',
 								roles: ['user']
 							};
+
 							chai.request(baseUrl)
 							.put('/business-users/' + businessuserToModify.id)
 							.set(token_header_flag, token)
 							.send(businessuserToModify)
 							.end((err, res) => {
 								res.should.have.status(200);
-								res.body.username.should.equal('johnBlack');
-								res.body.name.should.equal('Tom');
+								res.body.should.have.property('metadata');
+								res.body.should.have.property('businessUser');
+								res.body.businessUser.name.should.equal(businessuserToModify.name);
+								res.body.businessUser.surname.should.equal(businessuserToModify.surname);
 								done();
 							});
 						});
-
 					});				
 				});
 			});
@@ -253,6 +323,133 @@ describe('BusinessUsers', function()  {
 							res.should.have.status(404);
 							done();
 						});
+					});				
+				});
+			});
+	    });
+	});
+
+	describe('/GET a specific business user', function() {
+
+		var businessuserToGet = {
+		    id: 3,
+		    _ref: 'a3',
+		    username: 'johnBlack',
+		    password: 'abc',
+		    name: 'John',
+		    surname: 'Black',
+			roles: ['user']
+		};
+
+		it('it should GET a business user that exists', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(businessuserToGet)
+						.end((err, res) => {
+
+							chai.request(baseUrl)
+							.get('/business-users/' + businessuserToGet.id)
+							.set(token_header_flag, token)
+							.end((err, res) => {
+								res.should.have.status(200);
+								res.body.should.have.property('metadata');
+								res.body.should.have.property('businessUser');
+								res.body.businessUser.name.should.equal(businessuserToGet.name);
+								done();
+							});
+						});
+					});				
+				});
+			});
+	    });
+
+		it('it shouldn\'t GET a specific business user that doesn\'t exist', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.get('/business-users/' + businessuserToGet.id)
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							res.should.have.status(404);
+							done();
+						});
+					});				
+				});
+			});
+	    });
+	});
+
+	describe('/POST token', function() {
+	  	it('it shouldn\'t POST token for missing business user username', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"pedro", "password":"aaa"}})
+					.end((err, res) => {
+						res.should.have.status(404);
+						res.body.should.have.property('code');
+						done();
+					});				
+				});
+			});
+	    });
+
+	    it('it shouldn\'t POST token for wrong business user password', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"bbb"}})
+					.end((err, res) => {
+						res.should.have.status(401);
+						res.body.should.have.property('code');
+						done();
 					});				
 				});
 			});

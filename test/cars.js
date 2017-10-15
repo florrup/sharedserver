@@ -31,7 +31,7 @@ describe('Cars', function()  {
 	var usersAPI = require('../routes/users');
 
 	describe('/GET users car', function() {
-	  	it('it should GET no cars from user without cars', function(done) {
+	  	it('it shouldn\'t GET cars from user without cars', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable()
@@ -116,7 +116,7 @@ describe('Cars', function()  {
 							    "id": 25,
 							    "_ref": "hola",
 							    "owner": "Carlos", 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}],
+							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
 							}
 
 							chai.request(baseUrl)
@@ -126,8 +126,9 @@ describe('Cars', function()  {
 							.end((err, res) => {
 								console.log(car);
 								res.should.have.status(201);
-								res.body.should.have.property('id');
-								res.body.should.have.property('owner');
+								res.body.should.have.property('metadata');
+								res.body.should.have.property('car');
+								res.body.car.should.have.property('owner');
 								done();
 							});
 						});
@@ -135,29 +136,37 @@ describe('Cars', function()  {
 				});
 			});
 	    });
+	});
 
-	  	it('it should DELETE cars from existing user', function(done) {
+	describe('/DELETE users car', function() {
+
+		var user = {
+			id: 10,
+			username: 'testUsername10',
+			password: 'aaa',
+			name: 'testName10',
+			surname: 'testSurname10',
+			country: 'Argentina10',
+			email: 'testEmail10@gmail.com',
+			birthdate: '24/05/1992'
+		};
+
+		var car = {
+		    "id": 25,
+		    "_ref": "hola",
+		    "owner": "Carlos", 
+		    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+		};
+
+	  	it('it should DELETE existing car from user', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable()
 			.then( function(fulfilled){
 
-				var user = {
-					id: 10,
-					username: 'testUsername10',
-					password: 'aaa',
-					name: 'testName10',
-					surname: 'testSurname10',
-					country: 'Argentina10',
-					email: 'testEmail10@gmail.com',
-					birthdate: '24/05/1992'
-				};
-				
 				chai.request(baseUrl)
 				.get('/servers/initAndWriteDummyServer/')
 				.end((err,res) => {
-					
-					console.log('Is this body w token?: ', res.body);
 					var token = res.body.serverToken;
 
 					chai.request(baseUrl)
@@ -166,16 +175,8 @@ describe('Cars', function()  {
 					.send(user)
 					.end((err, res) => {
 						res.body.should.have.property('username');
-
 						usersAPI.clearCarsTable()
 						.then( function(fulfilled){
-
-							var car = {
-							    "id": 25,
-							    "_ref": "hola",
-							    "owner": "Carlos", 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}],
-							}
 
 							chai.request(baseUrl)
 							.post('/users/' + user.id + '/cars/')
@@ -198,61 +199,87 @@ describe('Cars', function()  {
 			});
 	    });
 
-	  	it('it should GET a specific car from specific user', function(done) {
+	  	it('it shouldn\'t DELETE a car that doesn\'t exist', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable()
 			.then( function(fulfilled){
-
-				var user = {
-					id: 10,
-					username: 'testUsername10',
-					password: 'aaa',
-					name: 'testName10',
-					surname: 'testSurname10',
-					country: 'Argentina10',
-					email: 'testEmail10@gmail.com',
-					birthdate: '24/05/1992'
-				};
-				
 				chai.request(baseUrl)
 				.get('/servers/initAndWriteDummyServer/')
 				.end((err,res) => {
-					
-					console.log('Is this body w token?: ', res.body);
 					var token = res.body.serverToken;
-
 					chai.request(baseUrl)
 					.post('/users/')
 					.set(token_header_flag, token)
 					.send(user)
 					.end((err, res) => {
 						res.body.should.have.property('username');
+						usersAPI.clearCarsTable()
+						.then( function(fulfilled){							
+							chai.request(baseUrl)
+							.delete('/users/' + user.id + '/cars/' + car.id)
+							.set(token_header_flag, token)
+							.end((err, res) => {
+								res.should.have.status(404);
+								done();
+							});	
+						});
+					});
+				});
+			});
+	    });
+	});
 
+	describe('/GET users specific car', function() {
+
+		var user = {
+			id: 10,
+			username: 'testUsername10',
+			password: 'aaa',
+			name: 'testName10',
+			surname: 'testSurname10',
+			country: 'Argentina10',
+			email: 'testEmail10@gmail.com',
+			birthdate: '24/05/1992'
+		};
+
+		var car = {
+		    "id": 25,
+		    "_ref": "hola",
+		    "owner": "Carlos", 
+		    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+		};
+
+	  	it('it should GET a specific car from specific user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/servers/initAndWriteDummyServer/')
+				.end((err,res) => {
+					var token = res.body.serverToken;
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+						res.body.should.have.property('username');
 						usersAPI.clearCarsTable()
 						.then( function(fulfilled){
-
-							var car = {
-							    "id": 25,
-							    "_ref": "hola",
-							    "owner": "Carlos", 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}],
-							}
-
 							chai.request(baseUrl)
 							.post('/users/' + user.id + '/cars/')
 							.set(token_header_flag, token)
 							.send(car)
 							.end((err, res) => {
-								console.log(car);
 								res.should.have.status(201);
-								
 								chai.request(baseUrl)
 								.get('/users/' + user.id + '/cars/' + car.id)
 								.set(token_header_flag, token)
 								.end((err, res) => {
 									res.should.have.status(200);
-									res.body.owner.should.equal(user.id.toString());
+									res.body.should.have.property('car');
+									res.body.car.owner.should.equal(user.id.toString());
 									done();
 								});
 							});
@@ -262,7 +289,48 @@ describe('Cars', function()  {
 			});
 	    });
 
-	  	it('it shouldn\'t GET an missing car from specific user', function(done) {
+	  	it('it shouldn\'t GET a missing car from specific user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.get('/servers/initAndWriteDummyServer/')
+				.end((err,res) => {
+					var token = res.body.serverToken;
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+						res.body.should.have.property('username');
+						usersAPI.clearCarsTable()
+						.then( function(fulfilled){
+
+							chai.request(baseUrl)
+							.post('/users/' + user.id + '/cars/')
+							.set(token_header_flag, token)
+							.send(car)
+							.end((err, res) => {
+								res.should.have.status(201);
+								chai.request(baseUrl)
+								.get('/users/' + user.id + '/cars/' + car.id + 1)
+								.set(token_header_flag, token)
+								.end((err, res) => {
+									res.should.have.status(404);
+									done();
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
+	});
+
+	describe('/PUT users car', function() {
+	  	it('it shouldn\'t PUT a missing car', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable()
@@ -292,30 +360,78 @@ describe('Cars', function()  {
 					.send(user)
 					.end((err, res) => {
 						res.body.should.have.property('username');
-
+						var car = {
+						    "id": 25,
+						    "_ref": "hola",
+						    "owner": "Carlos", 
+						    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+						}
 						usersAPI.clearCarsTable()
-						.then( function(fulfilled){
+						.then( function(fulfilled){							
+							chai.request(baseUrl)
+							.put('/users/' + user.id + '/cars/' + car.id)
+							.send(car)
+							.set(token_header_flag, token)
+							.end((err, res) => {
+								res.should.have.status(404);
+								done();
+							});
+						});
+					});
+				});
+			});
+	    });
 
-							var car = {
-							    "id": 25,
-							    "_ref": "hola",
-							    "owner": "Carlos", 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}],
-							}
+	  	it('it should PUT an existing car', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
 
+				var user = {
+					id: 10,
+					username: 'testUsername10',
+					password: 'aaa',
+					name: 'testName10',
+					surname: 'testSurname10',
+					country: 'Argentina10',
+					email: 'testEmail10@gmail.com',
+					birthdate: '24/05/1992'
+				};
+				
+				chai.request(baseUrl)
+				.get('/servers/initAndWriteDummyServer/')
+				.end((err,res) => {
+					
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.serverToken;
+
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+						res.body.should.have.property('username');
+						var car = {
+						    "id": 25,
+						    "_ref": "hola",
+						    "owner": "Carlos", 
+						    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+						}
+						usersAPI.clearCarsTable()
+						.then( function(fulfilled){		
 							chai.request(baseUrl)
 							.post('/users/' + user.id + '/cars/')
 							.set(token_header_flag, token)
-							.send(car)
-							.end((err, res) => {
-								console.log(car);
-								res.should.have.status(201);
-								
+							.send(car)		
+							.end((err, res) => {			
 								chai.request(baseUrl)
-								.get('/users/' + user.id + '/cars/' + car.id + 1)
+								.put('/users/' + user.id + '/cars/' + car.id)
+								.send(car)
 								.set(token_header_flag, token)
 								.end((err, res) => {
-									res.should.have.status(404);
+									res.should.have.status(200);
+									res.body.should.have.property('car');
 									done();
 								});
 							});

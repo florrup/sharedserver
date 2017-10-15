@@ -15,7 +15,17 @@ module.exports = function(sequelize, DataTypes) {
   var User = sequelize.define("user", {
     id: {
       type: Sequelize.STRING,
-      primaryKey: true
+      primaryKey: true,
+      unique: true
+    },
+    _ref: {
+      type: Sequelize.STRING
+    },
+    applicationowner: {
+      type: Sequelize.STRING
+    },
+    type: {
+      type: Sequelize.STRING
     },
     username: {
       type: Sequelize.STRING,
@@ -39,6 +49,8 @@ module.exports = function(sequelize, DataTypes) {
     birthdate: {
       type: Sequelize.STRING
     }
+  }, {
+    timestamps: false
   }, {
     classMethods: {
       associate: function(models) {

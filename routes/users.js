@@ -5,18 +5,15 @@ var express = require('express');
 var router = express.Router();
 
 const Sequelize = require('sequelize');
-//var User = require('../models/user.js');
-//var Car = require('../models/car.js');
 
 var models = require('../models/db'); // loads db.js
-var User = models.user;       // the model keyed by its name
+var User = models.user;
 var Car = models.car;
 
 var Verify = require('./verify');
 var api = require('./api');
 
-// CREATE TABLE users(id INT PRIMARY KEY, username VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
-
+// CREATE TABLE users(id INT PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
 /**
  * Test method to empty the users database and create a dummy user in order to make further tests
@@ -33,7 +30,11 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 
       var dummyUser = {
         id: 0,
+        _ref: 'aaa',
+        applicationowner: 'hi',
+        type: 'conductor',
         username: 'johnny',
+        password: 'aaa',
         name: 'John',
         surname: 'Hancock',
         country: 'Argentina',
@@ -63,6 +64,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 	User.findAll({
     attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
   }).then(users => {
+    /* istanbul ignore if  */
     if (!users) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
@@ -77,14 +79,17 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   User.create({
     id: request.body.id,
+    _ref: request.body._ref,
+    type: request.body.type,
     username: request.body.username,
     password: request.body.password,
-    name: request.body.name,
-    surname: request.body.surname,
+    name: request.body.firstName,
+    surname: request.body.lastName,
     country: request.body.country,
     email: request.body.email,
     birthdate: request.body.birthdate
   }).then(user => {
+    /* istanbul ignore if  */
     if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
@@ -121,6 +126,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
     });
     return response.status(200).json(responseJson);
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 
@@ -141,6 +147,7 @@ router.delete('/:userId', Verify.verifyToken, Verify.verifyManagerOrAppRole, fun
     }
     return response.status(204).json({});
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -160,6 +167,7 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
     }
     return response.status(200).json(user);
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -176,10 +184,13 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
   }).then(user => {
     if (user) {
       user.updateAttributes({
-        id: request.body.id,
+        _ref: request.body._ref,
+        applicationowner: request.body.applicationowner,
+        type: request.body.type,
         username: request.body.username,
-        name: request.body.name,
-        surname: request.body.surname,
+        password: request.body.password,
+        name: request.body.firstName,
+        surname: request.body.lastName,
         country: request.body.country,
         email: request.body.email,
         birthdate: request.body.birthdate
@@ -190,6 +201,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
       return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
     }
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -205,7 +217,7 @@ router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, func
     where: {
       owner: request.params.userId
     }
-  }).then(function(cars) {
+  }).then(cars => {
     console.log(cars);
     return response.status(200).json(cars); 
   }).catch(function (error) {
@@ -222,14 +234,26 @@ router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(
   Car.create({
     id: request.body.id,
     _ref: request.body._ref,
-    owner: request.params.userId, 
+    owner: request.params.userId, // request.params.owner,
     properties: request.body.properties
-  }).then(car => {
-    if (!car) {
+  }).then(newCar => {
+    if (!newCar) {
       return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones"});
     }
-    return response.status(201).json(car);
+    var jsonInResponse = {
+      metadata: {
+        "version": api.apiVersion
+      },
+      car: {
+        "id": newCar.id,
+        "_ref": newCar._ref,
+        "owner": newCar.owner,
+        "properties": newCar.properties
+      }
+    };
+    return response.status(201).json(jsonInResponse);
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -250,6 +274,7 @@ router.delete('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyManagerOr
     }
     return response.status(204).json({});
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -264,13 +289,25 @@ router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRol
       owner: request.params.userId,
       id: request.params.carId
     }
-  }).then(function(car) {
-    if (car) {
-      console.log(car + '\n\n');
-      return response.status(200).json(car); 
+  }).then(carFound => {
+    if (carFound) {
+      var jsonInResponse = {
+        metadata: {
+          "version": api.apiVersion
+        },
+        car: {
+          "id": carFound.id,
+          "_ref": carFound._ref,
+          "owner": carFound.owner,
+          "properties": carFound.properties
+        }
+      };
+      return response.status(200).json(jsonInResponse); 
+    } else {
+      return response.status(404).json({code: 0, message: "Auto inexistente"});
     }
-    return response.status(404).json({code: 0, message: "Auto inexistente"});
   }).catch(function (error) {
+    /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -279,11 +316,41 @@ router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRol
  *  Modifica los datos del auto.
  *
  */
- /*
 router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
-  
+  Car.find({
+    where: {
+      owner: request.params.userId,
+      id: request.params.carId
+    }
+  }).then(carFound => {
+    if (carFound) {
+      carFound.updateAttributes({
+        _ref: request.body._ref,
+        owner: request.body.owner,
+        properties: request.body.properties
+      }).then(updatedCar => {
+
+        var jsonInResponse = {
+          metadata: {
+            "version": api.apiVersion
+          },
+          car: {
+            "id": updatedCar.id,
+            "_ref": updatedCar._ref,
+            "owner": updatedCar.owner,
+            "properties": updatedCar.properties
+          }
+        };
+        return response.status(200).json(jsonInResponse);
+      });
+    } else {
+      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+    }
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
 });
-*/
+
 
 module.exports = router;
 

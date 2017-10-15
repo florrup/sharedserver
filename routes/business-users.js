@@ -5,19 +5,15 @@ var express = require('express');
 var router = express.Router();
 
 const Sequelize = require('sequelize');
-//var BusinessUser = require('../models/businessuser.js');
-var Server = require('../routes/servers.js');
+
 var api = require('./api.js');
 
 var models = require('../models/db'); // loads db.js
-var BusinessUser = models.businessuser;       // the model keyed by its name
-
-//const BusinessUser = require('../models/db').BusinessUser;
+var BusinessUser = models.businessuser; 
 
 var Verify = require('./verify');
 
 // CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40));
-
 
 /**
  * Test method to empty the business users database and create a dummy business user in order to make further tests
@@ -31,28 +27,27 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 	// It is only available in development environment
 	if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){
 		BusinessUser.sync({force: true}).then(() => {
-		  // Table created
-		  
-		  var dummyBusinessUser = {
+			// Table created
+
+			var dummyBusinessUser = {
 			id: 0,
 			username: 'johnny',
 			password: 'aaa',
 			name: 'John',
 			surname: 'Hancock',
 			roles: ['admin', 'manager', 'user']
-		  };
-		  BusinessUser.create(dummyBusinessUser)
-		  .then(() => {
-			return response.status(200).json(dummyBusinessUser);
-		  })
-		  .catch(error => {
-			  return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
-			// mhhh, wth!
-		  })
-		  
-		})
-	}
-	else {
+			};
+			BusinessUser.create(dummyBusinessUser)
+			.then(() => {
+				return response.status(200).json(dummyBusinessUser);
+			})
+			.catch(error => {
+				return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
+				// mhhh, wth!
+			});		  
+		});
+	} else {
+		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
 	}
 });
@@ -64,7 +59,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	BusinessUser.findAll({
 		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
-		}).then(businessusers => {
+	}).then(businessusers => {
 		/* istanbul ignore if  */
 	    if (!businessusers) {
 	      return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -79,19 +74,36 @@ router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, re
  */
 router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	BusinessUser.create({
-		id: request.body.id,
+		id: request.body.id, 
 		username: request.body.username,
 		password: request.body.password,
 		name: request.body.name,
 		surname: request.body.surname,
 		roles: request.body.roles
 	}).then(businessuser => {
-		/* istanbul ignore if  */
 		if (!businessuser) {
-		  return response.status(500).json({code: 0, message: "Unexpected error"});
+			/* istanbul ignore next  */
+			return response.status(500).json({code: 0, message: "Unexpected error"});
 		}
-		response.status(201).json(businessuser);
-	});
+		var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion
+			},
+			businessUser: {
+				id: businessuser.id,
+			    _ref: businessuser._ref,
+			    username: businessuser.username,
+			    password: businessuser.password,
+			    name: businessuser.name,
+			    surname: businessuser.surname,
+			    roles: businessuser.roles
+			}
+		};
+		return response.status(201).json(jsonInResponse);
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
 });
 
 /**
@@ -99,25 +111,19 @@ router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, r
  *
  */
 router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
-  BusinessUser.destroy({
-    where: {
-      id: request.params.businessuserId
-    }
-  }).then(affectedRows => {
-    if (affectedRows == 0) {
-      return response.status(500).json({code: 0, message: "Unexpected error: didn't find target user"});
-    }
-
-    BusinessUser.findAll({ // must return all businessusers
-		attributes: ['id', '_ref', 'username', 'password', 'name', 'surname', 'roles']
-    })
-    .then(businessusers => {
-      if (!businessusers) {
-        return response.status(500).json({code: 0, message: "Unexpected error"});
-      }
-      return response.status(204).json(businessusers);
-    });
-  });
+	BusinessUser.destroy({
+		where: {
+			id: request.params.businessuserId
+		}
+	}).then(affectedRows => {
+		if (affectedRows == 0) {
+			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+		}
+		return response.status(204).json({});
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+  	});
 });
 
 /**
@@ -125,72 +131,155 @@ router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, fu
  *
  */
 router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
-  BusinessUser.find({
-    where: {
-      id: request.params.businessuserId
-    }
-  }).then(businessuser => {
-    if (businessuser) {
-      businessuser.updateAttributes({
-        username: request.body.username,
-        name: request.body.name,
-        surname: request.body.surname,
-        country: request.body.country,
-        email: request.body.email,
-        birthdate: request.body.birthdate
-      }).then(updatedUser => {
-        return response.status(200).json(updatedUser);
-      });
-    } else {
-      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
-    }
-  }).catch(function (error) {
-    return response.status(500).json({code: 0, message: "Unexpected error"});
-  });
-});
-
-router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
-	var username = req.decoded.username;
 	BusinessUser.find({
 		where: {
-		username: username
+			id: request.params.businessuserId
 		}
 	}).then(businessuser => {
 		if (businessuser) {
-			return response.status(200).json({"metadata":{"version":api.apiVersion}, "businessUser":businessuser});
-		}
-		else{
+			businessuser.updateAttributes({
+				username: request.body.username,
+				password: request.body.password,
+			    name: request.body.name,
+			    surname: request.body.surname,
+			    roles: request.body.roles
+			}).then(updatedUser => {
+				var jsonInResponse = {
+					metadata: {
+						version: api.apiVersion
+					},
+					businessUser: {
+						id: updatedUser.id,
+					    _ref: updatedUser._ref,
+					    username: updatedUser.username,
+					    password: updatedUser.password,
+					    name: updatedUser.name,
+					    surname: updatedUser.surname,
+					    roles: updatedUser.roles
+					}
+				};
+				return response.status(200).json(jsonInResponse);
+			});
+		} else {
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
 });
 
-// TODO test this method
+/**
+ *  Devuelve toda la información del usuario de negocio.
+ *
+ */
+router.get('/:businessuserId', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
+	BusinessUser.find({
+		where: {
+			id: request.params.businessuserId
+		}
+	}).then(businessuser => {
+		if (!businessuser) {
+			return response.status(404).json({code: 0, message: "User inexistente"});
+		}
+		var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion
+			},
+			businessUser: {
+				id: businessuser.id,
+			    _ref: businessuser._ref,
+			    username: businessuser.username,
+			    password: businessuser.password,
+			    name: businessuser.name,
+			    surname: businessuser.surname,
+			    roles: businessuser.roles
+			}
+		};
+		return response.status(200).json(jsonInResponse);
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
+});
+
+/**
+ *  Obtiene información del usuario de negocio conectado.
+ *
+ */
+router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
+	var username = req.decoded.username; // or request?
+	BusinessUser.find({
+		where: {
+			username: username
+		}
+	}).then(businessuser => {
+		if (businessuser) {
+			var jsonInResponse = {
+				metadata: {
+					version: api.apiVersion
+				},
+				businessUser: {
+					id: businessuser.id,
+				    _ref: businessuser._ref,
+				    username: businessuser.username,
+				    password: businessuser.password,
+				    name: businessuser.name,
+				    surname: businessuser.surname,
+				    roles: businessuser.roles
+				}
+			};
+			return response.status(200).json(jsonInResponse);
+		} else {
+			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+		}
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
+});
+
+/**
+ *  Modificación de los datos del usuario de negocio conectado.
+ *
+ */
 router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
 	var username = req.decoded.username;
 	BusinessUser.find({
 		where: {
-		username: username
+			username: username
 		}
 	}).then(businessuser => {
 		if (businessuser) {
 			// we don't update roles here
 			businessuser.updateAttributes({
 				username: request.body.username,
+				password: request.body.password,
 				name: request.body.name,
-				surname: request.body.surname,
-				country: request.body.country,
-				email: request.body.email,
-				birthdate: request.body.birthdate
+				surname: request.body.surname
 			}).then(updatedUser => {
-				return response.status(200).json(updatedUser);
+				var jsonInResponse = {
+					metadata: {
+						version: api.apiVersion
+					},
+					businessUser: {
+						id: updatedUser.id,
+					    _ref: updatedUser._ref,
+					    username: updatedUser.username,
+					    password: updatedUser.password,
+					    name: updatedUser.name,
+					    surname: updatedUser.surname,
+					    roles: updatedUser.roles
+					}
+				};
+				return response.status(200).json(jsonInResponse);
 			  })
 			  .catch(error => {
+			  	/* istanbul ignore next  */
 				return response.status(500).json({code: 0, message: "Unexpected error while trying to update business user by itself (/me)."});
 				// mhhh, wth!
 			  })
-		}
-		else{
+		} else {
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
 	});

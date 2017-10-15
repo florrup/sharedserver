@@ -27,7 +27,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     username: {
       type: Sequelize.STRING,
-    unique: true
+      unique: true,
+      allowNull: false
     },
     password: {
       type: Sequelize.STRING

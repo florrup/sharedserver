@@ -72,8 +72,8 @@ describe('Users', function()  {
 					id: 0,
 					username: 'johnny',
 					password: 'aaaa',
-					name: 'John',
-					surname: 'Hancock',
+					firstName: 'John',
+					lastName: 'Hancock',
 					country: 'Argentina',
 					email: 'johnny123@gmail.com',
 					birthdate: '24/05/1992'
@@ -105,8 +105,8 @@ describe('Users', function()  {
 		id: 15,
 		username: 'testUsername',
 		password: 'fakepasswd',
-		name: 'testName',
-		surname: 'testSurname',
+		firstName: 'testName',
+		lastName: 'testSurname',
 		country: 'Argentina',
 		email: 'testEmail@gmail.com',
 		birthdate: '24/05/1992'
@@ -161,7 +161,6 @@ describe('Users', function()  {
 						chai.request(baseUrl)
 						.delete('/users/' + userToDelete.id)
 						.set(token_header_flag, token)
-						.send(userToDelete)
 						.end((err, res) => {
 							res.should.have.status(204);
 							done();
@@ -181,10 +180,13 @@ describe('Users', function()  {
 
 				var userToGet = {
 					id: 10,
+					_ref: 'aaa',
+					applicationowner: 'hi',
+					type: 'conductor',
 					username: 'testUsername10',
 					password: 'aaa',
-					name: 'testName10',
-					surname: 'testSurname10',
+					firstName: 'testName10',
+					lastName: 'testSurname10',
 					country: 'Argentina10',
 					email: 'testEmail10@gmail.com',
 					birthdate: '24/05/1992'
@@ -367,10 +369,13 @@ describe('Users', function()  {
 
 	var userToModify = {
 		id: 11,
+		_ref: 'aaa',
+		applicationowner: 'aaa',
+		type: 'conductor',
 		username: 'testUsername11',
 		password: 'aaa',
-		name: 'testName11',
-		surname: 'testSurname11',
+		firstName: 'testName11',
+		lastName: 'testSurname11',
 		country: 'Argentina11',
 		email: 'testEmail11@gmail.com',
 		birthdate: '24/05/1992'
@@ -378,7 +383,7 @@ describe('Users', function()  {
 
 	describe('/PUT user', function() {
 
-		it('it shouldnt PUT a user that doesnt exist', function(done) {
+		it('it shouldn\'t PUT a user that doesnt exist', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable().
@@ -411,9 +416,12 @@ describe('Users', function()  {
 
 				var userToModify = {
 					id: 11,
+					_ref: 'aaa',
+					applicationowner: 'aaa',
+					type: 'conductor',
 					username: 'testUsername11',
-					name: 'testName11',
-					surname: 'testSurname11',
+					firstName: 'testName11',
+					lastName: 'testSurname11',
 					country: 'Argentina11',
 					email: 'testEmail11@gmail.com',
 					birthdate: '24/05/1992'
@@ -433,9 +441,12 @@ describe('Users', function()  {
 					.end((err, res) => {
 						userToModify = {
 							id: 11,
+							_ref: 'aaa',
+							applicationowner: 'aaa',
+							type: 'conductor',
 							username: 'modifiedUsername',
-							name: 'testName11',
-							surname: 'testSurname11',
+							firstName: 'testName11',
+							lastName: 'testSurname11',
 							country: 'Argentina11',
 							email: 'testEmail11@gmail.com',
 							birthdate: '24/05/1992'
@@ -468,8 +479,8 @@ describe('Users', function()  {
 					id: 10,
 					username: 'testUsername10',
 					password: 'aaa',
-					name: 'testName10',
-					surname: 'testSurname10',
+					firstName: 'testName10',
+					lastName: 'testSurname10',
 					country: 'Argentina10',
 					email: 'testEmail10@gmail.com',
 					birthdate: '24/05/1992'
