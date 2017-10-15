@@ -170,7 +170,7 @@ describe('BusinessUsers', function()  {
 			roles: ['user']
 		};
 
-		it('it shouldn\'t PUT a business user that doesnt exist', function(done) {
+		it('it should PUT a business user that exists', function(done) {
 	  		this.timeout(15000);
 	  		businessUsersAPI.clearBusinessUsersTable()
 			.then( function(fulfilled){
@@ -213,6 +213,46 @@ describe('BusinessUsers', function()  {
 							});
 						});
 
+					});				
+				});
+			});
+	    });
+
+		it('it shouldn\'t PUT a business user that doesnt exist', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+					
+						businessuserToModify = {
+						    id: 3,
+						    _ref: 'a3',
+						    username: 'johnBlack',
+						    password: 'abc',
+						    name: 'Tom',
+						    surname: 'White',
+							roles: ['user']
+						};
+
+						chai.request(baseUrl)
+						.put('/business-users/' + businessuserToModify.id)
+						.set(token_header_flag, token)
+						.send(businessuserToModify)
+						.end((err, res) => {
+							res.should.have.status(404);
+							done();
+						});
 					});				
 				});
 			});

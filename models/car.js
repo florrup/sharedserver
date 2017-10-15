@@ -15,7 +15,8 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING,
     },
     owner: {
-      type: Sequelize.STRING // owner is the id of the owner of the car
+      type: Sequelize.STRING, // owner is the id of the owner of the car
+      allowNull: false
     },
     properties: {
       type: Sequelize.ARRAY(Sequelize.JSON)

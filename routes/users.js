@@ -226,8 +226,7 @@ router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(
     properties: request.body.properties
   }).then(car => {
     if (!car) {
-      console.log('Car couldn\'t be created\n\n');
-      return;
+      return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones"});
     }
     return response.status(201).json(car);
   }).catch(function (error) {
@@ -259,11 +258,22 @@ router.delete('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyManagerOr
  *  Devuelve toda la información del auto.
  *
  */
- /*
 router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
-  
+  Car.find({
+    where: {
+      owner: request.params.userId,
+      id: request.params.carId
+    }
+  }).then(function(car) {
+    if (car) {
+      console.log(car + '\n\n');
+      return response.status(200).json(car); 
+    }
+    return response.status(404).json({code: 0, message: "Auto inexistente"});
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
 });
-*/
 
 /**
  *  Modifica los datos del auto.

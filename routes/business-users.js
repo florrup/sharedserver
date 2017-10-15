@@ -163,6 +163,7 @@ router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
 	});
 });
 
+// TODO test this method
 router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
 	var username = req.decoded.username;
 	BusinessUser.find({

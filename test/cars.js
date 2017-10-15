@@ -198,5 +198,131 @@ describe('Cars', function()  {
 			});
 	    });
 
+	  	it('it should GET a specific car from specific user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+
+				var user = {
+					id: 10,
+					username: 'testUsername10',
+					password: 'aaa',
+					name: 'testName10',
+					surname: 'testSurname10',
+					country: 'Argentina10',
+					email: 'testEmail10@gmail.com',
+					birthdate: '24/05/1992'
+				};
+				
+				chai.request(baseUrl)
+				.get('/servers/initAndWriteDummyServer/')
+				.end((err,res) => {
+					
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.serverToken;
+
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+						res.body.should.have.property('username');
+
+						usersAPI.clearCarsTable()
+						.then( function(fulfilled){
+
+							var car = {
+							    "id": 25,
+							    "_ref": "hola",
+							    "owner": "Carlos", 
+							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}],
+							}
+
+							chai.request(baseUrl)
+							.post('/users/' + user.id + '/cars/')
+							.set(token_header_flag, token)
+							.send(car)
+							.end((err, res) => {
+								console.log(car);
+								res.should.have.status(201);
+								
+								chai.request(baseUrl)
+								.get('/users/' + user.id + '/cars/' + car.id)
+								.set(token_header_flag, token)
+								.end((err, res) => {
+									res.should.have.status(200);
+									res.body.owner.should.equal(user.id.toString());
+									done();
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
+
+	  	it('it shouldn\'t GET an missing car from specific user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+
+				var user = {
+					id: 10,
+					username: 'testUsername10',
+					password: 'aaa',
+					name: 'testName10',
+					surname: 'testSurname10',
+					country: 'Argentina10',
+					email: 'testEmail10@gmail.com',
+					birthdate: '24/05/1992'
+				};
+				
+				chai.request(baseUrl)
+				.get('/servers/initAndWriteDummyServer/')
+				.end((err,res) => {
+					
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.serverToken;
+
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+						res.body.should.have.property('username');
+
+						usersAPI.clearCarsTable()
+						.then( function(fulfilled){
+
+							var car = {
+							    "id": 25,
+							    "_ref": "hola",
+							    "owner": "Carlos", 
+							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}],
+							}
+
+							chai.request(baseUrl)
+							.post('/users/' + user.id + '/cars/')
+							.set(token_header_flag, token)
+							.send(car)
+							.end((err, res) => {
+								console.log(car);
+								res.should.have.status(201);
+								
+								chai.request(baseUrl)
+								.get('/users/' + user.id + '/cars/' + car.id + 1)
+								.set(token_header_flag, token)
+								.end((err, res) => {
+									res.should.have.status(404);
+									done();
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
 	});
 });
