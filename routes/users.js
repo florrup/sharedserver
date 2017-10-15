@@ -218,35 +218,42 @@ router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, func
  *
  */
 router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
-  // Verificar acá que cada json tenga name y value nada más, antes de meterlo a la base de datos
-
+  // TODO Verificar acá que cada json tenga name y value nada más, antes de meterlo a la base de datos
   Car.create({
     id: request.body.id,
     _ref: request.body._ref,
-    owner: request.body.owner, 
+    owner: request.params.userId, 
     properties: request.body.properties
   }).then(car => {
     if (!car) {
       console.log('Car couldn\'t be created\n\n');
       return;
     }
-    console.log('Car was created!!\n\n');
     return response.status(201).json(car);
   }).catch(function (error) {
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
 
-
 /**
  *  Da de baja un auto.
  *
  */
-/*
 router.delete('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyManagerOrAppRole, function(request, response) {
-  
+  Car.destroy({
+    where: {
+      id: request.params.carId,
+      owner: request.params.userId
+    }
+  }).then(affectedRows => {
+    if (affectedRows == 0) {
+      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+    }
+    return response.status(204).json({});
+  }).catch(function (error) {
+    return response.status(500).json({code: 0, message: "Unexpected error"});
+  });
 });
-*/
 
 /**
  *  Devuelve toda la información del auto.
@@ -291,3 +298,25 @@ function clearUsersTable(){
 };
 
 module.exports.clearUsersTable = clearUsersTable;
+
+/**
+ *  This method clears the application users database, leaving blank the servers table
+ */
+function clearCarsTable(){
+  return new Promise(
+    function (resolve, reject) {
+      Car.destroy({
+      where: {},
+      truncate: true
+      })
+      .then(affectedRows => {
+        if (affectedRows == 0) {
+          // database was already empty
+        }
+        resolve(true);
+      })
+      // .catch(reject(false));
+  })
+};
+
+module.exports.clearCarsTable = clearCarsTable;

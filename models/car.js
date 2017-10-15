@@ -25,10 +25,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        Car.belongsTo(models.User, {
-          foreignKey: 'userId',
-          onDelete: 'CASCADE',
-        });
+        Car.belongsTo(models.User);
       }
     }
   });
