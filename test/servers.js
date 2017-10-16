@@ -157,6 +157,43 @@ describe('Servers', function()  {
 				});
 			});
 	    });
+
+		it('it shouldn\'t POST a server with missing parameters', function(done) {
+			this.timeout(15000);
+
+	  		serversAPI.clearServersTable()
+			.then( function(fulfilled) {
+
+				chai.request(baseUrl)
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					var token = res.body.token.token;
+
+					var newServer = {
+						id: 10,
+						_ref: '',
+						createdBy: 10,
+						createdTime: 'abc10',
+						name: '',
+						lastConnection: 10,
+						username: 'myAppServer'
+					};
+
+					chai.request(baseUrl)
+					.post('/servers/')
+					.set(token_header_flag, token)
+					.send(newServer)
+					.end((err, res) => {
+						res.should.have.status(400);
+						res.body.should.have.property('code');
+						res.body.should.have.property('message');
+					  	done();
+					});
+				});
+			});
+	    });
 	});
 
 	describe('/DELETE server', function() {
@@ -371,6 +408,62 @@ describe('Servers', function()  {
 							res.body.should.have.property('code');
 							res.body.should.have.property('message');
 							done();
+						});
+					});
+				});
+			});
+	    });
+
+	  	it('it shouldn\'t PUT a server with missing parameters', function(done) {
+			this.timeout(15000);
+
+			var serverToPost = {
+				id: 12,
+				_ref: 'abc12',
+				createdBy: 12,
+				createdTime: 'testTime12',
+				name: 'Test12',
+				lastConnection: 12
+			};
+
+			serversAPI.clearServersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/')
+				.end((err,res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+						chai.request(baseUrl)
+						.post('/servers/')
+						.set(token_header_flag, token)
+						.send(serverToPost)
+						.end((err, res) => {
+
+							serverToPost = {
+								id: 12,
+								_ref: 'abc12',
+								createdBy: 12,
+								createdTime: '',
+								name: '',
+								lastConnection: 12
+							};
+
+							chai.request(baseUrl)
+							.put('/servers/' + serverToPost.id)
+							.set(token_header_flag, token)
+							.send(serverToPost)
+							.end((err, res) => {
+								res.should.have.status(400);
+								res.body.should.have.property('code');
+								res.body.should.have.property('message');
+								done();
+							});
 						});
 					});
 				});

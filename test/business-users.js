@@ -54,9 +54,64 @@ describe('BusinessUsers', function()  {
 						.set(token_header_flag, token)
 						.end((err, res) => {
 							res.should.have.status(200);
-							res.body.should.be.a('array');
-							res.body.length.should.be.eql(1);
+							res.body.should.have.property('metadata');
+							res.body.should.have.property('businessUser');
+							res.body.businessUser.length.should.be.eql(1);
+							res.body.businessUser.should.be.a('array');
+							res.body.businessUser[0].should.have.property('username');
+							res.body.businessUser[0].id.should.be.eql(1);
 							done();
+						});
+					});				
+				});
+			});
+	    });
+
+	  	it('it should GET two business users from database', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						var newBusinessUser = {
+						    _ref: 'a2',
+						    username: 'carlossanchez',
+						    password: 'carlos123',
+						    name: 'Carlos',
+						    surname: 'Sanchez',
+							roles: ['admin', 'user']
+						};
+
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(newBusinessUser)
+						.end((err, res) => {
+
+							chai.request(baseUrl)
+							.get('/business-users/')
+							.set(token_header_flag, token)
+							.end((err, res) => {
+								res.should.have.status(200);
+								res.body.should.have.property('metadata');
+								res.body.should.have.property('businessUser');
+								res.body.businessUser.length.should.be.eql(2);
+								res.body.businessUser.should.be.a('array');
+								res.body.businessUser[1].should.have.property('username'); // [0] is the Dummy BusinessUser
+								res.body.businessUser[1].id.should.be.eql(2);
+								done();
+							});
 						});
 					});				
 				});
@@ -72,7 +127,6 @@ describe('BusinessUsers', function()  {
 			.then( function(fulfilled){
 
 				var newBusinessUser = {
-				    id: 2,
 				    _ref: 'a2',
 				    username: 'carlossanchez',
 				    password: 'carlos123',
@@ -101,9 +155,9 @@ describe('BusinessUsers', function()  {
 							res.should.have.status(201);
 							res.body.should.have.property('metadata');
 							res.body.should.have.property('businessUser');
-						  done();
+							res.body.businessUser.id.should.be.eql(2);
+							done();
 						});
-
 					});				
 				});
 			});
@@ -116,7 +170,6 @@ describe('BusinessUsers', function()  {
 			.then( function(fulfilled){
 
 				var newBusinessUser = {
-				    id: 2,
 				    _ref: 'a2',
 				    username: 'johnny',
 				    password: 'carlos123',
@@ -145,7 +198,7 @@ describe('BusinessUsers', function()  {
 							res.should.have.status(500);
 							res.body.should.have.property('code');
 							res.body.should.have.property('message');
-						  done();
+							done();
 						});
 
 					});				
@@ -160,7 +213,6 @@ describe('BusinessUsers', function()  {
 			.then( function(fulfilled){
 
 				var newBusinessUser = {
-				    id: 2,
 				    _ref: 'a2',
 				    username: '',
 				    password: '',
@@ -189,7 +241,7 @@ describe('BusinessUsers', function()  {
 							res.should.have.status(400);
 							res.body.should.have.property('code');
 							res.body.should.have.property('message');
-						  done();
+							done();
 						});
 
 					});				
@@ -201,7 +253,6 @@ describe('BusinessUsers', function()  {
 	describe('/DELETE business user', function() {
 
 		var businessUserToDelete = {
-		    id: '3',
 		    _ref: 'a3',
 		    username: 'johnBlack',
 		    password: 'aaa',
@@ -209,6 +260,8 @@ describe('BusinessUsers', function()  {
 		    surname: 'Black',
 			roles: ['admin', 'user']
 		};
+
+		var businessUserToDeleteId = 2; // Id 1 is the Dummy
 
 	  	it('it should DELETE a business user', function(done) {
 	  		this.timeout(15000);
@@ -231,7 +284,7 @@ describe('BusinessUsers', function()  {
 						.send(businessUserToDelete)
 						.end((err, res) => {
 							chai.request(baseUrl)
-							.delete('/business-users/' + businessUserToDelete.id)
+							.delete('/business-users/' + businessUserToDeleteId)
 							.set(token_header_flag, token)
 							.end((err, res) => {
 								res.should.have.status(204);
@@ -258,7 +311,7 @@ describe('BusinessUsers', function()  {
 					.end((err, res) => {
 						var token = res.body.token.token;
 						chai.request(baseUrl)
-						.delete('/business-users/' + businessUserToDelete.id)
+						.delete('/business-users/' + businessUserToDeleteId)
 						.set(token_header_flag, token)
 						.end((err, res) => {
 							res.should.have.status(404);
@@ -273,7 +326,6 @@ describe('BusinessUsers', function()  {
 	describe('/PUT business user', function() {
 
 		var businessuserToModify = {
-		    id: 3,
 		    _ref: 'a3',
 		    username: 'johnBlack',
 		    password: 'abc',
@@ -281,6 +333,8 @@ describe('BusinessUsers', function()  {
 		    surname: 'Black',
 			roles: ['user']
 		};
+
+		var businessUserToModifyId = 2; // Id 1 is the Dummy
 
 		it('it should PUT a business user that exists', function(done) {
 	  		this.timeout(15000);
@@ -306,17 +360,16 @@ describe('BusinessUsers', function()  {
 						.end((err, res) => {
 
 							businessuserToModify = {
-							    id: 3,
 							    _ref: 'a3',
 							    username: 'johnBlack',
 							    password: 'abc',
-							    name: 'Tom',
-							    surname: 'White',
+							    name: 'Tom', // name changed
+							    surname: 'White', // surname changed
 								roles: ['user']
 							};
 
 							chai.request(baseUrl)
-							.put('/business-users/' + businessuserToModify.id)
+							.put('/business-users/' + businessUserToModifyId)
 							.set(token_header_flag, token)
 							.send(businessuserToModify)
 							.end((err, res) => {
@@ -333,7 +386,7 @@ describe('BusinessUsers', function()  {
 			});
 	    });
 
-		it('it shouldn\'t PUT a business user that doesnt exist', function(done) {
+		it('it shouldn\'t PUT a business user that doesn\'t exist', function(done) {
 	  		this.timeout(15000);
 	  		businessUsersAPI.clearBusinessUsersTable()
 			.then( function(fulfilled){
@@ -350,8 +403,8 @@ describe('BusinessUsers', function()  {
 						console.log('Is this body w token?: ', res.body);
 						var token = res.body.token.token;
 					
+						var businessUserToModifyId = 3;
 						businessuserToModify = {
-						    id: 3,
 						    _ref: 'a3',
 						    username: 'johnBlack',
 						    password: 'abc',
@@ -361,7 +414,7 @@ describe('BusinessUsers', function()  {
 						};
 
 						chai.request(baseUrl)
-						.put('/business-users/' + businessuserToModify.id)
+						.put('/business-users/' + businessUserToModifyId)
 						.set(token_header_flag, token)
 						.send(businessuserToModify)
 						.end((err, res) => {
@@ -372,12 +425,59 @@ describe('BusinessUsers', function()  {
 				});
 			});
 	    });
+
+		it('it shouldn\'t PUT a business user that has missing parameters', function(done) {
+	  		this.timeout(15000);
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(businessuserToModify)
+						.end((err, res) => {
+							var businessUserToModifyId = 3;
+							businessuserToModify = {
+							    _ref: 'a3',
+							    username: '',
+							    password: 'abc',
+							    name: 'Tom',
+							    surname: 'White',
+								roles: ['user']
+							};
+
+							chai.request(baseUrl)
+							.put('/business-users/' + businessUserToModifyId)
+							.set(token_header_flag, token)
+							.send(businessuserToModify)
+							.end((err, res) => {
+								res.should.have.status(400);
+								res.body.should.have.property('code');
+								res.body.should.have.property('message');
+								done();
+							});
+						});
+					});				
+				});
+			});
+	    });
 	});
 
 	describe('/GET a specific business user', function() {
 
 		var businessuserToGet = {
-		    id: 3,
 		    _ref: 'a3',
 		    username: 'johnBlack',
 		    password: 'abc',
@@ -385,6 +485,8 @@ describe('BusinessUsers', function()  {
 		    surname: 'Black',
 			roles: ['user']
 		};
+
+		var businessuserToGetId = 2; // Id 1 is the Dummy
 
 		it('it should GET a business user that exists', function(done) {
 	  		this.timeout(15000);
@@ -410,13 +512,14 @@ describe('BusinessUsers', function()  {
 						.end((err, res) => {
 
 							chai.request(baseUrl)
-							.get('/business-users/' + businessuserToGet.id)
+							.get('/business-users/' + businessuserToGetId)
 							.set(token_header_flag, token)
 							.end((err, res) => {
 								res.should.have.status(200);
 								res.body.should.have.property('metadata');
 								res.body.should.have.property('businessUser');
 								res.body.businessUser.name.should.equal(businessuserToGet.name);
+								res.body.businessUser.id.should.equal(businessuserToGetId);
 								done();
 							});
 						});
@@ -443,7 +546,7 @@ describe('BusinessUsers', function()  {
 						var token = res.body.token.token;
 
 						chai.request(baseUrl)
-						.get('/business-users/' + businessuserToGet.id)
+						.get('/business-users/' + businessuserToGetId)
 						.set(token_header_flag, token)
 						.end((err, res) => {
 							res.should.have.status(404);

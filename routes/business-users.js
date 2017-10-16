@@ -13,7 +13,7 @@ var BusinessUser = models.businessuser;
 
 var Verify = require('./verify');
 
-// CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), roles TEXT[]);
+// CREATE TABLE businessusers(id SERIAL PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), roles TEXT[]);
 
 /**
  * Test method to empty the business users database and create a dummy business user in order to make further tests
@@ -30,12 +30,11 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 			// Table created
 
 			var dummyBusinessUser = {
-			id: 0,
-			username: 'johnny',
-			password: 'aaa',
-			name: 'John',
-			surname: 'Hancock',
-			roles: ['admin', 'manager', 'user']
+				username: 'johnny',
+				password: 'aaa',
+				name: 'John',
+				surname: 'Hancock',
+				roles: ['admin', 'manager', 'user']
 			};
 			BusinessUser.create(dummyBusinessUser)
 			.then(() => {
@@ -64,13 +63,30 @@ router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, re
 	    if (!businessusers) {
 	      return response.status(500).json({code: 0, message: "Unexpected error"});
 	    }
-		return response.status(200).json(businessusers);
+
+		var userArray = [];
+		businessusers.forEach(function(item) {
+			var jsonUser = {
+				id: item.id,
+			    _ref: item._ref,
+			    username: item.username,
+			    password: item.password,
+			    name: item.name,
+			    surname: item.surname,
+			    roles: item.roles
+			}
+		    userArray.push(jsonUser);
+		});
+
+	    var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion // falta completar
+			},
+			businessUser: userArray
+		};
+		return response.status(200).json(jsonInResponse);
 	});
 });
-
-function isEmpty(value) {
-  return typeof value == 'string' && !value.trim() || typeof value == 'undefined' || value === null;
-}
 
 /**
  *  Da de alta un usuario de negocio.
@@ -78,13 +94,12 @@ function isEmpty(value) {
  */
 router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
 	// si hay algún parámetro faltante
-	if (isEmpty(request.body.username) || isEmpty(request.body.password) || isEmpty(request.body.name)
-		|| isEmpty(request.body.surname) || isEmpty(request.body.roles)) {
+	if (api.isEmpty(request.body.username) || api.isEmpty(request.body.password) || api.isEmpty(request.body.name)
+		|| api.isEmpty(request.body.surname) || api.isEmpty(request.body.roles)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
 
 	BusinessUser.create({
-		id: request.body.id, 
 		username: request.body.username,
 		password: request.body.password,
 		name: request.body.name,
@@ -141,6 +156,12 @@ router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, fu
  *
  */
 router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
+	// si hay algún parámetro faltante
+	if (api.isEmpty(request.body.username) || api.isEmpty(request.body.password) || api.isEmpty(request.body.name)
+		|| api.isEmpty(request.body.surname) || api.isEmpty(request.body.roles)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	}
+
 	BusinessUser.find({
 		where: {
 			id: request.params.businessuserId

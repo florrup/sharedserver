@@ -12,5 +12,10 @@ router.use('/token', require('./token'));
 var apiVersion = '1.0';
 exports.apiVersion = apiVersion;
 
+exports.isEmpty = function(value) {
+  return typeof value == 'string' && !value.trim() || typeof value == 'undefined' || value === null;
+}
+
+
 // always return router
 module.exports = router;

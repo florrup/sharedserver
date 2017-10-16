@@ -87,9 +87,17 @@ router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, res
 
 /**
  *  Da de alta un server.
+ *  Se ignorarán los campos de id, _ref y lastConnection.
  *
  */
 router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
+	// si hay algún parámetro faltante
+	if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
+		|| api.isEmpty(request.body.createdTime) || api.isEmpty(request.body.name)
+		|| api.isEmpty(request.body.lastConnection)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	}
+
 	Server.create({
 		id: request.body.id,
 		_ref: request.body._ref,
@@ -201,6 +209,13 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
  *
  */
 router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
+	// si hay algún parámetro faltante
+	if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
+		|| api.isEmpty(request.body.createdTime) || api.isEmpty(request.body.name)
+		|| api.isEmpty(request.body.lastConnection)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	}
+
 	Server.find({
 		where: {
 			id: request.params.serverId
@@ -213,9 +228,7 @@ router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(
 			    createdBy: request.body.createdBy,
 			    createdTime: request.body.createdTime,
 			    name: request.body.name,
-			    lastConnection: request.body.lastConnection,
-				username: request.body.username,
-				password: request.body.password
+			    lastConnection: request.body.lastConnection
 			}).then(updatedServer => {
 				var jsonInResponse = {
 					metadata: {
