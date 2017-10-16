@@ -13,7 +13,7 @@ var Car = models.car;
 var Verify = require('./verify');
 var api = require('./api');
 
-// CREATE TABLE users(id INT PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
+// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
 /**
  * Test method to empty the users database and create a dummy user in order to make further tests
@@ -29,7 +29,6 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 		  // Table created
 
       var dummyUser = {
-        id: 0,
         _ref: 'aaa',
         applicationowner: 'hi',
         type: 'conductor',
@@ -56,21 +55,58 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 	}
 });
 
+router.get('/dropUserTable', function(request, response) {
+  // Test code: dummy register and table initialization:
+  // force: true will drop the table if it already exists
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    User.sync({force: true}).then(() => {
+      return response.status(200).json({});
+    }).catch(function (error) {
+      /* istanbul ignore next  */
+      return response.status(500).json({code: 0, message: "Unexpected error"});
+    });
+  }
+});
+
 /**
  *  Devuelve toda la información acerca de todos los users indicados.
  *
  */ 
 router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	User.findAll({
-    attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
+    attributes: ['id', '_ref', 'applicationowner', 'type', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
   }, { include: [ Car ]
   }).then(users => {
     /* istanbul ignore if  */
     if (!users) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-    console.log(users.car + '\n\n\n');
-		return response.status(200).json(users);
+
+    var userArray = [];
+    users.forEach(function(item) {
+      var jsonUser = {
+        id: item.id,
+        _ref: item._ref,
+        applicationowner: item.applicationowner,
+        type: item.type,
+        username: item.username,
+        name: item.name,
+        surname: item.surname,
+        country: item.country,
+        email: item.email,
+        birthdate: item.birthdate
+      }
+        userArray.push(jsonUser);
+    });
+
+    var jsonInResponse = {
+      metadata: {
+        version: api.apiVersion // falta completar
+      },
+      users: userArray
+    };
+
+		return response.status(200).json(jsonInResponse);
 	})
 });
 
@@ -79,8 +115,14 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  *
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+  // si hay algún parámetro faltante
+  if (api.isEmpty(request.body._ref) || api.isEmpty(request.body.type) || api.isEmpty(request.body.username)
+    || api.isEmpty(request.body.password) || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
+    || api.isEmpty(request.body.country) || api.isEmpty(request.body.email) || api.isEmpty(request.body.birthdate)) {
+    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+  }
+
   User.create({
-    id: request.body.id, // TODO esto debería generarse automáticamente por la bd
     _ref: request.body._ref,
     type: request.body.type,
     username: request.body.username,
@@ -95,7 +137,25 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
     if (!user) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
-    return response.status(201).json(user);
+    var jsonInResponse = {
+      metadata: {
+        version: api.apiVersion 
+      },
+      user: {
+        id: user.id,
+        _ref: user._ref,
+        applicationowner: user.applicationowner,
+        type: user.type,
+        username: user.username,
+        password: user.password,
+        name: user.name,
+        surname: user.surname,
+        country: user.country,
+        email: user.email,
+        birthdate: user.birthdate
+      }
+    };
+    return response.status(201).json(jsonInResponse);
   });
 });
 
@@ -185,6 +245,12 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
  *
  */
 router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+  // si hay algún parámetro faltante
+  if (api.isEmpty(request.body._ref) || api.isEmpty(request.body.type) || api.isEmpty(request.body.username)
+    || api.isEmpty(request.body.password) || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
+    || api.isEmpty(request.body.country) || api.isEmpty(request.body.email) || api.isEmpty(request.body.birthdate)) {
+    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+  }
   User.find({
     where: {
       id: request.params.userId

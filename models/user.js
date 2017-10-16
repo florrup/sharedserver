@@ -14,9 +14,10 @@ var Sequelize = require("sequelize");
 module.exports = function(sequelize, DataTypes) {
   var User = sequelize.define("user", {
     id: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
       primaryKey: true,
-      unique: true
+      unique: true,
+      autoIncrement: true // from 1 onwards
     },
     _ref: {
       type: Sequelize.STRING
