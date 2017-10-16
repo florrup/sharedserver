@@ -30,29 +30,33 @@ describe('Cars', function()  {
 
 	var usersAPI = require('../routes/users');
 
+	var user = {
+		id: 10,
+		username: 'testUsername10',
+		password: 'aaa',
+		name: 'testName10',
+		surname: 'testSurname10',
+		country: 'Argentina10',
+		email: 'testEmail10@gmail.com',
+		birthdate: '24/05/1992'
+	};
+
+	var car = {
+	    "id": 25,
+	    "_ref": "hola",
+	    "owner": "Carlos", 
+	    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+	};
+
 	describe('/GET users car', function() {
 	  	it('it shouldn\'t GET cars from user without cars', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable()
 			.then( function(fulfilled){
-
-				var user = {
-					id: 10,
-					username: 'testUsername10',
-					password: 'aaa',
-					name: 'testName10',
-					surname: 'testSurname10',
-					country: 'Argentina10',
-					email: 'testEmail10@gmail.com',
-					birthdate: '24/05/1992'
-				};
-				
 				chai.request(baseUrl)
 				.get('/servers/initAndWriteDummyServer/')
 				.end((err,res) => {
-					
-					console.log('Is this body w token?: ', res.body);
 					var token = res.body.serverToken;
 
 					chai.request(baseUrl)
@@ -67,7 +71,6 @@ describe('Cars', function()  {
 							.get('/users/' + user.id + '/cars/')
 							.set(token_header_flag, token)
 							.end((err, res) => {
-								console.log('Test body is: ' + res.body);
 								res.should.have.status(200);
 								res.body.should.be.a('array');
 								done();
@@ -83,18 +86,6 @@ describe('Cars', function()  {
 			
 			usersAPI.clearUsersTable()
 			.then( function(fulfilled){
-
-				var user = {
-					id: 10,
-					username: 'testUsername10',
-					password: 'aaa',
-					name: 'testName10',
-					surname: 'testSurname10',
-					country: 'Argentina10',
-					email: 'testEmail10@gmail.com',
-					birthdate: '24/05/1992'
-				};
-				
 				chai.request(baseUrl)
 				.get('/servers/initAndWriteDummyServer/')
 				.end((err,res) => {
@@ -111,14 +102,6 @@ describe('Cars', function()  {
 
 						usersAPI.clearCarsTable()
 						.then( function(fulfilled){
-
-							var car = {
-							    "id": 25,
-							    "_ref": "hola",
-							    "owner": "Carlos", 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
-							}
-
 							chai.request(baseUrl)
 							.post('/users/' + user.id + '/cars/')
 							.set(token_header_flag, token)
@@ -136,6 +119,48 @@ describe('Cars', function()  {
 				});
 			});
 	    });
+/*
+	  	it('it should GET user information, including cars', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/servers/initAndWriteDummyServer/')
+				.end((err,res) => {
+					var token = res.body.serverToken;
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+
+						usersAPI.clearCarsTable()
+						.then( function(fulfilled){
+							chai.request(baseUrl)
+							.post('/users/' + user.id + '/cars/')
+							.set(token_header_flag, token)
+							.send(car)
+							.end((err, res) => {
+								console.log(car);
+								res.should.have.status(201);
+								chai.request(baseUrl)
+								.get('/users/' + user.id)
+								.set(token_header_flag, token)
+								.end((err, res) => {
+									
+									console.log(res.body.Car + '\n\n');
+									// TODO aca tienen que mostrarse los autos
+									res.should.have.status(200);
+									done();
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
+*/
 	});
 
 	describe('/DELETE users car', function() {

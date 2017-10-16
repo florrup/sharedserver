@@ -209,7 +209,7 @@ describe('Users', function()  {
 						.get('/servers/initAndWriteDummyServer')
 						.set(token_header_flag, businessToken)
 						.end((err,res) => {
-							res.should.have.status(200);
+
 							var serverToken = res.body.serverToken;
 
 							chai.request(baseUrl)

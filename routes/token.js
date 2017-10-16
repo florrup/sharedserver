@@ -39,11 +39,11 @@ router.post('/', function (request, response){
 				var appOk = businessUser.roles.indexOf(process.env.TAG_APP) !== -1;
 				var userOk = businessUser.roles.indexOf(process.env.TAG_USER) !== -1;
 				var payload = {
-					 username: businessUser.username,
-					 userOk: userOk,
-					 appOk: appOk, // normally it would be false to business users
-					 managerOk: managerOk,
-					 adminOk: adminOk
+					username: businessUser.username,
+					userOk: userOk,
+					appOk: appOk, // normally it would be false to business users
+					managerOk: managerOk,
+					adminOk: adminOk
 				};
 				var localToken = verify.getToken(payload);
 				response.writeHead(201, {"Content-Type": "application/json"});

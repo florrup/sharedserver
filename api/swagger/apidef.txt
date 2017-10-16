@@ -18,13 +18,13 @@ PUT /business-users/me			 user
 SERVERS
 
 
-POST /servers/ping				app
+POST /servers/ping				app			// status 400, Incumplimiento de precondiciones (parámetros faltantes)
 
-POST /servers					manager
+POST /servers					manager		// status 400, Incumplimiento de precondiciones (parámetros faltantes)
 
 PUT /servers/{serverId}			manager		// status 400, Incumplimiento de precondiciones (parámetros faltantes)
 
-POST /servers/{serverId}		manager
+POST /servers/{serverId}		manager		// status 400, Incumplimiento de precondiciones (parámetros faltantes)
 
 GET /servers					user 		
 
@@ -34,9 +34,11 @@ USERS
 
 GET /users								app user		
 
-POST /users								app 		
+POST /users								app				// id debería generarse pr la bd
+														// falta property fb con userId y authToken, property Images
 
-POST /users/validate					app 		
+
+POST /users/validate					app 			// falta property facebookAuthToken, images, balance	
 
 GET /users/{userId}						app user		
 

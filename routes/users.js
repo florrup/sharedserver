@@ -63,11 +63,13 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	User.findAll({
     attributes: ['id', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
+  }, { include: [ Car ]
   }).then(users => {
     /* istanbul ignore if  */
     if (!users) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     }
+    console.log(users.car + '\n\n\n');
 		return response.status(200).json(users);
 	})
 });
@@ -78,7 +80,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   User.create({
-    id: request.body.id,
+    id: request.body.id, // TODO esto debería generarse automáticamente por la bd
     _ref: request.body._ref,
     type: request.body.type,
     username: request.body.username,
@@ -107,24 +109,29 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
       username: request.body.username,
       password: request.body.password // TODO add facebookAuthToken
     }
-  }).then(user => {
-    if (!user) {
+  }).then(userFound => {
+    if (!userFound) {
       return response.status(400).json({code: 0, message: "Faltan parámetros o validación fallida"});
     }
-    var responseJson = JSON.stringify({
-      metadata: {version: api.apiVersion},
+
+    var jsonInResponse = {
+      metadata: {
+        version: api.apiVersion
+      },
       user: {
-        id: user.id,
-        _ref: user._ref,
-        username: user.username,
-        name: user.name,
-        surname: user.surname,
-        country: user.country,
-        email: user.email,
-        birthdate: user.birthdate
+        id: userFound.id,
+        _ref: userFound._ref,
+        applicationowner: userFound.applicationowner,
+        type: userFound.type,
+        username: userFound.username,
+        name: userFound.name,
+        surname: userFound.surname,
+        country: userFound.country,
+        email: userFound.email,
+        birthdate: userFound.birthdate
       }
-    });
-    return response.status(200).json(responseJson);
+    };
+    return response.status(200).json(jsonInResponse);
   }).catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -165,6 +172,7 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
     if (!user) {
       return response.status(404).json({code: 0, message: "User inexistente"});
     }
+
     return response.status(200).json(user);
   }).catch(function (error) {
     /* istanbul ignore next  */
@@ -242,13 +250,13 @@ router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(
     }
     var jsonInResponse = {
       metadata: {
-        "version": api.apiVersion
+        version: api.apiVersion
       },
       car: {
-        "id": newCar.id,
-        "_ref": newCar._ref,
-        "owner": newCar.owner,
-        "properties": newCar.properties
+        id: newCar.id,
+        _ref: newCar._ref,
+        owner: newCar.owner,
+        properties: newCar.properties
       }
     };
     return response.status(201).json(jsonInResponse);
@@ -293,13 +301,13 @@ router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRol
     if (carFound) {
       var jsonInResponse = {
         metadata: {
-          "version": api.apiVersion
+          version: api.apiVersion
         },
         car: {
-          "id": carFound.id,
-          "_ref": carFound._ref,
-          "owner": carFound.owner,
-          "properties": carFound.properties
+          id: carFound.id,
+          _ref: carFound._ref,
+          owner: carFound.owner,
+          properties: carFound.properties
         }
       };
       return response.status(200).json(jsonInResponse); 
@@ -332,13 +340,13 @@ router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, fun
 
         var jsonInResponse = {
           metadata: {
-            "version": api.apiVersion
+            version: api.apiVersion
           },
           car: {
-            "id": updatedCar.id,
-            "_ref": updatedCar._ref,
-            "owner": updatedCar.owner,
-            "properties": updatedCar.properties
+            id: updatedCar.id,
+            _ref: updatedCar._ref,
+            owner: updatedCar.owner,
+            properties: updatedCar.properties
           }
         };
         return response.status(200).json(jsonInResponse);

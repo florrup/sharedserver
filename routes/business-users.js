@@ -13,7 +13,7 @@ var BusinessUser = models.businessuser;
 
 var Verify = require('./verify');
 
-// CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40));
+// CREATE TABLE businessusers(id INT PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), roles TEXT[]);
 
 /**
  * Test method to empty the business users database and create a dummy business user in order to make further tests
@@ -68,11 +68,21 @@ router.get('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, re
 	});
 });
 
+function isEmpty(value) {
+  return typeof value == 'string' && !value.trim() || typeof value == 'undefined' || value === null;
+}
+
 /**
  *  Da de alta un usuario de negocio.
  *
  */
 router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, response) {
+	// si hay algún parámetro faltante
+	if (isEmpty(request.body.username) || isEmpty(request.body.password) || isEmpty(request.body.name)
+		|| isEmpty(request.body.surname) || isEmpty(request.body.roles)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	}
+
 	BusinessUser.create({
 		id: request.body.id, 
 		username: request.body.username,
@@ -208,6 +218,9 @@ router.get('/:businessuserId', Verify.verifyToken, Verify.verifyUserRole, functi
  *
  */
 router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
+	console.log(request.body + ' is the body \n');
+	console.log(request.decoded.username + '\n\n\n');
+
 	var username = req.decoded.username; // or request?
 	BusinessUser.find({
 		where: {
@@ -231,6 +244,7 @@ router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
 			};
 			return response.status(200).json(jsonInResponse);
 		} else {
+			console.log("LLEGA ACÁ \n\n\n");
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
 	}).catch(function (error) {

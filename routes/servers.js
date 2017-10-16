@@ -106,26 +106,28 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 		} else {
 			// Now we generate and return a new fresh token with full lifetime length from now
 			var payload = {
-				 username: request.decoded.username,
-				 userOk: request.decoded.userOk,
-				 appOk: request.decoded.appOk, // normally it would be false to business users
-				 managerOk: request.decoded.managerOk,
-				 adminOk: request.decoded.adminOk
+				username: request.decoded.username,
+				userOk: request.decoded.userOk,
+				appOk: request.decoded.appOk, // normally it would be false to business users
+				managerOk: request.decoded.managerOk,
+				adminOk: request.decoded.adminOk
 			};
 			var newToken = Verify.getToken(payload);
 			var jsonInResponse = {
 				metadata: {version: api.apiVersion},
-				server:{
-					id: server.id,
-					_ref: '',
-					createdBy: request.body.createdBy,
-					createdTime: (new Date).getTime(),
-					name: request.body.name,
-					lastConnection: 0
-				},
-				token: {
-					expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
-					token: newToken
+				server: {
+					server: {
+						id: server.id,
+						_ref: '',
+						createdBy: request.body.createdBy,
+						createdTime: (new Date).getTime(),
+						name: request.body.name,
+						lastConnection: 0
+					},
+					token: {
+						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
+						token: newToken
+					}
 				}
 			};
 			return response.status(201).json(jsonInResponse);
@@ -321,16 +323,26 @@ router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function
 		};
 		var newToken = Verify.getToken(payload);
 
-		var response = JSON.stringify({
+		var responseJson = {
 			metadata: {version: api.apiVersion},
 			server: {
-				CreateServerResponse : {
-					server: JSON.stringify(server),
+				server: {
+					server: {
+						id: server.id,
+					    _ref: server._ref,
+					    createdBy: server.createdBy,
+					    createdTime: 0,
+					    name: server.name,
+					    lastConnection: 0
+					}
+				},
+				token: {
+					expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
 					token: newToken
 				}
 			}
-		});
-		return response.status(200).json(response);
+		};
+		return response.status(200).json(responseJson);
 	});
 });
 

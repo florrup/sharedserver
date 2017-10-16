@@ -152,6 +152,50 @@ describe('BusinessUsers', function()  {
 				});
 			});
 	    });
+
+	  	it('it shouldn\'t POST a business user that has parameters missing', function(done) {
+			this.timeout(15000);
+
+	  		businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+
+				var newBusinessUser = {
+				    id: 2,
+				    _ref: 'a2',
+				    username: '',
+				    password: '',
+				    name: 'Carlos',
+				    surname: 'Sanchez',
+					roles: ['admin', 'user']
+				};
+
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.post('/business-users/')
+						.set(token_header_flag, token)
+						.send(newBusinessUser)
+						.end((err, res) => {
+							res.should.have.status(400);
+							res.body.should.have.property('code');
+							res.body.should.have.property('message');
+						  done();
+						});
+
+					});				
+				});
+			});
+	    });
 	});
 
 	describe('/DELETE business user', function() {
@@ -160,6 +204,7 @@ describe('BusinessUsers', function()  {
 		    id: '3',
 		    _ref: 'a3',
 		    username: 'johnBlack',
+		    password: 'aaa',
 		    name: 'John',
 		    surname: 'Black',
 			roles: ['admin', 'user']
@@ -455,4 +500,36 @@ describe('BusinessUsers', function()  {
 			});
 	    });
 	});
+/*
+	describe('/GET ME business user', function() {
+	  	it('it should GET ME business users from database', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.get('/business-users/me')
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							res.should.have.status(200);
+							done();
+						});
+					});				
+				});
+			});
+	    });
+	});
+*/
 });

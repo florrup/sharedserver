@@ -150,7 +150,8 @@ describe('Servers', function()  {
 						res.should.have.status(201);
 						res.body.should.have.property('metadata');
 						res.body.should.have.property('server');
-						res.body.should.have.property('token');
+						res.body.server.should.have.property('server');
+						res.body.server.should.have.property('token');
 					  done();
 					});
 				});
@@ -219,6 +220,53 @@ describe('Servers', function()  {
 					.end((err, res) => {
 						res.should.have.status(404);
 						done();
+					});
+				});
+			});
+	    });
+	});
+
+	describe('/POST specific server', function() {
+
+		var serverToPost = {
+			id: 11,
+			_ref: 'abc11',
+			createdBy: 11,
+			createdTime: 'testTime11',
+			name: 'Test11',
+			lastConnection: 11,
+			username: 'myAppServer'
+		};
+
+	  	it('it should POST a server', function(done) {
+	  		this.timeout(15000);
+	  		serversAPI.clearServersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					console.log('Is this body w token?: ', res.body);
+					var token = res.body.token.token;
+
+					chai.request(baseUrl)
+					.post('/servers/')
+					.set(token_header_flag, token)
+					.send(serverToPost)
+					.end((err, res) => {
+						chai.request(baseUrl)
+						.post('/servers/' + serverToPost.id)
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							res.should.have.status(200);
+							res.body.should.have.property('metadata');
+							res.body.should.have.property('server');
+							res.body.server.token.should.have.property('token');
+							res.body.server.token.should.not.equal(token);
+							done();
+						});
 					});
 				});
 			});
