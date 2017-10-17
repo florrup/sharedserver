@@ -13,8 +13,7 @@ var invalidatedTokens;
 **/
 exports.getToken = function (payload) {
 	if (typeof invalidatedTokens === "undefined") {
-		// If it has been not before, we initialize invalidTokens variable
-		invalidatedTokens = [];
+		invalidatedTokens = new Map();
 	}
 	
     return jwt.sign(payload, process.env.TOKEN_SECRET_KEY,{
@@ -22,26 +21,52 @@ exports.getToken = function (payload) {
     });
 };
 
-exports.invalidateToken = function(token){
-
+function isTokenInvalidated(token){
+	
 	if (typeof invalidatedTokens === "undefined") {
-		// If it has been not before, we initialize invalidTokens variable
-		invalidatedTokens = [];
+		invalidatedTokens = new Map();
 	}
-	// console.log('111111111 INVALID TOKENS: ' + JSON.stringify(invalidatedTokens) + '*****************');
 	
-	// every time we invalidate a new token we clean the list first
-	// Checking for expired tokens to remove (we start from the back of the list)
-	for(var i = invalidatedTokens.length -1; i >= 0 ; i--){
-		jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
+	try {
+		var decoded = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
+		var username = decoded.username;
+		console.log(JSON.stringify(invalidatedTokens));
+		
+		if (invalidatedTokens.has(username)){
+			var token_was_invalidated_before = false;
+			
+			invalidatedTokens.get(username).foreach( function(item, index, array){
+				if (item === token){
+					token_was_invalidated_before = true; // token is listed as invalid
+				}
+			});
+			return token_was_invalidated_before;
+		}
+		else {;return false;} // username has no invalidated tokens
+	} catch(err) {
+		return true; // token is not valid right away
+	}
+}
+
+exports.invalidateToken = function(token){
+	if (typeof invalidatedTokens === "undefined") {
+		invalidatedTokens = new Map();
+	}
+	jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
             if (err) {
-				invalidatedTokens.splice(i, 1);
+				// token is not valid right away
 			}
-		});
-	};
-	
-	invalidatedTokens.push(token);
-	//console.log('INVALID TOKENS: ' + JSON.stringify(invalidatedTokens) + '*****************');
+			else {
+				console.log('INVALIDATING TOKEN: ' + token);
+				// invalidatedTokens.set(decoded.username, token);
+				if (invalidatedTokens.has(decoded.username)){
+					invalidatedTokens.get(decoded.username).push(token);
+				}
+				else{
+					invalidatedTokens.set(decoded.username, new Array(token));
+				}
+			}
+	});
 }
 
 /**
@@ -53,38 +78,40 @@ exports.verifyToken = function (req, res, next) {
     var token = req.body.token || req.query.token || req.headers[process.env.TOKEN_HEADER_FLAG];
 
 	if (typeof invalidatedTokens === "undefined") {
-		// If it has been not before, we initialize invalidTokens variable
-		invalidatedTokens = [];
+		invalidatedTokens = new Map();
 	}
 	
-	if (typeof invalidatedTokens === "undefined") {
-		console.log('INVALIDATEDTOKENS ARRAY STIL INVALID !!!!!!!!!!1');
-	}
-	else {
-		console.log('INVALID TOKENS: ' + JSON.stringify(invalidatedTokens) + '*********************');
-	}
     // decode token
-    if (token && (invalidatedTokens.indexOf(token) === -1)) {
-        // verifies secret and checks exp
-        jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
-            if (err) {
-				console.log('TOKEN VERIFICATION ERROR: '+JSON.stringify(err));
-				var errorMessage = JSON.stringify(err);
-                var err = new Error('You are not authenticated! '+errorMessage);
-                err.status = 401;
-                return next(err);
-            } else {
-                // if everything is good, save to request for use in other routes
-				// this method assures that TOKEN exists and it's signature is from this server
-				// ... and stores the info from the token in the decoded variable 
-                req.decoded = decoded;
-                next();
-            }
-        });
+    if (token) {
+		
+		// Has the token been previously excluded?
+		if (isTokenInvalidated(token)){
+			var err = new Error('Token was invalidated or is not valid!');
+			err.status = 401; // in this cases 403 is also used, API specified 401
+			return next(err);
+		}
+		else {
+			// verifies secret and checks exp
+			jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
+				if (err) {
+					console.log('TOKEN VERIFICATION ERROR: '+JSON.stringify(err));
+					var errorMessage = JSON.stringify(err);
+					var err = new Error('You are not authenticated! '+errorMessage);
+					err.status = 401;
+					return next(err);
+				} else {
+					// if everything is good, save to request for use in other routes
+					// this method assures that TOKEN exists and it's signature is from this server
+					// ... and stores the info from the token in the decoded variable 
+					req.decoded = decoded;
+					next();
+				}
+			});
+		}
     } else {
         // if there is no token or the signature is not from this application or token has been adulterated
         // return an error
-        var err = new Error('No token provided or Token was invalidated!');
+        var err = new Error('No token provided!');
         err.status = 401; // in this cases 403 is also used, API specified 401
         return next(err);
     }
