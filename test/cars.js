@@ -55,32 +55,31 @@ describe('Cars', function()  {
 	describe('/GET users car', function() {
 	  	it('it shouldn\'t GET cars from user without cars', function(done) {
 			this.timeout(15000);
-			
-			usersAPI.clearUsersTable()
-			.then( function(fulfilled){
-				serversAPI.clearServersTable()
-				.then(function(fulfilled) {
-					chai.request(baseUrl)
-					.get('/servers/initAndWriteDummyServer/')
-					.end((err,res) => {
-						var token = res.body.serverToken;
 
+			chai.request(baseUrl)
+			.get('/servers/initAndWriteDummyServer/')
+			.end((err,res) => {
+				var token = res.body.serverToken;
+				chai.request(baseUrl)
+				.get('/users/dropUserTable')
+				.end((err, res) => {
+					chai.request(baseUrl)
+					.post('/users/')
+					.set(token_header_flag, token)
+					.send(user)
+					.end((err, res) => {
+						res.body.should.have.property('user');
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropCarTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){
-								chai.request(baseUrl)
-								.get('/users/' + userId + '/cars/')
-								.set(token_header_flag, token)
-								.end((err, res) => {
-									res.should.have.status(200);
-									res.body.should.be.a('array');
-									done();
-								});
+							chai.request(baseUrl)
+							.get('/users/' + userId + '/cars/')
+							.set(token_header_flag, token)
+							.end((err, res) => {
+								res.should.have.status(200);
+								res.body.should.be.have.property('metadata');
+								res.body.cars.length.should.be.eql(0);
+								done();
 							});
 						});
 					});
@@ -98,30 +97,32 @@ describe('Cars', function()  {
 					chai.request(baseUrl)
 					.get('/servers/initAndWriteDummyServer/')
 					.end((err,res) => {
-						
-						console.log('Is this body w token?: ', res.body);
 						var token = res.body.serverToken;
-
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
 
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){
 								chai.request(baseUrl)
-								.post('/users/' + user.id + '/cars/')
-								.set(token_header_flag, token)
-								.send(car)
+								.get('/users/dropCarTable/')
 								.end((err, res) => {
-									console.log(car);
-									res.should.have.status(201);
-									res.body.should.have.property('metadata');
-									res.body.should.have.property('car');
-									res.body.car.should.have.property('owner');
-									done();
+									chai.request(baseUrl)
+									.post('/users/' + userId + '/cars/')
+									.set(token_header_flag, token)
+									.send(car)
+									.end((err, res) => {
+										console.log(res.body);
+										res.should.have.status(201);
+										res.body.should.have.property('metadata');
+										res.body.should.have.property('car');
+										res.body.car.should.have.property('owner');
+										done();
+									});
 								});
 							});
 						});
@@ -207,29 +208,33 @@ describe('Cars', function()  {
 					.get('/servers/initAndWriteDummyServer/')
 					.end((err,res) => {
 						var token = res.body.serverToken;
-
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){
-
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
 								chai.request(baseUrl)
-								.post('/users/' + userId + '/cars/')
-								.set(token_header_flag, token)
-								.send(car)
+								.get('/users/dropCarTable/')
 								.end((err, res) => {
-									res.should.have.status(201);
-									
+
 									chai.request(baseUrl)
-									.delete('/users/' + userId + '/cars/' + car.id)
+									.post('/users/' + userId + '/cars/')
 									.set(token_header_flag, token)
+									.send(car)
 									.end((err, res) => {
-										res.should.have.status(204);
-										done();
+										res.should.have.status(201);
+										
+										chai.request(baseUrl)
+										.delete('/users/' + userId + '/cars/' + car.id)
+										.set(token_header_flag, token)
+										.end((err, res) => {
+											res.should.have.status(204);
+											done();
+										});
 									});
 								});
 							});
@@ -251,20 +256,25 @@ describe('Cars', function()  {
 					.end((err,res) => {
 						var token = res.body.serverToken;
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){							
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
 								chai.request(baseUrl)
-								.delete('/users/' + userId + '/cars/' + car.id)
-								.set(token_header_flag, token)
-								.end((err, res) => {
-									res.should.have.status(404);
-									done();
-								});	
+								.get('/users/dropCarTable/')
+								.end((err, res) => {						
+									chai.request(baseUrl)
+									.delete('/users/' + userId + '/cars/' + car.id)
+									.set(token_header_flag, token)
+									.end((err, res) => {
+										res.should.have.status(404);
+										done();
+									});	
+								});
 							});
 						});
 					});
@@ -308,27 +318,32 @@ describe('Cars', function()  {
 					.end((err,res) => {
 						var token = res.body.serverToken;
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
 								chai.request(baseUrl)
-								.post('/users/' + userId + '/cars/')
-								.set(token_header_flag, token)
-								.send(car)
+								.get('/users/dropCarTable/')
 								.end((err, res) => {
-									res.should.have.status(201);
 									chai.request(baseUrl)
-									.get('/users/' + userId + '/cars/' + car.id)
+									.post('/users/' + userId + '/cars/')
 									.set(token_header_flag, token)
+									.send(car)
 									.end((err, res) => {
-										res.should.have.status(200);
-										res.body.should.have.property('car');
-										res.body.car.owner.should.equal(userId.toString());
-										done();
+										res.should.have.status(201);
+										chai.request(baseUrl)
+										.get('/users/' + userId + '/cars/' + car.id)
+										.set(token_header_flag, token)
+										.end((err, res) => {
+											res.should.have.status(200);
+											res.body.should.have.property('car');
+											res.body.car.owner.should.equal(userId);
+											done();
+										});
 									});
 								});
 							});
@@ -350,26 +365,31 @@ describe('Cars', function()  {
 					.end((err,res) => {
 						var token = res.body.serverToken;
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){
-
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
 								chai.request(baseUrl)
-								.post('/users/' + userId + '/cars/')
-								.set(token_header_flag, token)
-								.send(car)
+								.get('/users/dropCarTable/')
 								.end((err, res) => {
-									res.should.have.status(201);
+
 									chai.request(baseUrl)
-									.get('/users/' + userId + '/cars/' + car.id + 1)
+									.post('/users/' + userId + '/cars/')
 									.set(token_header_flag, token)
+									.send(car)
 									.end((err, res) => {
-										res.should.have.status(404);
-										done();
+										res.should.have.status(201);
+										chai.request(baseUrl)
+										.get('/users/' + userId + '/cars/' + car.id + 1)
+										.set(token_header_flag, token)
+										.end((err, res) => {
+											res.should.have.status(404);
+											done();
+										});
 									});
 								});
 							});
@@ -408,28 +428,32 @@ describe('Cars', function()  {
 						
 						console.log('Is this body w token?: ', res.body);
 						var token = res.body.serverToken;
-
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							var car = {
-							    "id": 25,
-							    "_ref": "hola",
-							    "owner": 1, 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
-							}
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){							
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
+								var car = {
+								    "id": 25,
+								    "_ref": "hola",
+								    "owner": 1, 
+								    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+								}
 								chai.request(baseUrl)
-								.put('/users/' + userId + '/cars/' + car.id)
-								.send(car)
-								.set(token_header_flag, token)
-								.end((err, res) => {
-									res.should.have.status(404);
-									done();
+								.get('/users/dropCarTable/')
+								.end((err, res) => {						
+									chai.request(baseUrl)
+									.put('/users/' + userId + '/cars/' + car.id)
+									.send(car)
+									.set(token_header_flag, token)
+									.end((err, res) => {
+										res.should.have.status(404);
+										done();
+									});
 								});
 							});
 						});
@@ -465,34 +489,38 @@ describe('Cars', function()  {
 						
 						console.log('Is this body w token?: ', res.body);
 						var token = res.body.serverToken;
-
 						chai.request(baseUrl)
-						.post('/users/')
-						.set(token_header_flag, token)
-						.send(user)
+						.get('/users/dropUserTable')
 						.end((err, res) => {
-							res.body.should.have.property('user');
-							var car = {
-							    "id": 25,
-							    "_ref": "hola",
-							    "owner": userId, 
-							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
-							}
-							usersAPI.clearCarsTable()
-							.then( function(fulfilled){		
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
+								var car = {
+								    "id": 25,
+								    "_ref": "hola",
+								    "owner": userId, 
+								    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+								}
 								chai.request(baseUrl)
-								.post('/users/' + userId + '/cars/')
-								.set(token_header_flag, token)
-								.send(car)		
-								.end((err, res) => {			
+								.get('/users/dropCarTable/')
+								.end((err, res) => {	
 									chai.request(baseUrl)
-									.put('/users/' + userId + '/cars/' + car.id)
-									.send(car)
+									.post('/users/' + userId + '/cars/')
 									.set(token_header_flag, token)
-									.end((err, res) => {
-										res.should.have.status(200);
-										res.body.should.have.property('car');
-										done();
+									.send(car)		
+									.end((err, res) => {			
+										chai.request(baseUrl)
+										.put('/users/' + userId + '/cars/' + car.id)
+										.send(car)
+										.set(token_header_flag, token)
+										.end((err, res) => {
+											res.should.have.status(200);
+											res.body.should.have.property('car');
+											done();
+										});
 									});
 								});
 							});

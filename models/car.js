@@ -8,14 +8,16 @@ var Sequelize = require("sequelize");
 module.exports = function(sequelize, DataTypes) {
   var Car = sequelize.define("car", {
     id: {
-      type: Sequelize.STRING,
-      primaryKey: true
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      unique: true,
+      autoIncrement: true // from 1 onwards
     },
     _ref: {
       type: Sequelize.STRING,
     },
     owner: {
-      type: Sequelize.STRING, // owner is the id of the owner of the car
+      type: Sequelize.INTEGER, // the id of the owner of the car
       allowNull: false
     },
     properties: {

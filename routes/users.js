@@ -68,6 +68,19 @@ router.get('/dropUserTable', function(request, response) {
   }
 });
 
+router.get('/dropCarTable', function(request, response) {
+  // Test code: dummy register and table initialization:
+  // force: true will drop the table if it already exists
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    Car.sync({force: true}).then(() => {
+      return response.status(200).json({});
+    }).catch(function (error) {
+      /* istanbul ignore next  */
+      return response.status(500).json({code: 0, message: "Unexpected error"});
+    });
+  }
+});
+
 /**
  *  Devuelve toda la información acerca de todos los users indicados.
  *
@@ -280,7 +293,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
   });
 });
 
-//CREATE TABLE cars(id INT PRIMARY KEY, _ref VARCHAR(20), owner VARCHAR(40), properties jsonb[]);
+//CREATE TABLE cars(id SERIAL PRIMARY KEY, _ref VARCHAR(20), owner INT, properties jsonb[]);
 
 /**
  *  Devuelve toda la información acerca de todos los autos del usuario.
@@ -291,9 +304,25 @@ router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, func
     where: {
       owner: request.params.userId
     }
-  }).then(cars => {
-    console.log(cars);
-    return response.status(200).json(cars); 
+  }).then(carsFound => {
+    var carArray = [];
+    carsFound.forEach(function(item) {
+      var jsonCar = {
+        id: item.id,
+        _ref: item._ref,
+        owner: item.owner,
+        properties: item.properties
+      }
+      carArray.push(jsonCar);
+    });
+
+    var jsonInResponse = {
+      metadata: {
+        version: api.apiVersion // falta completar
+      },
+      cars: carArray
+    };
+    return response.status(200).json(jsonInResponse); 
   }).catch(function (error) {
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -305,15 +334,18 @@ router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, func
  */
 router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // TODO Verificar acá que cada json tenga name y value nada más, antes de meterlo a la base de datos
+  // si hay algún parámetro faltante
+  if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.owner)
+    || api.isEmpty(request.body.properties)) {
+    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+  }
+
   Car.create({
     id: request.body.id,
     _ref: request.body._ref,
-    owner: request.params.userId, // request.params.owner,
+    owner: request.params.userId,
     properties: request.body.properties
   }).then(newCar => {
-    if (!newCar) {
-      return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones"});
-    }
     var jsonInResponse = {
       metadata: {
         version: api.apiVersion
