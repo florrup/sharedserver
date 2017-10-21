@@ -423,6 +423,12 @@ router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRol
  *
  */
 router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+  // si hay algún parámetro faltante
+  if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.owner)
+    || api.isEmpty(request.body.properties)) {
+    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+  }
+
   Car.find({
     where: {
       owner: request.params.userId,
@@ -457,11 +463,10 @@ router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, fun
   });
 });
 
-
 module.exports = router;
 
 /**
- *  This method clears the application users database, leaving blank the servers table
+ *  This method clears the application users database, leaving blank the users table
  */
 function clearUsersTable(){
 	return new Promise(
@@ -483,7 +488,7 @@ function clearUsersTable(){
 module.exports.clearUsersTable = clearUsersTable;
 
 /**
- *  This method clears the application users database, leaving blank the servers table
+ *  This method clears the application cars database, leaving blank the cars table
  */
 function clearCarsTable(){
   return new Promise(

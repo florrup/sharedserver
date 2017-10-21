@@ -242,7 +242,7 @@ router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
 	console.log(request.body + ' is the body \n');
 	console.log(request.decoded.username + '\n\n\n');
 
-	var username = req.decoded.username; // or request?
+	var username = request.decoded.username; // or request?
 	BusinessUser.find({
 		where: {
 			username: username
@@ -279,7 +279,7 @@ router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
  *
  */
 router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
-	var username = req.decoded.username;
+	var username = request.decoded.username;
 	BusinessUser.find({
 		where: {
 			username: username
@@ -323,7 +323,8 @@ router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
 module.exports = router;
 
 /**
- * Method to clean the business users table
+ * This method clears the businessusers database, leaving blank the businessusers table
+ *
 **/
 function clearBusinessUsersTable() {
 	return new Promise(

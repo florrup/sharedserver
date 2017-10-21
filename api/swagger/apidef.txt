@@ -41,11 +41,9 @@ GET /users/{userId}						app user
 PUT /users/{userId}						app 			// status 400 Incumplimiento de precondiciones (parámetros faltantes)
 														// status 409 Conflicto en el update (esta mal el valor de _ref)
 
-GET /users/{userId}/cars				app user		
+GET /users/{userId}/cars				app user		// completar metadata	
 
-POST /users/{userId}/cars				app 			// status 400 Incumplimiento de precondiciones (parámetros faltantes)
-
-PUT /users/{userId}/cars/{carId}		app 			// status 400 Incumplimiento de precondiciones (parámetros faltantes)	
+PUT /users/{userId}/cars/{carId}		app 			// status 409 Conflicto en el update (esta mal el valor de _ref)
 
 GET /users/{userId}/transactions		app user		
 

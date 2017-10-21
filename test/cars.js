@@ -77,7 +77,7 @@ describe('Cars', function()  {
 							.set(token_header_flag, token)
 							.end((err, res) => {
 								res.should.have.status(200);
-								res.body.should.be.have.property('metadata');
+								res.body.should.have.property('metadata');
 								res.body.cars.length.should.be.eql(0);
 								done();
 							});
@@ -87,7 +87,7 @@ describe('Cars', function()  {
 			});
 	    });
 
-	  	it('it should GET cars from existing user', function(done) {
+	  	it('it should POST cars from existing user', function(done) {
 			this.timeout(15000);
 			
 			usersAPI.clearUsersTable()
@@ -122,6 +122,68 @@ describe('Cars', function()  {
 										res.body.should.have.property('car');
 										res.body.car.should.have.property('owner');
 										done();
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
+
+		var secondCar = {
+		    "id": 15,
+		    "_ref": "ccc",
+		    "owner": 1, // id del user 
+		    "properties": [{"name": "Logan", "value": "autito"}]
+		};
+
+	  	it('it should GET multiple cars from existing user', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+				serversAPI.clearServersTable()
+				.then(function(fulfilled) {
+					chai.request(baseUrl)
+					.get('/servers/initAndWriteDummyServer/')
+					.end((err,res) => {
+						var token = res.body.serverToken;
+						chai.request(baseUrl)
+						.get('/users/dropUserTable')
+						.end((err, res) => {
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
+
+								chai.request(baseUrl)
+								.get('/users/dropCarTable/')
+								.end((err, res) => {
+									chai.request(baseUrl)
+									.post('/users/' + userId + '/cars/')
+									.set(token_header_flag, token)
+									.send(car)
+									.end((err, res) => {
+										res.should.have.status(201);
+										chai.request(baseUrl)
+										.post('/users/' + userId + '/cars/')
+										.set(token_header_flag, token)
+										.send(secondCar)
+										.end((err, res) => {
+											chai.request(baseUrl)
+											.get('/users/' + userId + '/cars/')
+											.set(token_header_flag, token)
+											.end((err, res) => {
+												res.should.have.status(200);
+												res.body.should.have.property('metadata');
+												res.body.should.have.property('cars');
+												res.body.cars.length.should.be.eql(2);
+												done();
+											});
+										});
 									});
 								});
 							});
@@ -519,6 +581,73 @@ describe('Cars', function()  {
 										.end((err, res) => {
 											res.should.have.status(200);
 											res.body.should.have.property('car');
+											done();
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+	    });
+
+	  	it('it shouldn\'t PUT a car with missing parameters', function(done) {
+			this.timeout(15000);
+			
+			usersAPI.clearUsersTable()
+			.then( function(fulfilled){
+				serversAPI.clearServersTable()
+				.then(function(fulfilled) {
+					var user = {
+						_ref: 'aaa',
+						type: 'conductor',
+						username: 'johnny',
+						password: 'aaaa',
+						firstName: 'John',
+						lastName: 'Hancock',
+						country: 'Argentina',
+						email: 'johnny123@gmail.com',
+						birthdate: '24/05/1992'
+					};
+
+					var userId = 1;
+					
+					chai.request(baseUrl)
+					.get('/servers/initAndWriteDummyServer/')
+					.end((err,res) => {
+						
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.serverToken;
+						chai.request(baseUrl)
+						.get('/users/dropUserTable')
+						.end((err, res) => {
+							chai.request(baseUrl)
+							.post('/users/')
+							.set(token_header_flag, token)
+							.send(user)
+							.end((err, res) => {
+								res.body.should.have.property('user');
+								var car = {
+								    "id": 25,
+								    "_ref": "hola",
+								    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
+								}
+								chai.request(baseUrl)
+								.get('/users/dropCarTable/')
+								.end((err, res) => {	
+									chai.request(baseUrl)
+									.post('/users/' + userId + '/cars/')
+									.set(token_header_flag, token)
+									.send(car)		
+									.end((err, res) => {			
+										chai.request(baseUrl)
+										.put('/users/' + userId + '/cars/' + car.id)
+										.send(car)
+										.set(token_header_flag, token)
+										.end((err, res) => {
+											res.should.have.status(400);
+											res.body.should.have.property('code');
 											done();
 										});
 									});
