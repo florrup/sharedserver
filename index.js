@@ -1,3 +1,5 @@
+/*istanbul ignore next*/
+
 //! @file index.js
 //! Starts the app
 
@@ -13,6 +15,15 @@ var logger = require('./utils/logger');
 // views is directory for all template files
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
+
+// Load any undefined ENV variables form a specified file. 
+var env = require('node-env-file');
+  env(__dirname + '/.env');
+
+// Get environment variables from config file is as follows...
+var path = require("path");
+var environment = process.env.NODE_ENV || "development"; // default is development
+var config = require(path.join(__dirname, 'config', 'config.json'))[environment];
 
 app.get('/', function(request, response) {
   response.render('pages/index');
@@ -32,40 +43,18 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
-// connects to the database
+// --------------------------------------------------------------------------
+// Sequelize Module: Instantiation and connection to Database 
 var pg = require('pg');
-pg.defaults.ssl = true;
-
-app.get('/db', function (request, response) {
-
-  console.log('Get /db');
-  console.log(process.env.DATABASE_URL);
-
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-    console.log('Connecting to db...');
-    client.query('SELECT * FROM users', function(err, result) {
-
-      console.log('Getting data from users');
-      logger.info('Getting data from users');
-
-      done();
-      if (err)
-       { console.error(err); response.send("Error " + err); }
-      else
-       { response.render('pages/db', {results: result.rows} ); }
-    });
-
-  });	
-
-});
-
+const sequelize = require('./models/db');
+// --------------------------------------------------------------------------
 
 /**
  * Returns "Hello World!" in order to test Coveralls
  *
  * @return {string}
  */
- function getStringToPrint() {
+function getStringToPrint() {
   return "Hello World!";
 }
  

@@ -1,3 +1,7 @@
 node_modules
 docs/html/*
 *.log
+npm-debug.log
+exceptions.log
+testrun
+Doxyfile.bak

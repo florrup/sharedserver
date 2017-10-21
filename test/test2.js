@@ -4,6 +4,11 @@
 
 const assert = require('assert');
 
+
+/**
+ *  Simple test to check testing suite configuration
+ *
+ */
 describe('Array', function() {
   describe('#indexOf()', function() {
     it('should return -1 when the value is not present', function() {
@@ -13,7 +18,6 @@ describe('Array', function() {
 });
 
 var index = require('../index.js');
-
 
 /**
  * Compares getStringToPrint result with a String
