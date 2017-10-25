@@ -36,6 +36,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
         type: 'conductor',
         username: 'johnny',
         password: 'aaa',
+		facebookUserId: '',
         name: 'John',
         surname: 'Hancock',
         country: 'Argentina',
@@ -92,6 +93,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         applicationowner: item.applicationowner,
         type: item.type,
         username: item.username,
+		facebookUserId: item.facebookUserId,
         name: item.name,
         surname: item.surname,
         country: item.country,
@@ -118,47 +120,97 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // si hay algún parámetro faltante
+  /*
   if (api.isEmpty(request.body._ref) || api.isEmpty(request.body.type) || api.isEmpty(request.body.username)
     || api.isEmpty(request.body.password) || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
     || api.isEmpty(request.body.country) || api.isEmpty(request.body.email) || api.isEmpty(request.body.birthdate)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
-
-  User.create({
-    _ref: request.body._ref,
-    type: request.body.type,
-    username: request.body.username,
-    password: request.body.password,
-    name: request.body.firstName,
-    surname: request.body.lastName,
-    country: request.body.country,
-    email: request.body.email,
-    birthdate: request.body.birthdate
-  }).then(user => {
-    /* istanbul ignore if  */
-    if (!user) {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
-    }
-    var jsonInResponse = {
-      metadata: {
-        version: api.apiVersion 
-      },
-      user: {
-        id: user.id,
-        _ref: user._ref,
-        applicationowner: user.applicationowner,
-        type: user.type,
-        username: user.username,
-        password: user.password,
-        name: user.name,
-        surname: user.surname,
-        country: user.country,
-        email: user.email,
-        birthdate: user.birthdate
-      }
-    };
-    return response.status(201).json(jsonInResponse);
-  });
+  */
+  
+  // request has USERNAME && PASSWORD (local user)
+  if (!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) && !api.isEmpty(request.body.username) && !api.isEmpty(request.body.password)){
+	  User.create({
+		_ref: request.body._ref,
+		type: request.body.type,
+		username: request.body.username,
+		password: request.body.password,
+		facebookUserId: '',
+		name: '', // request.body.firstName,
+		surname: '', // request.body.lastName,
+		country: '', // request.body.country,
+		email: '', // request.body.email,
+		birthdate: '', // request.body.birthdate
+	  }).then(user => {
+		/* istanbul ignore if  */
+		if (!user) {
+		  return response.status(500).json({code: 0, message: "Unexpected error"});
+		}
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  user: {
+			id: user.id,
+			_ref: user._ref,
+			applicationowner: user.applicationowner,
+			type: user.type,
+			username: user.username,
+			password: user.password,
+			facebookUserId: '',
+			name: '', // user.name,
+			surname: '', // user.surname,
+			country: '', // user.country,
+			email: '', // user.email,
+			birthdate: '', // user.birthdate
+		  }
+		};
+		return response.status(201).json(jsonInResponse);
+	  });
+  }
+  // request has FACEBOOK USER ID && FACEBOOK TOKEN (facebook user)
+  else if (!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) && !api.isEmpty(request.body.fb.userId) && !api.isEmpty(request.body.fb.authToken)) {
+	  User.create({
+		_ref: request.body._ref,
+		type: request.body.type,
+		username: '',
+		password: '',
+		facebookUserId: request.body.fb.userId,
+		name: request.body.firstName,
+		surname: request.body.lastName,
+		country: request.body.country,
+		email: request.body.email,
+		birthdate: request.body.birthdate
+	  }).then(user => {
+		/* istanbul ignore if  */
+		if (!user) {
+		  return response.status(500).json({code: 0, message: "Unexpected error"});
+		}
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  user: {
+			id: user.id,
+			_ref: user._ref,
+			applicationowner: user.applicationowner,
+			type: user.type,
+			username: '',
+			password: '',
+			facebookUserId: request.body.fb.userId,
+			name: user.name,
+			surname: user.surname,
+			country: user.country,
+			email: user.email,
+			birthdate: user.birthdate
+		  }
+		};
+		return response.status(201).json(jsonInResponse);
+	  });
+  }
+  else {
+	  return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes username/password ó fbUserId/fbToken)"});
+  }
 });
 
 /**
@@ -175,7 +227,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 			}
 		}).then(userFound => {
 			if (!userFound) {
-				return response.status(400).json({code: 0, message: "Faltan parámetros o validación fallida"});
+				return response.status(400).json({code: 0, message: "Faltan parámetros o validación fallida de username/password"});
 			}
 
 			var jsonInResponse = {
@@ -188,6 +240,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				applicationowner: userFound.applicationowner,
 				type: userFound.type,
 				username: userFound.username,
+				facebookUserId: userFound.facebookUserId,
 				name: userFound.name,
 				surname: userFound.surname,
 				country: userFound.country,
@@ -208,7 +261,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 			method: 'GET',
 			uri: `https://graph.facebook.com/v2.10/debug_token?input_token==request.body.facebookAuthToken`,
 			qs: {
-			  access_token: user_access_token
+			  access_token: request.body.facebookAuthToken // user_access_token
 			}
 		};
 		request(options)
@@ -224,7 +277,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 					method: 'GET',
 					uri: `https://graph.facebook.com/v2.10/facebookUserId`,
 					qs: {
-						access_token: user_access_token,
+						access_token: request.body.facebookAuthToken, // user_access_token,
 						fields: userFieldSet
 					}
 				};
@@ -232,12 +285,14 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				.then(fbRes => {
 					res.json(fbRes);
 				  
-					var facebookName = res.name;
-					var facebookEmail = res.email;
+					var responseFacebookUserId = res.id;
+					var responsefacebookName = res.name;
+					var responsefacebookEmail = res.email;
 				  
 					User.find({
 						where: {
-							username: facebookEmail
+							// username: facebookEmail
+							facebookUserId: responseFacebookUserId
 						}
 					}).then(userFound => {
 							if (!userFound) {
@@ -254,6 +309,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 										applicationowner: userFound.applicationowner,
 										type: userFound.type,
 										username: userFound.username,
+										facebookUserId: userFound.facebookUserId,
 										name: userFound.name,
 										surname: userFound.surname,
 										country: userFound.country,
@@ -344,6 +400,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
         type: request.body.type,
         username: request.body.username,
         password: request.body.password,
+		facebookUserId: request.body.facebookUserId,
         name: request.body.firstName,
         surname: request.body.lastName,
         country: request.body.country,

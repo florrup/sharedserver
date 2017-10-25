@@ -36,6 +36,10 @@ describe('Cars', function()  {
 		type: 'conductor',
 		username: 'johnny',
 		password: 'aaaa',
+		fb: {
+			userId: '',
+			authToken: ''
+		},
 		firstName: 'John',
 		lastName: 'Hancock',
 		country: 'Argentina',
@@ -180,6 +184,10 @@ describe('Cars', function()  {
 			type: 'conductor',
 			username: 'johnny',
 			password: 'aaaa',
+			fb: {
+				userId: '',
+				authToken: ''
+			},
 			firstName: 'John',
 			lastName: 'Hancock',
 			country: 'Argentina',
@@ -280,6 +288,10 @@ describe('Cars', function()  {
 			type: 'conductor',
 			username: 'johnny',
 			password: 'aaaa',
+			fb: {
+				userId: '',
+				authToken: ''
+			},
 			firstName: 'John',
 			lastName: 'Hancock',
 			country: 'Argentina',
@@ -393,6 +405,10 @@ describe('Cars', function()  {
 						type: 'conductor',
 						username: 'johnny',
 						password: 'aaaa',
+						fb: {
+							userId: '',
+							authToken: ''
+						},
 						firstName: 'John',
 						lastName: 'Hancock',
 						country: 'Argentina',
@@ -450,6 +466,10 @@ describe('Cars', function()  {
 						type: 'conductor',
 						username: 'johnny',
 						password: 'aaaa',
+						fb: {
+							userId: '',
+							authToken: ''
+						},
 						firstName: 'John',
 						lastName: 'Hancock',
 						country: 'Argentina',
@@ -479,12 +499,12 @@ describe('Cars', function()  {
 							    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
 							}
 							usersAPI.clearCarsTable()
-							.then( function(fulfilled){		
+							.then( function(fulfilled){
 								chai.request(baseUrl)
 								.post('/users/' + userId + '/cars/')
 								.set(token_header_flag, token)
 								.send(car)		
-								.end((err, res) => {			
+								.end((err, res) => {
 									chai.request(baseUrl)
 									.put('/users/' + userId + '/cars/' + car.id)
 									.send(car)

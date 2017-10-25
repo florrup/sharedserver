@@ -86,6 +86,10 @@ describe('Users', function()  {
 								type: 'conductor',
 								username: 'johnny',
 								password: 'aaaa',
+								fb: {
+									userId: '',
+									authToken: ''
+								},
 								firstName: 'John',
 								lastName: 'Hancock',
 								country: 'Argentina',
@@ -99,10 +103,14 @@ describe('Users', function()  {
 							.end((err, res) => {
 								res.should.have.status(201);
 								var secondUser = {
-									_ref: 'aaa',
+									_ref: 'bbb',
 									type: 'pasajero',
 									username: 'tommy',
 									password: 'bbbb',
+									fb: {
+										userId: '',
+										authToken: ''
+									},
 									firstName: 'Tom',
 									lastName: 'Smith',
 									country: 'EEUU',
@@ -154,6 +162,10 @@ describe('Users', function()  {
 								type: 'pasajero',
 								username: 'johnny',
 								password: 'aaaa',
+								fb: {
+									userId: '',
+									authToken: ''
+								},
 								firstName: 'John',
 								lastName: 'Hancock',
 								country: 'Argentina',
@@ -221,6 +233,10 @@ describe('Users', function()  {
 		type: 'pasajero',
 		username: 'testUsername',
 		password: 'fakepasswd',
+		fb: {
+			userId: '',
+			authToken: ''
+		},
 		firstName: 'testName',
 		lastName: 'testSurname',
 		country: 'Argentina',
@@ -310,6 +326,10 @@ describe('Users', function()  {
 							type: 'conductor',
 							username: 'testUsername10',
 							password: 'aaa',
+							fb: {
+								userId: '',
+								authToken: ''
+							},
 							firstName: 'testName10',
 							lastName: 'testSurname10',
 							country: 'Argentina10',
@@ -438,6 +458,10 @@ describe('Users', function()  {
 							type: 'conductor',
 							username: 'testUsername11',
 							password: 'aaa',
+							fb: {
+								userId: '',
+								authToken: ''
+							},
 							firstName: 'testName11',
 							lastName: 'testSurname11',
 							country: 'Argentina11',
@@ -467,6 +491,10 @@ describe('Users', function()  {
 									type: 'conductor',
 									username: 'modifiedUsername',
 									password: 'bbb',
+									fb: {
+										userId: '',
+										authToken: ''
+									},
 									firstName: 'testName11',
 									lastName: 'testSurname11',
 									country: 'Argentina11',
@@ -512,6 +540,10 @@ describe('Users', function()  {
 								type: 'conductor',
 								username: 'testUsername11',
 								password: 'aaa',
+								fb: {
+									userId: '',
+									authToken: ''
+								},
 								firstName: 'testName11',
 								lastName: 'testSurname11',
 								country: 'Argentina11',
@@ -588,6 +620,10 @@ describe('Users', function()  {
 					type: 'conductor',
 					username: 'testUsername10',
 					password: 'aaa',
+					fb: {
+						userId: '',
+						authToken: ''
+					},
 					firstName: 'testName10',
 					lastName: 'testSurname10',
 					country: 'Argentina10',
