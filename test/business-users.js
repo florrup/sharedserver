@@ -36,7 +36,6 @@ describe('BusinessUsers', function()  {
 		    this.timeout(15000);
 		    businessUsersAPI.clearBusinessUsersTable()
 			.then( function(fulfilled){
-				
 				chai.request(baseUrl)
 				.get('/business-users/initAndWriteDummyBusinessUser/') 
 				.end((err, res) => {

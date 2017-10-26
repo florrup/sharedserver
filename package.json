@@ -16,6 +16,8 @@
     "jsonwebtoken": "^8.0.1",
     "node-env-file": "^0.1.8",
     "pg": "6.4.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "sequelize": "^4.8.4"
   },
   "devDependencies": {

@@ -36,6 +36,10 @@ describe('Cars', function()  {
 		type: 'conductor',
 		username: 'johnny',
 		password: 'aaaa',
+		fb: {
+			userId: '',
+			authToken: ''
+		},
 		firstName: 'John',
 		lastName: 'Hancock',
 		country: 'Argentina',
@@ -192,7 +196,7 @@ describe('Cars', function()  {
 				});
 			});
 	    });
-/*
+		/*
 	  	it('it should GET user information, including cars', function(done) {
 			this.timeout(15000);
 			
@@ -233,9 +237,8 @@ describe('Cars', function()  {
 				});
 			});
 	    });
-*/
+		*/
 	});
-
 	describe('/DELETE users car', function() {
 
 		var user = {
@@ -243,6 +246,10 @@ describe('Cars', function()  {
 			type: 'conductor',
 			username: 'johnny',
 			password: 'aaaa',
+			fb: {
+				userId: '',
+				authToken: ''
+			},
 			firstName: 'John',
 			lastName: 'Hancock',
 			country: 'Argentina',
@@ -352,6 +359,10 @@ describe('Cars', function()  {
 			type: 'conductor',
 			username: 'johnny',
 			password: 'aaaa',
+			fb: {
+				userId: '',
+				authToken: ''
+			},
 			firstName: 'John',
 			lastName: 'Hancock',
 			country: 'Argentina',
@@ -475,6 +486,10 @@ describe('Cars', function()  {
 						type: 'conductor',
 						username: 'johnny',
 						password: 'aaaa',
+						fb: {
+							userId: '',
+							authToken: ''
+						},
 						firstName: 'John',
 						lastName: 'Hancock',
 						country: 'Argentina',
@@ -536,6 +551,10 @@ describe('Cars', function()  {
 						type: 'conductor',
 						username: 'johnny',
 						password: 'aaaa',
+						fb: {
+							userId: '',
+							authToken: ''
+						},
 						firstName: 'John',
 						lastName: 'Hancock',
 						country: 'Argentina',
@@ -604,6 +623,10 @@ describe('Cars', function()  {
 						type: 'conductor',
 						username: 'johnny',
 						password: 'aaaa',
+						fb: {
+							userId: '',
+							authToken: ''
+						},
 						firstName: 'John',
 						lastName: 'Hancock',
 						country: 'Argentina',
