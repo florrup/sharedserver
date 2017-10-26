@@ -17,7 +17,7 @@ exports.getToken = function (payload) {
 	}
 	
     return jwt.sign(payload, process.env.TOKEN_SECRET_KEY,{
-        expiresIn: process.env.TOKEN_LIFETIME_IN_SECONDS // 3600
+        expiresIn: parseInt(process.env.TOKEN_LIFETIME_IN_SECONDS) // 3600
     });
 };
 
@@ -30,23 +30,29 @@ function isTokenInvalidated(token){
 	try {
 		var decoded = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
 		var username = decoded.username;
-		console.log(JSON.stringify(invalidatedTokens));
-		
+		console.log(Array.from(invalidatedTokens));
+		console.log(username);
 		if (invalidatedTokens.has(username)){
 			var token_was_invalidated_before = false;
-			
-			invalidatedTokens.get(username).foreach( function(item, index, array){
-				if (item === token){
+			var invalidTokensFromUser = invalidatedTokens.get(username);
+			for (var aTokenIndex in invalidTokensFromUser) {
+				// console.log('A token'+aToken);
+				// console.log('A real token'+invalidTokensFromUser[aTokenIndex]);
+				// console.log('Given token'+token);
+				if (invalidTokensFromUser[aTokenIndex] === token){
 					token_was_invalidated_before = true; // token is listed as invalid
 				}
-			});
+			}
 			return token_was_invalidated_before;
 		}
-		else {;return false;} // username has no invalidated tokens
+		else {
+			return false; // username has no invalidated tokens
+		} 
 	} catch(err) {
+		// console.log('############################################# TOKEN INVALID RIGHT AWAY!! #############################################');
 		return true; // token is not valid right away
 	}
-}
+};
 
 exports.invalidateToken = function(token){
 	if (typeof invalidatedTokens === "undefined") {
@@ -67,7 +73,7 @@ exports.invalidateToken = function(token){
 				}
 			}
 	});
-}
+};
 
 /**
  * Verifies the token existance in the request body, the request query or the request header

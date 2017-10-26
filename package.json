@@ -22,8 +22,9 @@
     "pg": "6.4.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "sequelize": "^4.8.4",
-    "webpack": "^3.8.1"
+    "webpack": "^3.8.1",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "body-parser": "*",

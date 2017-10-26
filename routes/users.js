@@ -13,6 +13,8 @@ var Car = models.car;
 var Verify = require('./verify');
 var api = require('./api');
 
+const request = require('request-promise'); // to hit facebook api
+
 // CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
 /**
@@ -34,6 +36,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
         type: 'conductor',
         username: 'johnny',
         password: 'aaa',
+		facebookUserId: '',
         name: 'John',
         surname: 'Hancock',
         country: 'Argentina',
@@ -103,6 +106,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         applicationowner: item.applicationowner,
         type: item.type,
         username: item.username,
+		facebookUserId: item.facebookUserId,
         name: item.name,
         surname: item.surname,
         country: item.country,
@@ -129,47 +133,97 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // si hay algún parámetro faltante
+  /*
   if (api.isEmpty(request.body._ref) || api.isEmpty(request.body.type) || api.isEmpty(request.body.username)
     || api.isEmpty(request.body.password) || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
     || api.isEmpty(request.body.country) || api.isEmpty(request.body.email) || api.isEmpty(request.body.birthdate)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
-
-  User.create({
-    _ref: request.body._ref,
-    type: request.body.type,
-    username: request.body.username,
-    password: request.body.password,
-    name: request.body.firstName,
-    surname: request.body.lastName,
-    country: request.body.country,
-    email: request.body.email,
-    birthdate: request.body.birthdate
-  }).then(user => {
-    /* istanbul ignore if  */
-    if (!user) {
-      return response.status(500).json({code: 0, message: "Unexpected error"});
-    }
-    var jsonInResponse = {
-      metadata: {
-        version: api.apiVersion 
-      },
-      user: {
-        id: user.id,
-        _ref: user._ref,
-        applicationowner: user.applicationowner,
-        type: user.type,
-        username: user.username,
-        password: user.password,
-        name: user.name,
-        surname: user.surname,
-        country: user.country,
-        email: user.email,
-        birthdate: user.birthdate
-      }
-    };
-    return response.status(201).json(jsonInResponse);
-  });
+  */
+  
+  // request has USERNAME && PASSWORD (local user)
+  if (!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) && !api.isEmpty(request.body.username) && !api.isEmpty(request.body.password)){
+	  User.create({
+		_ref: request.body._ref,
+		type: request.body.type,
+		username: request.body.username,
+		password: request.body.password,
+		facebookUserId: '',
+		name: '', // request.body.firstName,
+		surname: '', // request.body.lastName,
+		country: '', // request.body.country,
+		email: '', // request.body.email,
+		birthdate: '', // request.body.birthdate
+	  }).then(user => {
+		/* istanbul ignore if  */
+		if (!user) {
+		  return response.status(500).json({code: 0, message: "Unexpected error"});
+		}
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  user: {
+			id: user.id,
+			_ref: user._ref,
+			applicationowner: user.applicationowner,
+			type: user.type,
+			username: user.username,
+			password: user.password,
+			facebookUserId: '',
+			name: '', // user.name,
+			surname: '', // user.surname,
+			country: '', // user.country,
+			email: '', // user.email,
+			birthdate: '', // user.birthdate
+		  }
+		};
+		return response.status(201).json(jsonInResponse);
+	  });
+  }
+  // request has FACEBOOK USER ID && FACEBOOK TOKEN (facebook user)
+  else if (!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) && !api.isEmpty(request.body.fb.userId) && !api.isEmpty(request.body.fb.authToken)) {
+	  User.create({
+		_ref: request.body._ref,
+		type: request.body.type,
+		username: '',
+		password: '',
+		facebookUserId: request.body.fb.userId,
+		name: request.body.firstName,
+		surname: request.body.lastName,
+		country: request.body.country,
+		email: request.body.email,
+		birthdate: request.body.birthdate
+	  }).then(user => {
+		/* istanbul ignore if  */
+		if (!user) {
+		  return response.status(500).json({code: 0, message: "Unexpected error"});
+		}
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  user: {
+			id: user.id,
+			_ref: user._ref,
+			applicationowner: user.applicationowner,
+			type: user.type,
+			username: '',
+			password: '',
+			facebookUserId: request.body.fb.userId,
+			name: user.name,
+			surname: user.surname,
+			country: user.country,
+			email: user.email,
+			birthdate: user.birthdate
+		  }
+		};
+		return response.status(201).json(jsonInResponse);
+	  });
+  }
+  else {
+	  return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes username/password ó fbUserId/fbToken)"});
+  }
 });
 
 /**
@@ -177,39 +231,122 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
  *
  */
 router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
-  User.find({
-    where: {
-      username: request.body.username,
-      password: request.body.password // TODO add facebookAuthToken
-    }
-  }).then(userFound => {
-    if (!userFound) {
-      return response.status(400).json({code: 0, message: "Faltan parámetros o validación fallida"});
-    }
+	if (!request.body.facebookAuthToken){
+		// local username and password validation
+		User.find({
+			where: {
+			  username: request.body.username,
+			  password: request.body.password
+			}
+		}).then(userFound => {
+			if (!userFound) {
+				return response.status(400).json({code: 0, message: "Faltan parámetros o validación fallida de username/password"});
+			}
 
-    var jsonInResponse = {
-      metadata: {
-        version: api.apiVersion
-      },
-      user: {
-        id: userFound.id,
-        _ref: userFound._ref,
-        applicationowner: userFound.applicationowner,
-        type: userFound.type,
-        username: userFound.username,
-        name: userFound.name,
-        surname: userFound.surname,
-        country: userFound.country,
-        email: userFound.email,
-        birthdate: userFound.birthdate
-      }
-    };
-    return response.status(200).json(jsonInResponse);
-  }).catch(function (error) {
-    /* istanbul ignore next  */
-    return response.status(500).json({code: 0, message: "Unexpected error"});
-  });
+			var jsonInResponse = {
+			  metadata: {
+				version: api.apiVersion
+			  },
+			  user: {
+				id: userFound.id,
+				_ref: userFound._ref,
+				applicationowner: userFound.applicationowner,
+				type: userFound.type,
+				username: userFound.username,
+				facebookUserId: userFound.facebookUserId,
+				name: userFound.name,
+				surname: userFound.surname,
+				country: userFound.country,
+				email: userFound.email,
+				birthdate: userFound.birthdate
+			  }
+			};
+			return response.status(200).json(jsonInResponse);
+		})
+		.catch(function (error) {
+			return response.status(500).json({code: 0, message: "Unexpected error"});
+		});
+	} else {
+		// Facebook user validation
+		// 1st get Facebook User ID from Facebook Token
+		// Check doc here: https://developers.facebook.com/docs/graph-api/reference/v2.10/debug_token/
+		const options = {
+			method: 'GET',
+			uri: `https://graph.facebook.com/v2.10/debug_token?input_token==request.body.facebookAuthToken`,
+			qs: {
+			  access_token: request.body.facebookAuthToken // user_access_token
+			}
+		};
+		request(options)
+			.then(fbRes => {
+				res.json(fbRes); // get user ID from here
+				
+				var facebookUserId = res.data.user_id;
+				
+				// const userFieldSet = 'id, name, about, email, accounts, link, is_verified, significant_other, relationship_status, website, picture, photos, feed';
+				const userFieldSet = 'id, name, email';
 
+				const options = {
+					method: 'GET',
+					uri: `https://graph.facebook.com/v2.10/facebookUserId`,
+					qs: {
+						access_token: request.body.facebookAuthToken, // user_access_token,
+						fields: userFieldSet
+					}
+				};
+				request(options)
+				.then(fbRes => {
+					res.json(fbRes);
+				  
+					var responseFacebookUserId = res.id;
+					var responsefacebookName = res.name;
+					var responsefacebookEmail = res.email;
+				  
+					User.find({
+						where: {
+							// username: facebookEmail
+							facebookUserId: responseFacebookUserId
+						}
+					}).then(userFound => {
+							if (!userFound) {
+								return response.status(401).json({code: 0, message: "Facebook user was not registered in the system, create user account with this token"});
+							}
+							else {
+								var jsonInResponse = {
+									metadata: {
+										version: api.apiVersion
+									},
+									user: {
+										id: userFound.id,
+										_ref: userFound._ref,
+										applicationowner: userFound.applicationowner,
+										type: userFound.type,
+										username: userFound.username,
+										facebookUserId: userFound.facebookUserId,
+										name: userFound.name,
+										surname: userFound.surname,
+										country: userFound.country,
+										email: userFound.email,
+										birthdate: userFound.birthdate
+									}
+								};
+								return response.status(200).json(jsonInResponse);
+							}
+						})
+						.catch(function (error) {
+							return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized"});
+						});
+				})
+				.catch(function (error) {
+					return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized"});
+				});
+				
+				
+			})
+			.catch(function (error) {
+				return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized"});
+			});
+	}
 });
 
 /**
@@ -276,6 +413,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
         type: request.body.type,
         username: request.body.username,
         password: request.body.password,
+		facebookUserId: request.body.facebookUserId,
         name: request.body.firstName,
         surname: request.body.lastName,
         country: request.body.country,

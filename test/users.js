@@ -86,6 +86,10 @@ describe('Users', function()  {
 								type: 'conductor',
 								username: 'johnny',
 								password: 'aaaa',
+								fb: {
+									userId: '',
+									authToken: ''
+								},
 								firstName: 'John',
 								lastName: 'Hancock',
 								country: 'Argentina',
@@ -99,10 +103,14 @@ describe('Users', function()  {
 							.end((err, res) => {
 								res.should.have.status(201);
 								var secondUser = {
-									_ref: 'aaa',
+									_ref: 'bbb',
 									type: 'pasajero',
 									username: 'tommy',
 									password: 'bbbb',
+									fb: {
+										userId: '',
+										authToken: ''
+									},
 									firstName: 'Tom',
 									lastName: 'Smith',
 									country: 'EEUU',
@@ -154,6 +162,10 @@ describe('Users', function()  {
 								type: 'pasajero',
 								username: 'johnny',
 								password: 'aaaa',
+								fb: {
+									userId: '',
+									authToken: ''
+								},
 								firstName: 'John',
 								lastName: 'Hancock',
 								country: 'Argentina',
@@ -221,6 +233,10 @@ describe('Users', function()  {
 		type: 'pasajero',
 		username: 'testUsername',
 		password: 'fakepasswd',
+		fb: {
+			userId: '',
+			authToken: ''
+		},
 		firstName: 'testName',
 		lastName: 'testSurname',
 		country: 'Argentina',
@@ -296,7 +312,6 @@ describe('Users', function()  {
 	describe('/GET specific user', function() {
 	  	it('it should GET a specific existing user', function(done) {
 			this.timeout(15000);
-			
 			usersAPI.clearUsersTable().
 			then( function(fulfilled){
 				serversAPI.clearServersTable()
@@ -310,6 +325,10 @@ describe('Users', function()  {
 							type: 'conductor',
 							username: 'testUsername10',
 							password: 'aaa',
+							fb: {
+								userId: '',
+								authToken: ''
+							},
 							firstName: 'testName10',
 							lastName: 'testSurname10',
 							country: 'Argentina10',
@@ -322,7 +341,6 @@ describe('Users', function()  {
 						.get('/servers/initAndWriteDummyServer')
 						.end((err,res) => {
 							var serverToken = res.body.serverToken;
-
 							chai.request(baseUrl)
 							.post('/users/')
 							.set(token_header_flag, serverToken)
@@ -438,6 +456,10 @@ describe('Users', function()  {
 							type: 'conductor',
 							username: 'testUsername11',
 							password: 'aaa',
+							fb: {
+								userId: '',
+								authToken: ''
+							},
 							firstName: 'testName11',
 							lastName: 'testSurname11',
 							country: 'Argentina11',
@@ -467,6 +489,10 @@ describe('Users', function()  {
 									type: 'conductor',
 									username: 'modifiedUsername',
 									password: 'bbb',
+									fb: {
+										userId: '',
+										authToken: ''
+									},
 									firstName: 'testName11',
 									lastName: 'testSurname11',
 									country: 'Argentina11',
@@ -512,6 +538,10 @@ describe('Users', function()  {
 								type: 'conductor',
 								username: 'testUsername11',
 								password: 'aaa',
+								fb: {
+									userId: '',
+									authToken: ''
+								},
 								firstName: 'testName11',
 								lastName: 'testSurname11',
 								country: 'Argentina11',
@@ -588,6 +618,10 @@ describe('Users', function()  {
 					type: 'conductor',
 					username: 'testUsername10',
 					password: 'aaa',
+					fb: {
+						userId: '',
+						authToken: ''
+					},
 					firstName: 'testName10',
 					lastName: 'testSurname10',
 					country: 'Argentina10',
@@ -653,8 +687,8 @@ describe('Users', function()  {
 												/// Si para este método el token aún es válido (en un escenario real debería serlo)
 												/// La anulación del token funciona correctamente. Si en cambio el token expira
 												/// como se mencionó este test llega hasta acá y termina con error 401
-												done();
-												/*
+												// done();
+												
 												res.should.have.status(200);
 												var newAppToken = res.body.ping.token.token;
 												jwt.verify(newAppToken, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
@@ -663,6 +697,7 @@ describe('Users', function()  {
 													.get('/users/' + userToGetId)
 													.set(token_header_flag, oldAppToken) // oldAppToken has been invalidated
 													.end((err, res) => {
+														console.log('TOKENNN: ' + oldAppToken);
 														res.should.have.status(401); // unauthorized
 														chai.request(baseUrl)
 														.get('/users/' + userToGetId)
@@ -673,7 +708,7 @@ describe('Users', function()  {
 														});
 													});
 												});
-												*/
+												
 											});
 										});
 									});
