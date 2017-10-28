@@ -20,7 +20,7 @@ class App extends Component {
 
               <Header title="Index Header" link="/"/>
 
-              <Banner title="Hi, I’m Editorial by HTML5 UP" subtitle="A free and fully responsive site template"
+              <Banner title="Title Banner" subtitle="Subtitle Banner"
               content="Aenean ornare velit lacus, ac varius enim ullamcorper eu. Proin aliquam facilisis ante interdum congue.
               Integer mollis, nisl amet convallis, porttitor magna ullamcorper, amet egestas mauris.
               Ut magna finibus nisi nec lacinia. Nam maximus erat id euismod egestas. Pellentesque sapien ac quam.

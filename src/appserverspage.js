@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { Footer, Menu, Header, Banner, GeneralStats } from './components';
 
-class UsersPage extends Component {
+class AppServersPage extends Component {
 
   render() {
     return (
@@ -13,10 +13,10 @@ class UsersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="UsersPage Header" link="/"/>
+              <Header title="AppServersPage Header" link="/"/>
 
-              <Banner title="UsersPage" subtitle="A free and fully responsive site template"
-              content="Hello, Users"/>
+              <Banner title="AppServersPage" subtitle="A free and fully responsive site template"
+              content="Hello, AppServersPage"/>
           </div>
         </div>
 
@@ -31,4 +31,4 @@ class UsersPage extends Component {
   }
 }
 
-ReactDOM.render(<UsersPage />, document.getElementById('userspage'));
+ReactDOM.render(<AppServersPage />, document.getElementById('appserverspage'));
