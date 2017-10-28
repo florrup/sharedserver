@@ -22,9 +22,8 @@ chai.use(chaiHttp);
 var jwt = require('jsonwebtoken');
 
 /**
- *  Test methods for application users endpoints
+ *  Test methods for cars endpoints
  *
- * Application users are the drivers or passangers that use the system and have a profile in this database
  */
 describe('Cars', function()  {
 
