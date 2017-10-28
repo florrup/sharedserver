@@ -29,6 +29,10 @@ app.get('/', function(request, response) {
   response.render('pages/index');
 });
 
+app.get('/users', function(request, response) {
+  response.render('pages/users');
+});
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

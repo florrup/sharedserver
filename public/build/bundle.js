@@ -360,6 +360,21 @@ module.exports = invariant;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(16);
+} else {
+  module.exports = __webpack_require__(17);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /*
 object-assign
 (c) Sindre Sorhus
@@ -453,7 +468,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -477,7 +492,7 @@ module.exports = emptyObject;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -546,21 +561,6 @@ module.exports = warning;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(16);
-} else {
-  module.exports = __webpack_require__(17);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -576,7 +576,7 @@ if (process.env.NODE_ENV === 'production') {
 
 if (process.env.NODE_ENV !== 'production') {
   var invariant = __webpack_require__(2);
-  var warning = __webpack_require__(5);
+  var warning = __webpack_require__(6);
   var ReactPropTypesSecret = __webpack_require__(8);
   var loggedTypeFailures = {};
 }
@@ -961,13 +961,15 @@ module.exports = getActiveElement;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(6);
+var _react = __webpack_require__(3);
 
 var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(18);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _components = __webpack_require__(32);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -976,6 +978,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// Terminal 1
+// ./node_modules/.bin/webpack -w 
+// Terminal 2
+// npm start
+// El index se va a ir actualizando solito
 
 var App = function (_Component) {
   _inherits(App, _Component);
@@ -998,438 +1006,10 @@ var App = function (_Component) {
           _react2.default.createElement(
             'div',
             { className: 'inner' },
-            _react2.default.createElement(
-              'header',
-              { id: 'header' },
-              _react2.default.createElement(
-                'a',
-                { href: 'index.html', className: 'logo' },
-                _react2.default.createElement(
-                  'strong',
-                  null,
-                  'Editorial'
-                ),
-                ' by HTML5 UP'
-              ),
-              _react2.default.createElement(
-                'ul',
-                { className: 'icons' },
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'icon fa-twitter' },
-                    _react2.default.createElement(
-                      'span',
-                      { className: 'label' },
-                      'Twitter'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'icon fa-facebook' },
-                    _react2.default.createElement(
-                      'span',
-                      { className: 'label' },
-                      'Facebook'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'icon fa-snapchat-ghost' },
-                    _react2.default.createElement(
-                      'span',
-                      { className: 'label' },
-                      'Snapchat'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'icon fa-instagram' },
-                    _react2.default.createElement(
-                      'span',
-                      { className: 'label' },
-                      'Instagram'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'icon fa-medium' },
-                    _react2.default.createElement(
-                      'span',
-                      { className: 'label' },
-                      'Medium'
-                    )
-                  )
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'section',
-              { id: 'banner' },
-              _react2.default.createElement(
-                'div',
-                { className: 'content' },
-                _react2.default.createElement(
-                  'header',
-                  null,
-                  _react2.default.createElement(
-                    'h1',
-                    null,
-                    'Hi, I\u2019m Editorial',
-                    _react2.default.createElement('br', null),
-                    'by HTML5 UP'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'A free and fully responsive site template'
-                  )
-                ),
-                _react2.default.createElement(
-                  'p',
-                  null,
-                  'Aenean ornare velit lacus, ac varius enim ullamcorper eu. Proin aliquam facilisis ante interdum congue. Integer mollis, nisl amet convallis, porttitor magna ullamcorper, amet egestas mauris. Ut magna finibus nisi nec lacinia. Nam maximus erat id euismod egestas. Pellentesque sapien ac quam. Lorem ipsum dolor sit nullam.'
-                ),
-                _react2.default.createElement(
-                  'ul',
-                  { className: 'actions' },
-                  _react2.default.createElement(
-                    'li',
-                    null,
-                    _react2.default.createElement(
-                      'a',
-                      { href: '#', className: 'button big' },
-                      'Learn More'
-                    )
-                  )
-                )
-              ),
-              _react2.default.createElement(
-                'span',
-                { className: 'image object' },
-                _react2.default.createElement('img', { src: 'images/pic10.jpg', alt: '' })
-              )
-            ),
-            _react2.default.createElement(
-              'section',
-              null,
-              _react2.default.createElement(
-                'header',
-                { className: 'major' },
-                _react2.default.createElement(
-                  'h2',
-                  null,
-                  'Erat lacinia'
-                )
-              ),
-              _react2.default.createElement(
-                'div',
-                { className: 'features' },
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement('span', { className: 'icon fa-diamond' }),
-                  _react2.default.createElement(
-                    'div',
-                    { className: 'content' },
-                    _react2.default.createElement(
-                      'h3',
-                      null,
-                      'Portitor ullamcorper'
-                    ),
-                    _react2.default.createElement(
-                      'p',
-                      null,
-                      'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement('span', { className: 'icon fa-paper-plane' }),
-                  _react2.default.createElement(
-                    'div',
-                    { className: 'content' },
-                    _react2.default.createElement(
-                      'h3',
-                      null,
-                      'Sapien veroeros'
-                    ),
-                    _react2.default.createElement(
-                      'p',
-                      null,
-                      'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement('span', { className: 'icon fa-rocket' }),
-                  _react2.default.createElement(
-                    'div',
-                    { className: 'content' },
-                    _react2.default.createElement(
-                      'h3',
-                      null,
-                      'Quam lorem ipsum'
-                    ),
-                    _react2.default.createElement(
-                      'p',
-                      null,
-                      'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement('span', { className: 'icon fa-signal' }),
-                  _react2.default.createElement(
-                    'div',
-                    { className: 'content' },
-                    _react2.default.createElement(
-                      'h3',
-                      null,
-                      'Sed magna finibus'
-                    ),
-                    _react2.default.createElement(
-                      'p',
-                      null,
-                      'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                    )
-                  )
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'section',
-              null,
-              _react2.default.createElement(
-                'header',
-                { className: 'major' },
-                _react2.default.createElement(
-                  'h2',
-                  null,
-                  'Ipsum sed dolor'
-                )
-              ),
-              _react2.default.createElement(
-                'div',
-                { className: 'posts' },
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic01.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'h3',
-                    null,
-                    'Interdum aenean'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    { className: 'actions' },
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#', className: 'button' },
-                        'More'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic02.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'h3',
-                    null,
-                    'Nulla amet dolore'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    { className: 'actions' },
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#', className: 'button' },
-                        'More'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic03.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'h3',
-                    null,
-                    'Tempus ullamcorper'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    { className: 'actions' },
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#', className: 'button' },
-                        'More'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic04.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'h3',
-                    null,
-                    'Sed etiam facilis'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    { className: 'actions' },
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#', className: 'button' },
-                        'More'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic05.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'h3',
-                    null,
-                    'Feugiat lorem aenean'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    { className: 'actions' },
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#', className: 'button' },
-                        'More'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic06.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'h3',
-                    null,
-                    'Amet varius aliquam'
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    { className: 'actions' },
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#', className: 'button' },
-                        'More'
-                      )
-                    )
-                  )
-                )
-              )
-            )
+            _react2.default.createElement(_components.Header, { title: 'Index Header', link: '/' }),
+            _react2.default.createElement(_components.Banner, { title: 'Hi, I\u2019m Editorial by HTML5 UP', subtitle: 'A free and fully responsive site template',
+              content: 'Aenean ornare velit lacus, ac varius enim ullamcorper eu. Proin aliquam facilisis ante interdum congue. Integer mollis, nisl amet convallis, porttitor magna ullamcorper, amet egestas mauris. Ut magna finibus nisi nec lacinia. Nam maximus erat id euismod egestas. Pellentesque sapien ac quam. Lorem ipsum dolor sit nullam.' }),
+            _react2.default.createElement(_components.GeneralStats, null)
           )
         ),
         _react2.default.createElement(
@@ -1438,338 +1018,8 @@ var App = function (_Component) {
           _react2.default.createElement(
             'div',
             { className: 'inner' },
-            _react2.default.createElement(
-              'section',
-              { id: 'search', className: 'alt' },
-              _react2.default.createElement(
-                'form',
-                { method: 'post', action: '#' },
-                _react2.default.createElement('input', { type: 'text', name: 'query', id: 'query', placeholder: 'Search' })
-              )
-            ),
-            _react2.default.createElement(
-              'nav',
-              { id: 'menu' },
-              _react2.default.createElement(
-                'header',
-                { className: 'major' },
-                _react2.default.createElement(
-                  'h2',
-                  null,
-                  'Menu'
-                )
-              ),
-              _react2.default.createElement(
-                'ul',
-                null,
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: 'index.html' },
-                    'Homepage'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: 'generic.html' },
-                    'Generic'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: 'elements.html' },
-                    'Elements'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'span',
-                    { className: 'opener' },
-                    'Submenu'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    null,
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Lorem Dolor'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Ipsum Adipiscing'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Tempus Magna'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Feugiat Veroeros'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#' },
-                    'Etiam Dolore'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#' },
-                    'Adipiscing'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'span',
-                    { className: 'opener' },
-                    'Another Submenu'
-                  ),
-                  _react2.default.createElement(
-                    'ul',
-                    null,
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Lorem Dolor'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Ipsum Adipiscing'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Tempus Magna'
-                      )
-                    ),
-                    _react2.default.createElement(
-                      'li',
-                      null,
-                      _react2.default.createElement(
-                        'a',
-                        { href: '#' },
-                        'Feugiat Veroeros'
-                      )
-                    )
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#' },
-                    'Maximus Erat'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#' },
-                    'Sapien Mauris'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#' },
-                    'Amet Lacinia'
-                  )
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'section',
-              null,
-              _react2.default.createElement(
-                'header',
-                { className: 'major' },
-                _react2.default.createElement(
-                  'h2',
-                  null,
-                  'Ante interdum'
-                )
-              ),
-              _react2.default.createElement(
-                'div',
-                { className: 'mini-posts' },
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic07.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore aliquam.'
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic08.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore aliquam.'
-                  )
-                ),
-                _react2.default.createElement(
-                  'article',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'image' },
-                    _react2.default.createElement('img', { src: 'images/pic09.jpg', alt: '' })
-                  ),
-                  _react2.default.createElement(
-                    'p',
-                    null,
-                    'Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore aliquam.'
-                  )
-                )
-              ),
-              _react2.default.createElement(
-                'ul',
-                { className: 'actions' },
-                _react2.default.createElement(
-                  'li',
-                  null,
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#', className: 'button' },
-                    'More'
-                  )
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'section',
-              null,
-              _react2.default.createElement(
-                'header',
-                { className: 'major' },
-                _react2.default.createElement(
-                  'h2',
-                  null,
-                  'Get in touch'
-                )
-              ),
-              _react2.default.createElement(
-                'p',
-                null,
-                'Sed varius enim lorem ullamcorper dolore aliquam aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin sed aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.'
-              ),
-              _react2.default.createElement(
-                'ul',
-                { className: 'contact' },
-                _react2.default.createElement(
-                  'li',
-                  { className: 'fa-envelope-o' },
-                  _react2.default.createElement(
-                    'a',
-                    { href: '#' },
-                    'information@untitled.tld'
-                  )
-                ),
-                _react2.default.createElement(
-                  'li',
-                  { className: 'fa-phone' },
-                  '(000) 000-0000'
-                ),
-                _react2.default.createElement(
-                  'li',
-                  { className: 'fa-home' },
-                  '1234 Somewhere Road #8254',
-                  _react2.default.createElement('br', null),
-                  'Nashville, TN 00000-0000'
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'footer',
-              { id: 'footer' },
-              _react2.default.createElement(
-                'p',
-                { className: 'copyright' },
-                '\xA9 Untitled. All rights reserved. Demo Images: ',
-                _react2.default.createElement(
-                  'a',
-                  { href: 'https://unsplash.com' },
-                  'Unsplash'
-                ),
-                '. Design: ',
-                _react2.default.createElement(
-                  'a',
-                  { href: 'https://html5up.net' },
-                  'HTML5 UP'
-                ),
-                '.'
-              )
-            )
+            _react2.default.createElement(_components.Menu, null),
+            _react2.default.createElement(_components.Footer, null)
           )
         )
       );
@@ -1796,7 +1046,7 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
  This source code is licensed under the MIT license found in the
  LICENSE file in the root directory of this source tree.
 */
-var f=__webpack_require__(3),p=__webpack_require__(4);__webpack_require__(2);var r=__webpack_require__(1);
+var f=__webpack_require__(4),p=__webpack_require__(5);__webpack_require__(2);var r=__webpack_require__(1);
 function t(a){for(var b=arguments.length-1,d="Minified React error #"+a+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant\x3d"+a,e=0;e<b;e++)d+="\x26args[]\x3d"+encodeURIComponent(arguments[e+1]);b=Error(d+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.");b.name="Invariant Violation";b.framesToPop=1;throw b;}
 var u={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}};function v(a,b,d){this.props=a;this.context=b;this.refs=p;this.updater=d||u}v.prototype.isReactComponent={};v.prototype.setState=function(a,b){"object"!==typeof a&&"function"!==typeof a&&null!=a?t("85"):void 0;this.updater.enqueueSetState(this,a,b,"setState")};v.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};
 function w(a,b,d){this.props=a;this.context=b;this.refs=p;this.updater=d||u}function x(){}x.prototype=v.prototype;var y=w.prototype=new x;y.constructor=w;f(y,v.prototype);y.isPureReactComponent=!0;function z(a,b,d){this.props=a;this.context=b;this.refs=p;this.updater=d||u}var A=z.prototype=new x;A.constructor=z;f(A,v.prototype);A.unstable_isAsyncReactComponent=!0;A.render=function(){return this.props.children};
@@ -1833,9 +1083,9 @@ if (process.env.NODE_ENV !== "production") {
 
 'use strict';
 
-var objectAssign$1 = __webpack_require__(3);
-var require$$0 = __webpack_require__(5);
-var emptyObject = __webpack_require__(4);
+var objectAssign$1 = __webpack_require__(4);
+var require$$0 = __webpack_require__(6);
+var emptyObject = __webpack_require__(5);
 var invariant = __webpack_require__(2);
 var emptyFunction = __webpack_require__(1);
 var checkPropTypes = __webpack_require__(7);
@@ -3579,7 +2829,7 @@ if (process.env.NODE_ENV === 'production') {
  LICENSE file in the root directory of this source tree.
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(6);__webpack_require__(2);var l=__webpack_require__(9),n=__webpack_require__(3),ba=__webpack_require__(10),ca=__webpack_require__(1),da=__webpack_require__(4),ea=__webpack_require__(11),fa=__webpack_require__(12),ha=__webpack_require__(13),ia=__webpack_require__(14);
+var aa=__webpack_require__(3);__webpack_require__(2);var l=__webpack_require__(9),n=__webpack_require__(4),ba=__webpack_require__(10),ca=__webpack_require__(1),da=__webpack_require__(5),ea=__webpack_require__(11),fa=__webpack_require__(12),ha=__webpack_require__(13),ia=__webpack_require__(14);
 function w(a){for(var b=arguments.length-1,c="Minified React error #"+a+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant\x3d"+a,d=0;d<b;d++)c+="\x26args[]\x3d"+encodeURIComponent(arguments[d+1]);b=Error(c+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.");b.name="Invariant Violation";b.framesToPop=1;throw b;}aa?void 0:w("227");
 function ja(a){switch(a){case "svg":return"http://www.w3.org/2000/svg";case "math":return"http://www.w3.org/1998/Math/MathML";default:return"http://www.w3.org/1999/xhtml"}}
 var ka={Namespaces:{html:"http://www.w3.org/1999/xhtml",mathml:"http://www.w3.org/1998/Math/MathML",svg:"http://www.w3.org/2000/svg"},getIntrinsicNamespace:ja,getChildNamespace:function(a,b){return null==a||"http://www.w3.org/1999/xhtml"===a?ja(b):"http://www.w3.org/2000/svg"===a&&"foreignObject"===b?"http://www.w3.org/1999/xhtml":a}},la=null,oa={};
@@ -3904,18 +3154,18 @@ if (process.env.NODE_ENV !== "production") {
 
 'use strict';
 
-var react = __webpack_require__(6);
+var react = __webpack_require__(3);
 var invariant = __webpack_require__(2);
 var ExecutionEnvironment = __webpack_require__(9);
-var _assign = __webpack_require__(3);
+var _assign = __webpack_require__(4);
 var EventListener = __webpack_require__(10);
-var require$$0 = __webpack_require__(5);
+var require$$0 = __webpack_require__(6);
 var hyphenateStyleName = __webpack_require__(23);
 var emptyFunction = __webpack_require__(1);
 var camelizeStyleName = __webpack_require__(25);
 var performanceNow = __webpack_require__(27);
 var propTypes = __webpack_require__(29);
-var emptyObject = __webpack_require__(4);
+var emptyObject = __webpack_require__(5);
 var checkPropTypes = __webpack_require__(7);
 var shallowEqual = __webpack_require__(11);
 var containsNode = __webpack_require__(12);
@@ -21382,8 +20632,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 var emptyFunction = __webpack_require__(1);
 var invariant = __webpack_require__(2);
-var warning = __webpack_require__(5);
-var assign = __webpack_require__(3);
+var warning = __webpack_require__(6);
+var assign = __webpack_require__(4);
 
 var ReactPropTypesSecret = __webpack_require__(8);
 var checkPropTypes = __webpack_require__(7);
@@ -21980,6 +21230,397 @@ module.exports = function() {
   return ReactPropTypes;
 };
 
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.GeneralStats = exports.Banner = exports.Header = exports.Menu = exports.Footer = undefined;
+
+var _Footer = __webpack_require__(33);
+
+var _Footer2 = _interopRequireDefault(_Footer);
+
+var _Menu = __webpack_require__(34);
+
+var _Menu2 = _interopRequireDefault(_Menu);
+
+var _Header = __webpack_require__(35);
+
+var _Header2 = _interopRequireDefault(_Header);
+
+var _Banner = __webpack_require__(36);
+
+var _Banner2 = _interopRequireDefault(_Banner);
+
+var _GeneralStats = __webpack_require__(37);
+
+var _GeneralStats2 = _interopRequireDefault(_GeneralStats);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.Footer = _Footer2.default;
+exports.Menu = _Menu2.default;
+exports.Header = _Header2.default;
+exports.Banner = _Banner2.default;
+exports.GeneralStats = _GeneralStats2.default;
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (props) {
+  return _react2.default.createElement(
+    "footer",
+    { id: "footer" },
+    _react2.default.createElement(
+      "p",
+      { className: "copyright" },
+      "\xA9 Untitled. All rights reserved. Demo Images: ",
+      _react2.default.createElement(
+        "a",
+        { href: "https://unsplash.com" },
+        "Unsplash"
+      ),
+      ". Design: ",
+      _react2.default.createElement(
+        "a",
+        { href: "https://html5up.net" },
+        "HTML5 UP"
+      ),
+      "."
+    )
+  );
+};
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (props) {
+  return _react2.default.createElement(
+    "nav",
+    { id: "menu" },
+    _react2.default.createElement(
+      "header",
+      { className: "major" },
+      _react2.default.createElement(
+        "h2",
+        null,
+        "Men\xFA"
+      )
+    ),
+    _react2.default.createElement(
+      "ul",
+      null,
+      _react2.default.createElement(
+        "li",
+        null,
+        _react2.default.createElement(
+          "a",
+          { href: "/" },
+          "Homepage"
+        )
+      ),
+      _react2.default.createElement(
+        "li",
+        null,
+        _react2.default.createElement(
+          "span",
+          { className: "opener" },
+          "Gesti\xF3n de Usuarios"
+        ),
+        _react2.default.createElement(
+          "ul",
+          null,
+          _react2.default.createElement(
+            "li",
+            null,
+            _react2.default.createElement(
+              "a",
+              { href: "#" },
+              "Usuarios de Negocio"
+            )
+          ),
+          _react2.default.createElement(
+            "li",
+            null,
+            _react2.default.createElement(
+              "a",
+              { href: "#" },
+              "Usuarios de Aplicaci\xF3n"
+            )
+          )
+        )
+      ),
+      _react2.default.createElement(
+        "li",
+        null,
+        _react2.default.createElement(
+          "a",
+          { href: "#" },
+          "Application Servers"
+        )
+      ),
+      _react2.default.createElement(
+        "li",
+        null,
+        _react2.default.createElement(
+          "a",
+          { href: "#" },
+          "Reportes y Estad\xEDsticas"
+        )
+      ),
+      _react2.default.createElement(
+        "li",
+        null,
+        _react2.default.createElement(
+          "a",
+          { href: "#" },
+          "Reglas de Negocio"
+        )
+      )
+    )
+  );
+};
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (props) {
+	return _react2.default.createElement(
+		"header",
+		{ id: "header" },
+		_react2.default.createElement(
+			"a",
+			{ href: props.link, className: "logo" },
+			_react2.default.createElement(
+				"strong",
+				null,
+				props.title
+			)
+		)
+	);
+};
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (props) {
+  return _react2.default.createElement(
+    "section",
+    { id: "banner" },
+    _react2.default.createElement(
+      "div",
+      { className: "content" },
+      _react2.default.createElement(
+        "header",
+        null,
+        _react2.default.createElement(
+          "h1",
+          null,
+          props.title
+        ),
+        _react2.default.createElement(
+          "p",
+          null,
+          props.subtitle
+        )
+      ),
+      _react2.default.createElement(
+        "p",
+        null,
+        props.content
+      ),
+      _react2.default.createElement(
+        "ul",
+        { className: "actions" },
+        _react2.default.createElement(
+          "li",
+          null,
+          _react2.default.createElement(
+            "a",
+            { href: "#", className: "button big" },
+            "Learn More"
+          )
+        )
+      )
+    )
+  );
+};
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (props) {
+  return _react2.default.createElement(
+    "section",
+    null,
+    _react2.default.createElement(
+      "header",
+      { className: "major" },
+      _react2.default.createElement(
+        "h2",
+        null,
+        "Erat lacinia"
+      )
+    ),
+    _react2.default.createElement(
+      "div",
+      { className: "features" },
+      _react2.default.createElement(
+        "article",
+        null,
+        _react2.default.createElement("span", { className: "icon fa-diamond" }),
+        _react2.default.createElement(
+          "div",
+          { className: "content" },
+          _react2.default.createElement(
+            "h3",
+            null,
+            "Portitor ullamcorper"
+          ),
+          _react2.default.createElement(
+            "p",
+            null,
+            "Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam."
+          )
+        )
+      ),
+      _react2.default.createElement(
+        "article",
+        null,
+        _react2.default.createElement("span", { className: "icon fa-paper-plane" }),
+        _react2.default.createElement(
+          "div",
+          { className: "content" },
+          _react2.default.createElement(
+            "h3",
+            null,
+            "Sapien veroeros"
+          ),
+          _react2.default.createElement(
+            "p",
+            null,
+            "Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam."
+          )
+        )
+      ),
+      _react2.default.createElement(
+        "article",
+        null,
+        _react2.default.createElement("span", { className: "icon fa-rocket" }),
+        _react2.default.createElement(
+          "div",
+          { className: "content" },
+          _react2.default.createElement(
+            "h3",
+            null,
+            "Quam lorem ipsum"
+          ),
+          _react2.default.createElement(
+            "p",
+            null,
+            "Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam."
+          )
+        )
+      ),
+      _react2.default.createElement(
+        "article",
+        null,
+        _react2.default.createElement("span", { className: "icon fa-signal" }),
+        _react2.default.createElement(
+          "div",
+          { className: "content" },
+          _react2.default.createElement(
+            "h3",
+            null,
+            "Sed magna finibus"
+          ),
+          _react2.default.createElement(
+            "p",
+            null,
+            "Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam."
+          )
+        )
+      )
+    )
+  );
+};
 
 /***/ })
 /******/ ]);
