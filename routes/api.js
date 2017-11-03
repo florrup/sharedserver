@@ -7,6 +7,7 @@ router.use('/users', require('./users'));
 router.use('/servers', require('./servers'));
 router.use('/business-users', require('./business-users'));
 router.use('/rules', require('./rules'));
+router.use('/trips', require('./trips'));
 router.use('/token', require('./token'));
 
 // API Version
