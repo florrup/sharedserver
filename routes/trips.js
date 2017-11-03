@@ -99,6 +99,155 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 	})
 });
 
+/**
+ *  Da de alta un trip
+ */
+router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+	if (api.isEmpty(request.body.driver) || api.isEmpty(request.body.passanger) || api.isEmpty(request.body.start.address.street)
+		|| api.isEmpty(request.body.start.address.location.latitude) || api.isEmpty(request.body.start.address.location.longitude)
+		|| api.isEmpty(request.body.start.timestamp) || api.isEmpty(request.body.end.address.street) || api.isEmpty(request.body.end.address.location.latitude) 
+		|| api.isEmpty(request.body.end.address.location.longitude) || api.isEmpty(request.body.end.Timestamp) || api.isEmpty(request.body.totalTime)
+		|| api.isEmpty(request.body.waitTime) || api.isEmpty(request.body.travelTime) || api.isEmpty(request.body.distance) || api.isEmpty(request.body.route)
+		|| api.isEmpty(request.body.cost.currency) || api.isEmpty(request.cost.value)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	}
+
+	Trip.create({
+		// id: 0,
+		_ref: '',
+		applicationOwner: '',
+		driverId: request.body.driver,
+		passangerId: request.body.passanger,
+		startAddressStreet: request.body.start.address.street,
+		startAddressLocationLat: request.body.start.address.location.latitude,
+		startAddressLocationLon: request.body.start.address.location.longitude,
+		startTimestamp: request.body.start.timestamp,
+		endAddressStreet: request.body.end.address.street,
+		endAddressLocationLat: request.body.end.address.location.latitude,
+		endAddressLocationLon: request.body.end.address.location.longitude,
+		endTimestamp: request.body.end.Timestamp,
+		totalTime: request.body.totalTime,
+		waitTime: request.body.waitTime,
+		travelTime: request.body.travelTime,
+		distance: request.body.distance,
+		route: request.body.route,
+		costCurrency: request.body.cost.currency,
+		costValue: request.body.cost.value
+	}).then(trip => {
+			/* istanbul ignore if  */
+			if (!trip) {
+				return response.status(500).json({code: 0, message: "Unexpected error"});
+			} else {
+				var jsonInResponse = {
+					id: trip.id,
+					applicationOwner: trip.applicationOwner,
+					driver: trip.driverId,
+					passanger: trip.passangerId,
+					start: {
+						address: {
+							street: trip.startAddressStreet,
+							location: {
+								lat: trip.startAddressLocationLat,
+								lon: trip.startAddressLocationLon
+							}
+						},
+						timestamp: trip.startTimestamp
+					},
+					end: {
+						address: {
+							street: trip.endAddressStreet,
+							location: {
+								lat: trip.endAddressLocationLat,
+								lon: trip.endAddressLocationLon
+							}
+						},
+						timestamp: trip.endTimestamp
+					},
+					totalTime: trip.totalTime,
+					waitTime: trip.waitTime,
+					travelTime: trip.travelTime,
+					distance: trip.distance,
+					route: trip.route,
+					cost: {
+						currency: trip.costCurrency,
+						value: trip.costValue
+					}
+				}
+				return response.status(201).json(jsonInResponse);
+			}
+		});
+});
+
+/**
+ *  Consultar la cotización de un viaje
+ */
+router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+	/// \brief todo implement this method
+	return response.status(500).json({code: 0, message: "This method: POST /trip/estimate is not yet implemented"});
+});
+
+
+/**
+ *  Devuelve toda la información del viaje con id especificado
+ *
+ */
+router.get('/:tripId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+	Trip.find({
+		where: {
+			id: request.params.tripId
+		}
+	}).then(trip => {
+		if (!trip) {
+			return response.status(404).json({code: 0, message: "Trip inexistente"});
+		}
+		var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion
+			},
+			
+			trip: {
+				id: trip.id,
+				applicationOwner: trip.applicationOwner,
+				driver: trip.driverId,
+				passanger: trip.passangerId,
+				start: {
+					address: {
+						street: trip.startAddressStreet,
+						location: {
+							lat: trip.startAddressLocationLat,
+							lon: trip.startAddressLocationLon
+						}
+					},
+					timestamp: trip.startTimestamp
+				},
+				end: {
+					address: {
+						street: trip.endAddressStreet,
+						location: {
+							lat: trip.endAddressLocationLat,
+							lon: trip.endAddressLocationLon
+						}
+					},
+					timestamp: trip.endTimestamp
+				},
+				totalTime: trip.totalTime,
+				waitTime: trip.waitTime,
+				travelTime: trip.travelTime,
+				distance: trip.distance,
+				route: trip.route,
+				cost: {
+					currency: trip.costCurrency,
+					value: trip.costValue
+				}
+			}
+		};
+		return response.status(200).json(jsonInResponse);
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
+});
+
 // Return router after endpoints definition
 module.exports = router;
 
