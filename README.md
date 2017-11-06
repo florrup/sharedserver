@@ -51,6 +51,10 @@ get database connection
 $heroku login
 $heroku git:remote -a serene-peak-94842
 $heroku pg:psql
+
+To restore database tables
+(in database terminal from prevoius step)
+PSQL> ...run CREATE commands commented in each route file to create psql database tables
 ```
 
 # Running built-in tests

@@ -5,8 +5,16 @@ var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 /**
  * Variable to track manually invalidated tokens
  * In javascript / nodeJS we can't initialize here statically these variables
+ * This variable is a map structure [ key=username, value=array[invalidatedToken1, invalidatedToken2, ...] ]
 **/
 var invalidatedTokens;
+
+/**
+ * Valid Tokens emmited by the shared server to application servers
+ * This variable is a map structure: [key=username, value=validToken]
+ * If a username has a valid token and a new one is emmited, the previous token will be added to the invalidatedTokens list
+**/
+var validTokens;
 
 /**
  * Method for token generation. It consumes token secret and token expiration time from env configuration.
@@ -15,16 +23,76 @@ exports.getToken = function (payload) {
 	if (typeof invalidatedTokens === "undefined") {
 		invalidatedTokens = new Map();
 	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	}
 	
-    return jwt.sign(payload, process.env.TOKEN_SECRET_KEY,{
-        expiresIn: parseInt(process.env.TOKEN_LIFETIME_IN_SECONDS) // 3600
-    });
+    newToken = jwt.sign(payload, process.env.TOKEN_SECRET_KEY,{expiresIn: parseInt(process.env.TOKEN_LIFETIME_IN_SECONDS) /*3600*/});
+	
+	/*
+	if(validTokens.has(payload.username)){
+		var oldValidToken = validTokens.get(payload.username);
+		if (oldValidToken != newToken){
+			console.log('OLD TOKEN: ' +oldValidToken);
+			console.log('NEW TOKEN: ' + newToken);
+			
+			// ----------------------
+			// NOTE: this invalidation of old token cannot be made here because servers may create tokens for other servers and don't need their own token invalidated
+			// this.invalidateToken(oldValidToken); // invalidate old valid token
+			// ----------------------
+			validTokens.set(payload.username, newToken); // add new valid token
+		} else {
+			return newToken; // if old and new token are the same, leave the old token as valid
+		}
+	}
+	*/
+	/*
+	if(invalidatedTokens.has(payload.username)){
+		var index = invalidatedTokens.get(payload.username).indexOf(newToken);
+		if (index != -1){
+			invalidatedTokens.get(payload.username).splice(index, 1); // if the newToken was invalidated we remove it from the invalidated list (may happen when fast testing)
+		}
+	}
+	*/
+	validTokens.set(payload.username, newToken);
+	return newToken;
 };
 
+/**
+ * Reports all actual authorized users, method used in backoffice application
+**/
+exports.reportActualState = function(){
+	
+}
+
+/**
+ * Invalidates current valid token from a user
+**/
+exports.invalidateActualValidTokenFromUser = function (username){
+	if (typeof invalidatedTokens === "undefined") {
+		invalidatedTokens = new Map();
+	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	}
+	if(validTokens.has(username)){
+		var oldValidToken = validTokens.get(username);
+		this.invalidateToken(oldValidToken); // invalidate old valid token
+		validTokens.delete(oldValidToken);
+	}
+};
+
+
+/**
+ * Checks if a token has been marked as invalid
+**/
 function isTokenInvalidated(token){
 	
 	if (typeof invalidatedTokens === "undefined") {
 		invalidatedTokens = new Map();
+	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
 	}
 	
 	try {
@@ -54,22 +122,47 @@ function isTokenInvalidated(token){
 	}
 };
 
+
+/**
+ * Invalidates a token
+**/
 exports.invalidateToken = function(token){
 	if (typeof invalidatedTokens === "undefined") {
 		invalidatedTokens = new Map();
 	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	}
+	
+	// remove token, if present, from validTokens list
+	
 	jwt.verify(token, process.env.TOKEN_SECRET_KEY, function (err, decoded) {
             if (err) {
-				// token is not valid right away
+				// or the token is not valid right away... or it is expired. We check that and remove token from valid token list
+				jwt.verify(token, process.env.TOKEN_SECRET_KEY, {ignoreExpiration: true}, function (err, decoded) {
+					if (!err){
+						if(validTokens.has(decoded.username)){
+							if (validTokens.get(decoded.username) === token){
+								validTokens.delete(decoded.username);
+							}
+						}
+					}
+				});
 			}
 			else {
 				console.log('INVALIDATING TOKEN: ' + token);
 				// invalidatedTokens.set(decoded.username, token);
 				if (invalidatedTokens.has(decoded.username)){
-					invalidatedTokens.get(decoded.username).push(token);
+					if (invalidatedTokens.get(decoded.username).indexOf(token) === -1 ) // we only add the token if the same token was not previously invalidated
+						invalidatedTokens.get(decoded.username).push(token);
 				}
 				else{
 					invalidatedTokens.set(decoded.username, new Array(token));
+				}
+				if(validTokens.has(decoded.username)){
+					if (validTokens.get(decoded.username) === token){
+						validTokens.delete(decoded.username);
+					}
 				}
 			}
 	});
@@ -86,7 +179,11 @@ exports.verifyToken = function (req, res, next) {
 	if (typeof invalidatedTokens === "undefined") {
 		invalidatedTokens = new Map();
 	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	}
 	
+	console.log('#### Verificating TOKEN: '+token);
     // decode token
     if (token) {
 		
@@ -228,6 +325,14 @@ exports.verifyUserOrAppRole = function (req, res, next) {
 	}
 };
 
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable managerOk OR the variable appOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
 exports.verifyManagerOrAppRole = function (req, res, next) {
 	var appOk = req.decoded.appOk;
 	var managerOk = req.decoded.managerOk;

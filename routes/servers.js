@@ -334,6 +334,8 @@ router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function
 			managerOk: request.decoded.managerOk,
 			adminOk: request.decoded.adminOk
 		};
+		
+		Verify.invalidateActualValidTokenFromUser(request.decoded.username);
 		var newToken = Verify.getToken(payload);
 
 		var responseJson = {
