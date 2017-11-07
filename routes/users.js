@@ -133,19 +133,17 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // si hay algún parámetro faltante
-  /*
-  if (api.isEmpty(request.body._ref) || api.isEmpty(request.body.type) || api.isEmpty(request.body.username)
-    || api.isEmpty(request.body.password) || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
-    || api.isEmpty(request.body.country) || api.isEmpty(request.body.email) || api.isEmpty(request.body.birthdate)) {
+  
+  if (api.isEmpty(request.body.username) || api.isEmpty(request.body.password) && api.isEmpty(request.body.fb.authToken)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
-  */
+  
   
   // request has USERNAME && PASSWORD (local user)
-  if (!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) && !api.isEmpty(request.body.username) && !api.isEmpty(request.body.password)){
+  if (/*!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) &&*/ !api.isEmpty(request.body.username) && !api.isEmpty(request.body.password)){
 	  User.create({
-		_ref: request.body._ref,
-		type: request.body.type,
+		_ref: '', //request.body._ref,
+		type: '', //request.body.type,
 		username: request.body.username,
 		password: request.body.password,
 		facebookUserId: '',
@@ -182,10 +180,10 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 	  });
   }
   // request has FACEBOOK USER ID && FACEBOOK TOKEN (facebook user)
-  else if (!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) && !api.isEmpty(request.body.fb.userId) && !api.isEmpty(request.body.fb.authToken)) {
+  else if (/*!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) &&*/ !api.isEmpty(request.body.fb.userId) && !api.isEmpty(request.body.fb.authToken)) {
 	  User.create({
-		_ref: request.body._ref,
-		type: request.body.type,
+		_ref: '', //request.body._ref,
+		type: '', //request.body.type,
 		username: '',
 		password: '',
 		facebookUserId: request.body.fb.userId,
@@ -396,9 +394,9 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
  */
 router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // si hay algún parámetro faltante
-  if (api.isEmpty(request.body._ref) || api.isEmpty(request.body.type) || api.isEmpty(request.body.username)
-    || api.isEmpty(request.body.password) || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
-    || api.isEmpty(request.body.country) || api.isEmpty(request.body.email) || api.isEmpty(request.body.birthdate)) {
+  if (/*api.isEmpty(request.body._ref) ||*/ api.isEmpty(request.body.type) /*|| api.isEmpty(request.body.username)*/
+    /*|| api.isEmpty(request.body.password)*/ || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
+    || api.isEmpty(request.body.country) /*|| api.isEmpty(request.body.email)*/ || api.isEmpty(request.body.birthdate)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
   User.find({

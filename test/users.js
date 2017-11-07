@@ -199,9 +199,9 @@ describe('Users', function()  {
 					var newUser = {
 						_ref: '0',
 						type: '',
-						username: 'johnny',
+						username: '', // no FB token and no username...
 						password: 'aaaa',
-						firstName: 'John',
+						firstName: 'asdasd',
 						country: 'Argentina',
 						email: 'johnny123@gmail.com',
 						birthdate: '24/05/1992'
