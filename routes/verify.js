@@ -46,14 +46,12 @@ exports.getToken = function (payload) {
 		}
 	}
 	*/
-	/*
 	if(invalidatedTokens.has(payload.username)){
 		var index = invalidatedTokens.get(payload.username).indexOf(newToken);
 		if (index != -1){
 			invalidatedTokens.get(payload.username).splice(index, 1); // if the newToken was invalidated we remove it from the invalidated list (may happen when fast testing)
 		}
 	}
-	*/
 	validTokens.set(payload.username, newToken);
 	return newToken;
 };
