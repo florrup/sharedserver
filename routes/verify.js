@@ -60,9 +60,23 @@ exports.getToken = function (payload) {
 
 /**
  * Reports all actual authorized users, method used in backoffice application
+ * usersWithAuthorizedTokens is a map structure with key=username ; value=validToken
+ * invalidatedTokens is a map structure with key=username ; value=array of invalidated tokens
 **/
 exports.reportActualState = function(){
+	if (typeof invalidatedTokens === "undefined") {
+		invalidatedTokens = new Map();
+	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	}
 	
+	var jsonInResponse = {
+		'usersWithAuthorizedTokens': JSON.stringify(validTokens), // this structure is a map: key=username, value=token.
+		'invalidatedTokens': JSON.stringify(Array.from(invalidatedTokens)) // this structure is a map: key=username, value=array of invalidated tokens from key username
+	};
+	
+	return jsonInResponse;
 }
 
 /**
