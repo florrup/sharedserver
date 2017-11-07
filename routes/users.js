@@ -134,7 +134,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // si hay algún parámetro faltante
   
-  if (api.isEmpty(request.body.username) || api.isEmpty(request.body.password) && api.isEmpty(request.body.fb.authToken)) {
+  if ((api.isEmpty(request.body.username) || api.isEmpty(request.body.password)) && api.isEmpty(request.body.fb.authToken)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
   
