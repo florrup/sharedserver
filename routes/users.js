@@ -108,7 +108,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         username: item.username,
 		facebookUserId: item.facebookUserId,
         name: item.name,
-        surname: item.surname,
+        lastName: item.surname,
         country: item.country,
         email: item.email,
         birthdate: item.birthdate
@@ -170,7 +170,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			password: user.password,
 			facebookUserId: '',
 			name: user.name,
-			surname: user.surname,
+			lastName: user.surname,
 			country: user.country,
 			email: user.email,
 			birthdate: user.birthdate
@@ -210,7 +210,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			password: '',
 			facebookUserId: request.body.fb.userId,
 			name: user.name,
-			surname: user.surname,
+			lastName: user.surname,
 			country: user.country,
 			email: user.email,
 			birthdate: user.birthdate
@@ -253,7 +253,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				username: userFound.username,
 				facebookUserId: userFound.facebookUserId,
 				name: userFound.name,
-				surname: userFound.surname,
+				lastName: userFound.surname,
 				country: userFound.country,
 				email: userFound.email,
 				birthdate: userFound.birthdate
@@ -322,7 +322,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 										username: userFound.username,
 										facebookUserId: userFound.facebookUserId,
 										name: userFound.name,
-										surname: userFound.surname,
+										lastName: userFound.surname,
 										country: userFound.country,
 										email: userFound.email,
 										birthdate: userFound.birthdate
