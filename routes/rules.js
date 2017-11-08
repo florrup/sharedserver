@@ -193,9 +193,9 @@ router.put('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
 
 		///\TODO get last commit and insert in response JSON
 		rule.updateAttributes({
-			language: ,
-			blob: ,
-			active
+			language: '',
+			blob: '',
+			active: ''
 		  }).then(updatedUser => {
 			  ///\TODO insert commit in history (similar to cars)
 			return response.status(200).json(updatedUser);
