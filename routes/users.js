@@ -332,17 +332,17 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 							}
 						})
 						.catch(function (error) {
-							return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized"});
+							return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized or user not found, token was originally accepted by FB"});
 						});
 				})
 				.catch(function (error) {
-					return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized"});
+					return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized while trying to fetch user info"});
 				});
 				
 				
 			})
 			.catch(function (error) {
-				return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized"});
+				return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized at first request, rightaway"});
 			});
 	}
 });
