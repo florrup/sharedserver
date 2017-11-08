@@ -169,11 +169,11 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			username: user.username,
 			password: user.password,
 			facebookUserId: '',
-			name: '', // user.name,
-			surname: '', // user.surname,
-			country: '', // user.country,
-			email: '', // user.email,
-			birthdate: '', // user.birthdate
+			name: user.name,
+			surname: user.surname,
+			country: user.country,
+			email: user.email,
+			birthdate: user.birthdate
 		  }
 		};
 		return response.status(201).json(jsonInResponse);
@@ -187,11 +187,11 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		username: '',
 		password: '',
 		facebookUserId: request.body.fb.userId,
-		name: request.body.firstName,
-		surname: request.body.lastName,
-		country: request.body.country,
-		email: request.body.email,
-		birthdate: request.body.birthdate
+		name: '', // request.body.firstName,
+		surname: '', // request.body.lastName,
+		country: '', // request.body.country,
+		email: '', // request.body.email,
+		birthdate: '' // request.body.birthdate
 	  }).then(user => {
 		/* istanbul ignore if  */
 		if (!user) {
@@ -397,32 +397,58 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
   if (/*api.isEmpty(request.body._ref) ||*/ api.isEmpty(request.body.type) /*|| api.isEmpty(request.body.username)*/
     /*|| api.isEmpty(request.body.password)*/ || api.isEmpty(request.body.firstName) || api.isEmpty(request.body.lastName)
     || api.isEmpty(request.body.country) /*|| api.isEmpty(request.body.email)*/ || api.isEmpty(request.body.birthdate)) {
-    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
+  
   User.find({
     where: {
       id: request.params.userId
     }
   }).then(user => {
-    if (user) {
-      user.updateAttributes({
-        _ref: request.body._ref,
-        applicationowner: request.body.applicationowner,
-        type: request.body.type,
-        username: request.body.username,
-        password: request.body.password,
-		facebookUserId: request.body.facebookUserId,
-        name: request.body.firstName,
-        surname: request.body.lastName,
-        country: request.body.country,
-        email: request.body.email,
-        birthdate: request.body.birthdate
-      }).then(updatedUser => {
-        return response.status(200).json(updatedUser);
-      });
-    } else {
-      return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
-    }
+	  
+	  if (user) {
+		  var localRef = user._ref;
+		  var localApplicationowner = user.applicationowner;
+		  var localType = user.type;
+		  var localUsername = user.username;
+		  var localPassword = user.password;
+		  var localFacebookUserId = user.facebookUserId;
+		  var localFirstName = user.name;
+		  var localSurname = user.surname;
+		  var localCountry = user.country;
+		  var localEmail = user.email;
+		  var localBirthdate = user.birthdate;
+		  
+		  if (!api.isEmpty(request.body._ref)){localRef=request.body._ref;}
+		  if (!api.isEmpty(request.body.applicationowner)){localApplicationowner=request.body.applicationowner;}
+		  if (!api.isEmpty(request.body.type)){localType=request.body.type;}
+		  if (!api.isEmpty(request.body.username)){localUsername=request.body.username;}
+		  if (!api.isEmpty(request.body.password)){localPassword=request.body.password;}
+		  if (!api.isEmpty(request.body.facebookUserId)){localFacebookUserId=request.body.facebookUserId;}
+		  if (!api.isEmpty(request.body.firstName)){localFirstName=request.body.firstName;}
+		  if (!api.isEmpty(request.body.lastName)){localSurname=request.body.lastName;}
+		  if (!api.isEmpty(request.body.country)){localCountry=request.body.country;}
+		  if (!api.isEmpty(request.body.email)){localEmail=request.body.email;}
+		  if (!api.isEmpty(request.body.birthdate)){localBirthdate=request.body.birthdate;}
+		  
+		  user.updateAttributes({
+			_ref: localRef,
+			applicationowner: localApplicationowner,
+			type: localType,
+			username: localUsername,
+			password: localPassword,
+			facebookUserId: localFacebookUserId,
+			name: localFirstName,
+			surname: localSurname,
+			country: localCountry,
+			email: localEmail,
+			birthdate: localBirthdate
+		  }).then(updatedUser => {
+			return response.status(200).json(updatedUser);
+		  });
+      } else {
+		return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+	  }
   }).catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});

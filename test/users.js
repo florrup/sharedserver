@@ -201,7 +201,12 @@ describe('Users', function()  {
 						type: '',
 						username: '', // no FB token and no username...
 						password: 'aaaa',
+						fb: {
+							userId: '',
+							authToken: ''
+						},
 						firstName: 'asdasd',
+						lastName: 'asdfasdf',
 						country: 'Argentina',
 						email: 'johnny123@gmail.com',
 						birthdate: '24/05/1992'
@@ -398,6 +403,10 @@ describe('Users', function()  {
 		type: 'conductor',
 		username: 'testUsername11',
 		password: 'aaa',
+		fb: {
+			userId: '',
+			authToken: ''
+		},
 		firstName: 'testName11',
 		lastName: 'testSurname11',
 		country: 'Argentina11',
