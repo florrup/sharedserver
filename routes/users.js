@@ -132,9 +132,12 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
  *
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
+  console.log('/user/:POST');
+  console.log(request.body);
+  console.log(request.body.fb);
   // si hay algún parámetro faltante
-  
   if ((api.isEmpty(request.body.username) || api.isEmpty(request.body.password)) && api.isEmpty(request.body.fb.authToken)) {
+	  console.log('Missing either fb.authToken or username or password')
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
   
@@ -268,78 +271,53 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 		// Facebook user validation
 		// 1st get Facebook User ID from Facebook Token
 		// Check doc here: https://developers.facebook.com/docs/graph-api/reference/v2.10/debug_token/
+		console.log('Authenticating Facebook user with token ' + request.body.facebookAuthToken);
 		const options = {
 			method: 'GET',
-			uri: `https://graph.facebook.com/v2.10/debug_token?input_token==request.body.facebookAuthToken`,
-			qs: {
-			  access_token: request.body.facebookAuthToken // user_access_token
-			}
-		};
+			uri: 'https://graph.facebook.com/me',
+			qs: {access_token: request.body.facebookAuthToken}};
 		urlRequest(options)
 			.then(fbRes => {
-				res.json(fbRes); // get user ID from here
+				var res = JSON.parse(fbRes);
+				console.log('Facebook returned: ' + res)
+				if (res.id == undefined || res.id == null) {
+					console.log('Invalid response! Reason: ' + res);
+					return response.status(500).json(res)
+				}
+				var facebookUserId = res.id;
+				console.log('Success! User ' + res.name + ' with ID ' + facebookUserId);
 				
-				var facebookUserId = res.data.user_id;
-				
-				// const userFieldSet = 'id, name, about, email, accounts, link, is_verified, significant_other, relationship_status, website, picture, photos, feed';
-				const userFieldSet = 'id, name, email';
-
-				const options = {
-					method: 'GET',
-					uri: `https://graph.facebook.com/v2.10/facebookUserId`,
-					qs: {
-						access_token: request.body.facebookAuthToken, // user_access_token,
-						fields: userFieldSet
-					}
-				};
-				urlRequest(options)
-				.then(fbRes => {
-					res.json(fbRes);
-				  
-					var responseFacebookUserId = res.id;
-					var responsefacebookName = res.name;
-					var responsefacebookEmail = res.email;
-				  
-					User.find({
-						where: {
-							// username: facebookEmail
-							facebookUserId: responseFacebookUserId
+				console.log('Requesting user data...');
+				User.find({where: {facebookUserId: facebookUserId}})
+					.then(userFound => {
+						if (!userFound) {
+							return response.status(412).json({code: 0, message: "Valid Facebook user not created in server, create first", userId:facebookUserId});
 						}
-					}).then(userFound => {
-							if (!userFound) {
-								return response.status(401).json({code: 0, message: "Facebook user was not registered in the system, create user account with this token"});
-							}
-							else {
-								var jsonInResponse = {
-									metadata: {
-										version: api.apiVersion
-									},
-									user: {
-										id: userFound.id,
-										_ref: userFound._ref,
-										applicationowner: userFound.applicationowner,
-										type: userFound.type,
-										username: userFound.username,
-										facebookUserId: userFound.facebookUserId,
-										name: userFound.name,
-										lastName: userFound.lastName,
-										country: userFound.country,
-										email: userFound.email,
-										birthdate: userFound.birthdate
-									}
-								};
-								return response.status(200).json(jsonInResponse);
-							}
-						})
-						.catch(function (error) {
-							return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized or user not found, token was originally accepted by FB"});
-						});
-				})
+						else {
+							var jsonInResponse = {
+								metadata: {
+									version: api.apiVersion
+								},
+								user: {
+									id: userFound.id,
+									_ref: userFound._ref,
+									applicationowner: userFound.applicationowner,
+									type: userFound.type,
+									username: userFound.username,
+									facebookUserId: userFound.facebookUserId,
+									name: userFound.name,
+									lastName: userFound.lastName,
+									country: userFound.country,
+									email: userFound.email,
+									birthdate: userFound.birthdate
+								}
+							};
+							return response.status(200).json(jsonInResponse);
+						}
+					})
 				.catch(function (error) {
-					return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized while trying to fetch user info"});
-				});
-				
-				
+					return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized or user not found, token was originally accepted by FB"});
+					});
 			})
 			.catch(function (error) {
 				return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized at first request, rightaway"});
