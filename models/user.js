@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
     name: {
       type: Sequelize.STRING
     },
-    surname: {
+    lastName: {
       type: Sequelize.STRING
     },
     country: {

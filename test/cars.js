@@ -49,7 +49,7 @@ describe('Cars', function()  {
 	var userId = 1;
 
 	var car = {
-	    "id": 25,
+	    // "id": 25,
 	    "_ref": "hola",
 	    "owner": 1, // id del user 
 	    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
@@ -135,7 +135,7 @@ describe('Cars', function()  {
 	    });
 
 		var secondCar = {
-		    "id": 15,
+		    // "id": 15,
 		    "_ref": "ccc",
 		    "owner": 1, // id del user 
 		    "properties": [{"name": "Logan", "value": "autito"}]
@@ -259,7 +259,7 @@ describe('Cars', function()  {
 		var userId = 1;
 
 		var car = {
-		    "id": 25,
+		    // "id": 25,
 		    "_ref": "hola",
 		    "owner": userId, 
 		    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
@@ -295,9 +295,9 @@ describe('Cars', function()  {
 									.send(car)
 									.end((err, res) => {
 										res.should.have.status(201);
-										
+										var carId = res.body.car.id;
 										chai.request(baseUrl)
-										.delete('/users/' + userId + '/cars/' + car.id)
+										.delete('/users/' + userId + '/cars/' + carId)
 										.set(token_header_flag, token)
 										.end((err, res) => {
 											res.should.have.status(204);
@@ -336,7 +336,7 @@ describe('Cars', function()  {
 								.get('/users/dropCarTable/')
 								.end((err, res) => {						
 									chai.request(baseUrl)
-									.delete('/users/' + userId + '/cars/' + car.id)
+									.delete('/users/' + userId + '/cars/' + 304)
 									.set(token_header_flag, token)
 									.end((err, res) => {
 										res.should.have.status(404);
@@ -372,7 +372,7 @@ describe('Cars', function()  {
 		var userId = 1;
 
 		var car = {
-		    "id": 25,
+		    // "id": 25,
 		    "_ref": "hola",
 		    "owner": 1, 
 		    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
@@ -406,9 +406,10 @@ describe('Cars', function()  {
 									.set(token_header_flag, token)
 									.send(car)
 									.end((err, res) => {
+										var carId = res.body.car.id;
 										res.should.have.status(201);
 										chai.request(baseUrl)
-										.get('/users/' + userId + '/cars/' + car.id)
+										.get('/users/' + userId + '/cars/' + carId)
 										.set(token_header_flag, token)
 										.end((err, res) => {
 											res.should.have.status(200);
@@ -454,9 +455,10 @@ describe('Cars', function()  {
 									.set(token_header_flag, token)
 									.send(car)
 									.end((err, res) => {
+										var carId = res.body.car.id;
 										res.should.have.status(201);
 										chai.request(baseUrl)
-										.get('/users/' + userId + '/cars/' + car.id + 1)
+										.get('/users/' + userId + '/cars/' + carId + 1)
 										.set(token_header_flag, token)
 										.end((err, res) => {
 											res.should.have.status(404);
@@ -514,16 +516,16 @@ describe('Cars', function()  {
 							.end((err, res) => {
 								res.body.should.have.property('user');
 								var car = {
-								    "id": 25,
+								    // "id": 25,
 								    "_ref": "hola",
 								    "owner": 1, 
 								    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
 								}
 								chai.request(baseUrl)
 								.get('/users/dropCarTable/')
-								.end((err, res) => {						
+								.end((err, res) => {
 									chai.request(baseUrl)
-									.put('/users/' + userId + '/cars/' + car.id)
+									.put('/users/' + userId + '/cars/' + 54)
 									.send(car)
 									.set(token_header_flag, token)
 									.end((err, res) => {
@@ -579,7 +581,7 @@ describe('Cars', function()  {
 							.end((err, res) => {
 								res.body.should.have.property('user');
 								var car = {
-								    "id": 25,
+								    // "id": 25,
 								    "_ref": "hola",
 								    "owner": userId, 
 								    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
@@ -591,9 +593,10 @@ describe('Cars', function()  {
 									.post('/users/' + userId + '/cars/')
 									.set(token_header_flag, token)
 									.send(car)		
-									.end((err, res) => {			
+									.end((err, res) => {
+										var carId = res.body.car.id;
 										chai.request(baseUrl)
-										.put('/users/' + userId + '/cars/' + car.id)
+										.put('/users/' + userId + '/cars/' + carId)
 										.send(car)
 										.set(token_header_flag, token)
 										.end((err, res) => {
@@ -651,7 +654,7 @@ describe('Cars', function()  {
 							.end((err, res) => {
 								res.body.should.have.property('user');
 								var car = {
-								    "id": 25,
+								    // "id": 25,
 								    "_ref": "hola",
 								    "properties": [{"name": "Ecosport", "value": "autito"}, {"name": "Fiesta", "value": "autito2"}]
 								}
@@ -662,9 +665,10 @@ describe('Cars', function()  {
 									.post('/users/' + userId + '/cars/')
 									.set(token_header_flag, token)
 									.send(car)		
-									.end((err, res) => {			
+									.end((err, res) => {
+										var carId = res.body.car.id;
 										chai.request(baseUrl)
-										.put('/users/' + userId + '/cars/' + car.id)
+										.put('/users/' + userId + '/cars/' + carId)
 										.send(car)
 										.set(token_header_flag, token)
 										.end((err, res) => {

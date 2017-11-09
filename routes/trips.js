@@ -12,6 +12,9 @@ var Trip = models.trip; // the model keyed by its name
 var Verify = require('./verify');
 var api = require('./api');
 
+// Review this line to open table
+// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), driverId VARCHAR(20), passangerId VARCHAR(20), startAddressStreet VARCHAR(40), startAddressLocationLat VARCHAR(40), startAddressLocationLon VARCHAR(40), startTimestamp VARCHAR(40), endAddressStreet VARCHAR(40), endAddressLocationLat VARCHAR(20), endAddressLocationLon VARCHAR(20), endTimestamp VARCHAR(20), totalTime VARCHAR(20), waitTime VARCHAR(20), travelTime VARCHAR(20), distance VARCHAR(20), route VARCHAR(20), costCurrency VARCHAR(20), costValue VARCHAR(20));
+
 /**
  * Test method to empty the trips database and create a dummy app trip (without valid data) in order to make further tests
  * This method is available only when the ENVIRONMENT is set as 'development' or 'test'
