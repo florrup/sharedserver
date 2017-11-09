@@ -497,15 +497,15 @@ router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, func
 router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // TODO Verificar acá que cada json tenga name y value nada más, antes de meterlo a la base de datos
   // si hay algún parámetro faltante
-  if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.owner)
-    || api.isEmpty(request.body.properties)) {
+  if (/*api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.owner)
+    || */api.isEmpty(request.body.properties)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
 
   Car.create({
-    id: request.body.id,
-    _ref: request.body._ref,
-    owner: request.params.userId,
+    // id: request.body.id,
+    _ref: '', // request.body._ref,
+    owner: request.params.userId, // similar to request.body.owner (...)
     properties: request.body.properties
   }).then(newCar => {
     var jsonInResponse = {
@@ -586,7 +586,7 @@ router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRol
  */
 router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   // si hay algún parámetro faltante
-  if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.owner)
+  if (/*api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || */api.isEmpty(request.body.owner)
     || api.isEmpty(request.body.properties)) {
     return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
   }
@@ -599,7 +599,7 @@ router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, fun
   }).then(carFound => {
     if (carFound) {
       carFound.updateAttributes({
-        _ref: request.body._ref,
+        _ref: '', // request.body._ref,
         owner: request.body.owner,
         properties: request.body.properties
       }).then(updatedCar => {
