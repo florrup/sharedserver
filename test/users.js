@@ -243,7 +243,7 @@ describe('Users', function()  {
 			authToken: ''
 		},
 		firstName: 'testName',
-		lastName: 'testSurname',
+		lastName: 'testlastName',
 		country: 'Argentina',
 		email: 'testEmail@gmail.com',
 		birthdate: '24/05/1992'
@@ -335,7 +335,7 @@ describe('Users', function()  {
 								authToken: ''
 							},
 							firstName: 'testName10',
-							lastName: 'testSurname10',
+							lastName: 'testlastName10',
 							country: 'Argentina10',
 							email: 'testEmail10@gmail.com',
 							birthdate: '24/05/1992'
@@ -408,7 +408,7 @@ describe('Users', function()  {
 			authToken: ''
 		},
 		firstName: 'testName11',
-		lastName: 'testSurname11',
+		lastName: 'testlastName11',
 		country: 'Argentina11',
 		email: 'testEmail11@gmail.com',
 		birthdate: '24/05/1992'
@@ -470,7 +470,7 @@ describe('Users', function()  {
 								authToken: ''
 							},
 							firstName: 'testName11',
-							lastName: 'testSurname11',
+							lastName: 'testlastName11',
 							country: 'Argentina11',
 							email: 'testEmail11@gmail.com',
 							birthdate: '24/05/1992'
@@ -503,7 +503,7 @@ describe('Users', function()  {
 										authToken: ''
 									},
 									firstName: 'testName11',
-									lastName: 'testSurname11',
+									lastName: 'testlastName11',
 									country: 'Argentina11',
 									email: 'testEmail11@gmail.com',
 									birthdate: '24/05/1992'
@@ -552,7 +552,7 @@ describe('Users', function()  {
 									authToken: ''
 								},
 								firstName: 'testName11',
-								lastName: 'testSurname11',
+								lastName: 'testlastName11',
 								country: 'Argentina11',
 								email: 'testEmail11@gmail.com',
 								birthdate: '24/05/1992'
@@ -632,7 +632,7 @@ describe('Users', function()  {
 						authToken: ''
 					},
 					firstName: 'testName10',
-					lastName: 'testSurname10',
+					lastName: 'testlastName10',
 					country: 'Argentina10',
 					email: 'testEmail10@gmail.com',
 					birthdate: '24/05/1992'

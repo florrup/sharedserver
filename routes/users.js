@@ -15,7 +15,7 @@ var api = require('./api');
 
 const request = require('request-promise'); // to hit facebook api
 
-// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
+// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), lastName VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
 /**
  * Test method to empty the users database and create a dummy user in order to make further tests
@@ -38,7 +38,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
         password: 'aaa',
 		facebookUserId: '',
         name: 'John',
-        surname: 'Hancock',
+        lastName: 'Hancock',
         country: 'Argentina',
         email: 'johnny123@gmail.com',
         birthdate: '24/05/1992'
@@ -90,7 +90,7 @@ router.get('/dropCarTable', function(request, response) {
  */ 
 router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	User.findAll({
-    attributes: ['id', '_ref', 'applicationowner', 'type', 'username', 'name', 'surname', 'country', 'email', 'birthdate']
+    attributes: ['id', '_ref', 'applicationowner', 'type', 'username', 'name', 'lastName', 'country', 'email', 'birthdate']
   }, { include: [ Car ]
   }).then(users => {
     /* istanbul ignore if  */
@@ -108,7 +108,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         username: item.username,
 		facebookUserId: item.facebookUserId,
         name: item.name,
-        lastName: item.surname,
+        lastName: item.lastName,
         country: item.country,
         email: item.email,
         birthdate: item.birthdate
@@ -148,7 +148,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		password: request.body.password,
 		facebookUserId: '',
 		name: '', // request.body.firstName,
-		surname: '', // request.body.lastName,
+		lastName: '', // request.body.lastName,
 		country: '', // request.body.country,
 		email: '', // request.body.email,
 		birthdate: '', // request.body.birthdate
@@ -170,7 +170,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			password: user.password,
 			facebookUserId: '',
 			name: user.name,
-			lastName: user.surname,
+			lastName: user.lastName,
 			country: user.country,
 			email: user.email,
 			birthdate: user.birthdate
@@ -188,7 +188,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		password: '',
 		facebookUserId: request.body.fb.userId,
 		name: '', // request.body.firstName,
-		surname: '', // request.body.lastName,
+		lastName: '', // request.body.lastName,
 		country: '', // request.body.country,
 		email: '', // request.body.email,
 		birthdate: '' // request.body.birthdate
@@ -210,7 +210,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			password: '',
 			facebookUserId: request.body.fb.userId,
 			name: user.name,
-			lastName: user.surname,
+			lastName: user.lastName,
 			country: user.country,
 			email: user.email,
 			birthdate: user.birthdate
@@ -253,7 +253,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				username: userFound.username,
 				facebookUserId: userFound.facebookUserId,
 				name: userFound.name,
-				lastName: userFound.surname,
+				lastName: userFound.lastName,
 				country: userFound.country,
 				email: userFound.email,
 				birthdate: userFound.birthdate
@@ -322,7 +322,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 										username: userFound.username,
 										facebookUserId: userFound.facebookUserId,
 										name: userFound.name,
-										lastName: userFound.surname,
+										lastName: userFound.lastName,
 										country: userFound.country,
 										email: userFound.email,
 										birthdate: userFound.birthdate
@@ -414,7 +414,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 		  var localPassword = user.password;
 		  var localFacebookUserId = user.facebookUserId;
 		  var localFirstName = user.name;
-		  var localSurname = user.surname;
+		  var localLastName = user.lastName;
 		  var localCountry = user.country;
 		  var localEmail = user.email;
 		  var localBirthdate = user.birthdate;
@@ -426,7 +426,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 		  if (!api.isEmpty(request.body.password)){localPassword=request.body.password;}
 		  if (!api.isEmpty(request.body.facebookUserId)){localFacebookUserId=request.body.facebookUserId;}
 		  if (!api.isEmpty(request.body.firstName)){localFirstName=request.body.firstName;}
-		  if (!api.isEmpty(request.body.lastName)){localSurname=request.body.lastName;}
+		  if (!api.isEmpty(request.body.lastName)){localLastName=request.body.lastName;}
 		  if (!api.isEmpty(request.body.country)){localCountry=request.body.country;}
 		  if (!api.isEmpty(request.body.email)){localEmail=request.body.email;}
 		  if (!api.isEmpty(request.body.birthdate)){localBirthdate=request.body.birthdate;}
@@ -439,7 +439,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 			password: localPassword,
 			facebookUserId: localFacebookUserId,
 			name: localFirstName,
-			surname: localSurname,
+			lastName: localLastName,
 			country: localCountry,
 			email: localEmail,
 			birthdate: localBirthdate
