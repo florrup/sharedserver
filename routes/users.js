@@ -13,7 +13,7 @@ var Car = models.car;
 var Verify = require('./verify');
 var api = require('./api');
 
-const request = require('request-promise'); // to hit facebook api
+const urlRequest = require('request-promise'); // to hit facebook api
 
 // CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), lastName VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
 
@@ -275,7 +275,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 			  access_token: request.body.facebookAuthToken // user_access_token
 			}
 		};
-		request(options)
+		urlRequest(options)
 			.then(fbRes => {
 				res.json(fbRes); // get user ID from here
 				
@@ -292,7 +292,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 						fields: userFieldSet
 					}
 				};
-				request(options)
+				urlRequest(options)
 				.then(fbRes => {
 					res.json(fbRes);
 				  
