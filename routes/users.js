@@ -327,16 +327,16 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 							};
 							return response.status(200).json(jsonInResponse);
 						}
-					})
+					});
 				// TESTING: we let the server crash to see error on console
 				/*
 				.catch(function (error) {
 					return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized or user not found, token was originally accepted by FB"});
 					});
 				*/
-			//TESTING: we let the server crash to see error on console
-				/*
 			})
+			//TESTING: we let the server crash to see error on console
+			/*
 			.catch(function (error) {
 				return response.status(401).json({code: 0, message: "Facebook Token provided was Unaothorized at first request, rightaway"});
 			});
