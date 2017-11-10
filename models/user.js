@@ -35,13 +35,13 @@ module.exports = function(sequelize, DataTypes) {
     password: {
       type: Sequelize.STRING
     },
-	facebookUserId: {
+	facebookuserid: {
 		type: Sequelize.STRING
 	},
     name: {
       type: Sequelize.STRING
     },
-    lastName: {
+    lastname: {
       type: Sequelize.STRING
     },
     country: {
