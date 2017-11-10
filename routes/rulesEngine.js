@@ -7,6 +7,10 @@ ruleEngine.addRule({
 	conditions: {
 		any: [{
 			all: [{
+				fact: 'precioPorKmARS',
+				operator: 'equal',
+				value: 15
+			},{
 				fact: 'costoMinimo',
 				operator: 'greaterThanInclusive',
 				value: 50
@@ -16,7 +20,8 @@ ruleEngine.addRule({
 	event: {  // define the event to fire when the conditions evaluate truthy
 		type: 'costoMinimoSuperado',
 		params: {
-			message: 'El costo supera el mínimo de 50ARS'
+			message: 'El costo supera el mínimo de 50ARS',
+			value: true // Se debe cobrar $COSTO MINIMO porque el saldo es inferior
 		}
 	}
 });
