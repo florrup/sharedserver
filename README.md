@@ -60,3 +60,12 @@ PSQL> ...run CREATE commands commented in each route file to create psql databas
 # Running built-in tests
 
 $npm test
+
+# Building and Watching the React app
+See the scripts in the main "package.json" application file, the scripts watch and build. They can be run as:
+
+$npm run watch
+(starts watching the React files and rebuilds online, in the browser you have to refresh to see the changes)
+
+$npm run build
+(builds the React application once)

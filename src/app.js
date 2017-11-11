@@ -20,11 +20,8 @@ class App extends Component {
 
               <Header title="Index Header" link="/"/>
 
-              <Banner title="Title Banner" subtitle="Subtitle Banner"
-              content="Aenean ornare velit lacus, ac varius enim ullamcorper eu. Proin aliquam facilisis ante interdum congue.
-              Integer mollis, nisl amet convallis, porttitor magna ullamcorper, amet egestas mauris.
-              Ut magna finibus nisi nec lacinia. Nam maximus erat id euismod egestas. Pellentesque sapien ac quam.
-              Lorem ipsum dolor sit nullam."/>
+              <Banner title="Llevame!" subtitle="Aplicación de Gestión Central"
+              content="El uso de esta aplicación es restringido al administrador del sistema y manager de servidores de aplicación."/>
 
               <GeneralStats/>
           </div>

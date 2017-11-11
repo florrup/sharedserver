@@ -9,10 +9,20 @@ export default (props) => {
               <p>{props.subtitle}</p>
             </header>
             <p>{props.content}</p>
-            <ul className="actions">
-              <li><a href="#" className="button big">Learn More</a></li>
-            </ul>
+			{/* (this is a comment un JSX from React)
+			Original button was here:
+			---------------------------------------------------------
+			*/}
           </div>
         </section>
 	)
 }
+
+/*
+This was the original button:
+---------------------------------------------------------
+<ul className="actions">
+  <li><a href="#" className="button big">Inicio</a></li>
+</ul>
+---------------------------------------------------------
+*/
