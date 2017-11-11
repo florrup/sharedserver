@@ -29,6 +29,8 @@ const sequelize = new Sequelize(config.DATABASE, config.DATABASE_USER, config.DA
   dialectOptions: {
     ssl: true
   }
+  //,
+  //logging: false
 });
 
 var db        = {};

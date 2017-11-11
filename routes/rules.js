@@ -14,7 +14,7 @@ var Rule = models.rule;
 var Verify = require('./verify');
 var RulesEngine = require('./rulesEngine');
 
-// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), language VARCHAR(40), blob VARCHAR(40), active BOOLEAN);
+// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blob VARCHAR(255), active BOOLEAN);
 
 
 /**
@@ -36,7 +36,7 @@ router.get('/dropRuleTable', function(request, response) {
 /**
  *  Devuelve toda la información acerca de todas las reglas indicadas.
  */ 
-router.get('/', /*Verify.verifyToken, Verify.verifyUserRole,*/ function(request, response) {
+router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
 	Rule.findAll({
 		attributes: ['id', '_ref', 'language', 'blob', 'active']
 	}).then(rulesFound => {
@@ -64,18 +64,6 @@ router.get('/', /*Verify.verifyToken, Verify.verifyUserRole,*/ function(request,
 			rules: ruleArray
 		};
 		
-		/*
-		let facts = {
-		  costoMinimo: 51
-		}
-
-		// Run the engine to evaluate
-		RulesEngine
-		  .run(facts)
-		  .then(events => { // run() returns events with truthy conditions
-		    events.map(event => console.log(event.params.message))
-		});
-		*/
 		return response.status(200).json(jsonInResponse);
 	});
 });
@@ -84,15 +72,40 @@ router.get('/', /*Verify.verifyToken, Verify.verifyUserRole,*/ function(request,
  *  Da de alta una regla
  */
 router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-  // si hay algún parámetro faltante
-  
-  if (api.isEmpty(request.body.languaje) || api.isEmpty(request.body.blob) || api.isEmpty(request.body.active)) {
-    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
-  }
+	// si hay algún parámetro faltante
+	if (api.isEmpty(request.body.language) || api.isEmpty(request.body.blob) || api.isEmpty(request.body.active)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	}
 
-  // body contiene: languaje, blob y active.
-  
-  ///\TODO agregar regla nueva y commit del autor. Si la regla ya existe tirar error (para actualizar debe usar put)
+	Rule.create({
+		_ref: '', //request.body._ref,
+		language: request.body.language, 
+		blob: request.body.blob,
+		active: request.body.active	// TODO crear campo name, habiendo parseado el nombre de la rule para hallarla con facilidad
+	}).then(rule => {
+		/* istanbul ignore if  */
+		if (!rule) {
+		  return response.status(500).json({code: 0, message: "Unexpected error"});
+		}
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  rule: {
+			id: rule.id,
+			_ref: rule._ref,
+			language: rule.language,
+			blob: rule.blob,
+			active: rule.active
+		  }
+		};
+		return response.status(201).json(jsonInResponse);
+	  }).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
+
+  // Agregar commit del autor. Si la regla ya existe tirar error (para actualizar debe usar put)
 });
 
 /**

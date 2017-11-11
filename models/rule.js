@@ -19,6 +19,9 @@ module.exports = function(sequelize, DataTypes) {
     _ref: {
       type: Sequelize.STRING
     },
+    name: {
+      type: Sequelize.STRING
+    },
     language: {
       type: Sequelize.STRING
     },
