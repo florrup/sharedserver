@@ -18,7 +18,7 @@ class App extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="Index Header" link="/"/>
+              <Header title="Index" link="/"/>
 
               <Banner title="Llevame!" subtitle="Aplicación de Gestión Central"
               content="El uso de esta aplicación es restringido al administrador del sistema y manager de servidores de aplicación."/>

@@ -13,7 +13,7 @@ class BusinessUsersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="BusinessUsersPage Header" link="/"/>
+              <Header title="Llevame! Aplicación de Gestión" link="/"/>
 
               <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
               content="Hello, BusinessUsers"/>

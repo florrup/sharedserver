@@ -13,7 +13,7 @@ class AppServersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="AppServersPage Header" link="/"/>
+              <Header title="Llevame! Aplicación de Gestión" link="/"/>
 
               <Banner title="AppServersPage" subtitle="A free and fully responsive site template"
               content="Hello, AppServersPage"/>

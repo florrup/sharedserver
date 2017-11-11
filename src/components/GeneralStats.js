@@ -4,7 +4,7 @@ export default (props) => {
   return (
     <section>
       <header className="major">
-        <h2>Llevame! Otro desarrollo de AppMaker</h2>
+        <h2>Llevame! Otro desarrollo de AppMaker&copy;</h2>
       </header>
       <div className="features">
         <article>

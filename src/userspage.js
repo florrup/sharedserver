@@ -13,7 +13,7 @@ class UsersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="UsersPage Header" link="/"/>
+              <Header title="Llevame! Aplicación de Gestión" link="/"/>
 
               <Banner title="UsersPage" subtitle="A free and fully responsive site template"
               content="Hello, Users"/>
