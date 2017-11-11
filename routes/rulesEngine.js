@@ -48,15 +48,65 @@ var rules = [
 {
 	"name": "descuentoPorMiercoles",
     "condition": function(R) {
-        R.when(this.type == "pasajero" && this.dia == "miercoles");
+		var arr = (this.hora).split(":");
+		var hora = arr[0];
+		var minutos = arr[1];
+		var segundos = arr[2];
+		console.log(arr);
+        R.when(this.type == "pasajero" && this.dia == "miercoles"); // TODO falta chequear horario
     },
     "consequence": function(R) {
         this.costoTotal = this.costoTotal - (this.costoTotal * 0.05);
-        this.reason = "Descuento del 5% por ser miercoles";
+        this.reason = "Descuento del 5% por ser miercoles entre 15 a 16hs";
         console.log(this.costoTotal);
         R.next();
     },
-    "priority": 7
+    "priority": 7 // descuentos tienen misma prioridad
+},
+/**** Rule 5 ****/
+{
+	"name": "descuentoPorPrimerViaje",
+    "condition": function(R) {
+        R.when(this.type == "pasajero" && this.primerViaje);
+    },
+    "consequence": function(R) {
+        this.costoTotal = this.costoTotal - 100;
+        this.reason = "Descuento de 100ARS por ser su primer viaje";
+        console.log(this.costoTotal);
+        R.next();
+    },
+    "priority": 7 // descuentos tienen misma prioridad
+},
+/**** Rule 6 ****/
+{
+	"name": "recargoDiaDeSemana",
+    "condition": function(R) {
+    	var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    	var arr = (this.hora).split(":");
+		var hora = arr[0];
+        R.when(this.type == "pasajero" && dias.includes(this.dia)); // TODO falta chequear horario
+    },
+    "consequence": function(R) {
+        this.costoTotal = this.costoTotal + (this.costoTotal * 0.1);
+        this.reason = "Recargo del 10% por ser dia de semana entre 17 y 19hs";
+        console.log(this.costoTotal);
+        R.next();
+    },
+    "priority": 7 // descuentos tienen misma prioridad
+},
+/**** Rule 7 ****/
+{
+	"name": "descuentoViajeDiario",
+    "condition": function(R) {
+        R.when(this.type == "pasajero" && this.viajesHoy >= 5); 
+    },
+    "consequence": function(R) {
+        this.costoTotal = this.costoTotal - (this.costoTotal * 0.05);
+        this.reason = "Descuento del 5% a partir del quinto viaje del dia";
+        console.log(this.costoTotal);
+        R.next();
+    },
+    "priority": 7 // descuentos tienen misma prioridad
 },
 /**** Last Rule ****/
 {
@@ -84,7 +134,10 @@ var fact = {
     "email": "florencia@gmail.com",
     "kmRecorridos": 2,
     "costoTotal": 0,
-    "dia": "miercoles" // TODO cambiar esto por fecha actual
+    "dia": "miercoles", // TODO cambiar esto por fecha actual
+    "hora": "15:20:58",
+    "viajesHoy": 5,
+    "primerViaje": true,
 };
 
 R.execute(fact, function(data) {
