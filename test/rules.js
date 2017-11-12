@@ -16,6 +16,8 @@ var should = chai.should();
 var expect = chai.expect;
 var util = require('util');
 var token_header_flag = 'x-access-token';
+var R = require('../routes/rulesEngine.js');
+
 
 chai.use(chaiHttp);
 
@@ -152,8 +154,28 @@ describe('Rules', function()  {
 								.get('/rules/')
 								.set(token_header_flag, token)
 								.end((err,res) => {
+
 									res.should.have.status(200);
 									res.body.rules.length.should.be.eql(1);
+
+									var fact = { // coincide con el fact de rulesEngine.js
+										"type": "pasajero",
+									    "saldo": 15,
+									    "email": "florencia@gmail.com",
+									    "kmRecorridos": 2,
+									    "costoTotal": 0,
+									    "dia": "miercoles",
+									    "hora": "15:20:58",
+									    "viajesHoy": 5,
+									    "primerViaje": true,
+									};
+
+									// Corre las exampleRules
+									R.runExampleEngine(R.exampleRules, fact);
+
+									// Corre la RuleNombrePrueba definida arriba
+									//R.runEngine(res.body.rules, fact); // TODO NO ESTÁ PUDIENDO CORRERLA
+
 									done();
 								});
 							});

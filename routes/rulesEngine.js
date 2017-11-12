@@ -2,7 +2,7 @@ const RuleEngine = require('node-rules');
 
 /*istanbul ignore next*/
 
-var rules = [
+var exampleRules = [
 /**** Rule 1 ****/
 {
 	"name": "saldoNegativo",
@@ -48,12 +48,14 @@ var rules = [
 {
 	"name": "descuentoPorMiercoles",
     "condition": function(R) {
-		var arr = (this.hora).split(":");
-		var hora = arr[0];
-		var minutos = arr[1];
-		var segundos = arr[2];
-		console.log(arr);
-        R.when(this.type == "pasajero" && this.dia == "miercoles"); // TODO falta chequear horario
+        if (this.dia) {
+    		var arr = (this.hora).split(":");
+    		var hora = arr[0];
+    		var minutos = arr[1];
+    		var segundos = arr[2];
+    		console.log(arr);
+            R.when(this.type == "pasajero" && this.dia == "miercoles"); // TODO falta chequear horario
+        }
     },
     "consequence": function(R) {
         this.costoTotal = this.costoTotal - (this.costoTotal * 0.05);
@@ -81,10 +83,12 @@ var rules = [
 {
 	"name": "recargoDiaDeSemana",
     "condition": function(R) {
-    	var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-    	var arr = (this.hora).split(":");
-		var hora = arr[0];
-        R.when(this.type == "pasajero" && dias.includes(this.dia)); // TODO falta chequear horario
+        if (this.dia) {
+    	   var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    	   var arr = (this.hora).split(":");
+		   var hora = arr[0];
+           R.when(this.type == "pasajero" && dias.includes(this.dia)); // TODO falta chequear horario
+       }
     },
     "consequence": function(R) {
         this.costoTotal = this.costoTotal + (this.costoTotal * 0.1);
@@ -125,7 +129,7 @@ var rules = [
 }];
 
 /* Creating Rule Engine instance and registering rule */
-var R = new RuleEngine(rules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
+var R = new RuleEngine(exampleRules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
 
 // Ejemplo de cómo tienen que pasarnos las rules para poder meterlas al engine
 // Se convierten las rules que corren dentro del engine en JSON
@@ -161,3 +165,49 @@ R.execute(fact, function(data) {
 });
 
 module.exports = R;
+
+module.exports.exampleRules = exampleRules;
+
+// Función para correr las exampleRules
+function runExampleEngine(rules, fact) {
+    var R1 = new RuleEngine(rules, {ignoreFactChanges: true});
+
+    R1.execute(fact, function(data) {
+        if (data.puedeViajar) {
+            console.log("Puede viajar con costo: " + data.costoTotal + "\n" + data.reason);
+        } else {
+            console.log("No puede viajar: " + data.reason);
+        }
+    });
+}
+
+module.exports.runExampleEngine = runExampleEngine;
+
+// Función para correr cualquier set de rules sacadas de la bd
+function runEngine(rules, fact) {
+    /* Creating Rule Engine instance and registering rule */
+    var R2 = new RuleEngine(exampleRules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
+
+    // Remueve todos los exampleRules
+    R2.init();
+
+    // Ejemplo de cómo tienen que pasarnos las rules para poder meterlas al engine
+    // Se convierten las rules que corren dentro del engine en JSON
+    var store = R2.toJSON();
+
+    for (var rule in rules) {
+        store.push(rule);
+    }
+
+    R2.fromJSON(store);
+
+    R2.execute(fact, function(data) {
+        if (data.puedeViajar) {
+            console.log("Puede viajar con costo: " + data.costoTotal + "\n" + data.reason);
+        } else {
+            console.log("No puede viajar: " + data.reason);
+        }
+    });    
+}
+
+module.exports.runEngine = runEngine;
