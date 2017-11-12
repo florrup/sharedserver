@@ -25,7 +25,13 @@ module.exports = function(sequelize, DataTypes) {
     language: {
       type: Sequelize.STRING
     },
-    blob: {
+    blobCondition: {
+      type: Sequelize.STRING
+    },
+    blobConsequence: {
+      type: Sequelize.STRING
+    },
+    blobPriority: {
       type: Sequelize.STRING
     },
     active: {

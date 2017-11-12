@@ -38,7 +38,7 @@ router.get('/dropRuleTable', function(request, response) {
  */ 
 router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
 	Rule.findAll({
-		attributes: ['id', '_ref', 'language', 'blob', 'active']
+		attributes: ['id', '_ref','name', 'language', 'blobCondition', 'blobConsequence', 'blobPriority', 'active']
 	}).then(rulesFound => {
 		/* istanbul ignore if  */
 	    if (!rulesFound) {
@@ -47,11 +47,18 @@ router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, res
 
 		var ruleArray = [];
 		rulesFound.forEach(function(item) {
+			
+			var jsonRuleBlob = {
+				name: item.name,
+				condition: item.blobCondition,
+				consequence: item.blobConsequence,
+				priority: item.blobPriority
+			};
 			var jsonRule = {
 				id: item.id,
 			    _ref: item._ref,
 			    language: item.language,
-			    blob: item.blob,
+			    blob: jsonRuleBlob,
 			    active: item.active
 			}
 		    ruleArray.push(jsonRule);
@@ -76,20 +83,47 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 	if (api.isEmpty(request.body.language) || api.isEmpty(request.body.blob) || api.isEmpty(request.body.active)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
-	var blobJSON = JSON.parse(request.body.blob);
-	console.log(blobJSON.name + "\n\n\n\n");
+	var blobJSON = {
+		name: request.body.blob.name,
+		condition: request.body.blob.condition, // JSON.stringify(request.body.blob.condition),
+		consequence: request.body.blob.consequence, // JSON.stringify(request.body.blob.consequence),
+		priority: request.body.blob.priority
+	};
+	var blobJSONStringified = JSON.stringify(blobJSON);
+	/*
+	var ruleJSON = {
+		name: request.body.blob.name,
+		language: request.body.language,
+		blobCondition: request.body.blob.condition,
+		blobConsequence: request.body.blob.consequence,
+		blobPriority: request.body.blob.priority,
+		active: request.body.active
+	};
+	*/
+	console.log('LOG BLOB:');
+	console.log(blobJSON);
 
 	Rule.create({
 		_ref: '', //request.body._ref,
-		name: blobJSON.name,
-		language: request.body.language, 
-		blob: request.body.blob,
+		name: request.body.blob.name,
+		language: request.body.language, // request.body.language, 
+		// blob: blobJSONStringified, // JSON.parse(request.body.rule.blob), // request.body.blob,
+		blobCondition: request.body.blob.condition,
+		blobConsequence: request.body.blob.consequence,
+		blobPriority: request.body.blob.priority,
 		active: request.body.active
 	}).then(rule => {
 		/* istanbul ignore if  */
 		if (!rule) {
 		  return response.status(500).json({code: 0, message: "Unexpected error"});
 		}
+		
+		var responseBlob = {
+			name: rule.name,
+			condition: rule.blobCondition,
+			consequence: rule.blobConsequence,
+			priority: rule.blobPriority
+		};
 		var jsonInResponse = {
 		  metadata: {
 			version: api.apiVersion 
@@ -98,7 +132,7 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 			id: rule.id,
 			_ref: rule._ref,
 			language: rule.language,
-			blob: rule.blob,
+			blob: responseBlob,
 			active: rule.active
 		  }
 		};

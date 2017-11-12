@@ -195,10 +195,17 @@ function runEngine(rules, fact) {
     // Se convierten las rules que corren dentro del engine en JSON
     var store = R2.toJSON();
 
-    for (var rule in rules) {
+	console.log('RUNNING RULES ENGINE!  Listing Rules: ---------------------------------');
+    // for (var rule in rules) { // this line didn't work as intended
+	rules.forEach(function(rule){
+		console.log(rule);
         store.push(rule);
-    }
+    });
+	console.log('---------------------------------');
 
+	console.log('Fact listing fatcs: -----------------------');
+	console.log(fact);
+	console.log('-----------------------');
     R2.fromJSON(store);
 
     R2.execute(fact, function(data) {

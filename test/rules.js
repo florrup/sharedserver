@@ -129,17 +129,17 @@ describe('Rules', function()  {
 						.get('/rules/dropRuleTable')
 						.set(token_header_flag, token)
 						.end((err, res) => {
-							var blob = {"name": "RuleNombrePrueba",
-				                    "condition": "function(R) { R.when(this.type == 'pasajero'); }",
-				                    "consequence": "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
-				                    "priority": 2};
+							var blob = {
+									name: 'RuleNombrePrueba',
+				                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+				                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
+				                    priority: 2};
 							var rule = {
 								_ref: 'abc', 
 								language: 'node-rules/javascript', 
-								blob: JSON.stringify(blob),
+								blob: blob,
 								active: true
 							}
-
 							chai.request(baseUrl)
 							.post('/rules')
 							.set(token_header_flag, token)
@@ -147,8 +147,10 @@ describe('Rules', function()  {
 							.end((err, res) => {
 								res.should.have.status(201);
 								res.body.should.have.property('metadata');
+								res.body.rule.should.have.property('id');
+								res.body.rule.should.have.property('_ref');
+								res.body.rule.should.have.property('language');
 								res.body.rule.should.have.property('blob');
-								res.body.rule.should.have.property('active');
 
 								chai.request(baseUrl)
 								.get('/rules/')
@@ -157,6 +159,20 @@ describe('Rules', function()  {
 
 									res.should.have.status(200);
 									res.body.rules.length.should.be.eql(1);
+									
+									console.log('Logging Rules Array:');
+									console.log(res.body.rules);
+									
+									var rulesToEngine = [];
+									res.body.rules.forEach(function(rule){
+										var ruleToEngine = {
+											name: rule.blob.name,
+											condition: rule.blob.condition,
+											consequence: rule.blob.consequence,
+											priority: rule.blob.priority
+										};
+										rulesToEngine.push(ruleToEngine);
+									});
 
 									var fact = { // coincide con el fact de rulesEngine.js
 										"type": "pasajero",
@@ -171,10 +187,11 @@ describe('Rules', function()  {
 									};
 
 									// Corre las exampleRules
-									R.runExampleEngine(R.exampleRules, fact);
+									// R.runExampleEngine(R.exampleRules, fact);
 
 									// Corre la RuleNombrePrueba definida arriba
-									//R.runEngine(res.body.rules, fact); // TODO NO ESTÁ PUDIENDO CORRERLA
+									// R.runEngine(res.body.rules, fact); // TODO NO ESTÁ PUDIENDO CORRERLA
+									R.runEngine(rulesToEngine, fact);
 
 									done();
 								});
