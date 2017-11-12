@@ -126,7 +126,19 @@ var rules = [
 
 /* Creating Rule Engine instance and registering rule */
 var R = new RuleEngine(rules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
-//R.register(rules, {ignoreFactChanges: true});
+
+// Ejemplo de cómo tienen que pasarnos las rules para poder meterlas al engine
+// Se convierten las rules que corren dentro del engine en JSON
+var store = R.toJSON();
+// Se tienen que poner quotes en las functions. 
+var testStringRule = {  "name": "Prueba",
+                    "condition": "function(R) { R.when(this.type == 'pasajero'); }",
+                    "consequence": "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
+                    "priority": 2 };
+// Agrego la nueva rule al store de rules
+store.push(testStringRule);
+// Cargo las rules nuevamente al engine
+R.fromJSON(store);
 
 var fact = {
 	"type": "pasajero",

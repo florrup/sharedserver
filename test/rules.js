@@ -128,15 +128,19 @@ describe('Rules', function()  {
 						.get('/rules/dropRuleTable')
 						.set(token_header_flag, token)
 						.end((err, res) => {
+							var blob = {"name": "Prueba",
+				                    "condition": "function(R) { R.when(this.type == 'pasajero'); }",
+				                    "consequence": "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
+				                    "priority": 2};
 							var rule = {
 								_ref: 'abc', 
 								language: 'node-rules/javascript', 
-								blob: 'abc',
+								blob: JSON.stringify(blob),
 								active: true
 							}
 
 							chai.request(baseUrl)
-							.post('/rules/')
+							.post('/rules')
 							.set(token_header_flag, token)
 							.send(rule)
 							.end((err, res) => {

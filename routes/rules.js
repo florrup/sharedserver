@@ -14,7 +14,7 @@ var Rule = models.rule;
 var Verify = require('./verify');
 var RulesEngine = require('./rulesEngine');
 
-// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blob VARCHAR(255), active BOOLEAN);
+// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blob JSON, active BOOLEAN);
 
 
 /**
@@ -123,12 +123,12 @@ router.post('/run', Verify.verifyToken, Verify.verifyManagerRole, function(reque
   // NOTE the api asks for "facts" in the response, after running the rules we have 'events':
   // rules + facts -----> events (in compliance with rules and facts)
   
-  var jsonInResponse = {
-			metadata: {
-				version: api.apiVersion // falta completar
-			},
-			events: '' // api specification mentions 'facts' here
-		};
+    var jsonInResponse = {
+		metadata: {
+			version: api.apiVersion // falta completar
+		},
+		events: '' // api specification mentions 'facts' here
+	};
 		
   return response.status(200).json(jsonInResponse);
 });
@@ -140,7 +140,7 @@ router.delete('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function
 	
 	Rule.destroy({
     where: {
-		id: request.params.userId
+		id: request.params.ruleId
 		}
 	})
 	.then(affectedRows => {
@@ -164,7 +164,7 @@ router.delete('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function
 router.get('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
 	Rule.find({
 		where: {
-		  id: request.params.userId
+		  id: request.params.ruleId
 		}
 	}).then(rule => {
 		if (!rule) {
@@ -197,7 +197,7 @@ router.put('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
 
 	Rule.find({
 		where: {
-		  id: request.params.userId
+		  id: request.params.ruleId
 		}
 	}).then(rule => {
 		if (!rule) {
