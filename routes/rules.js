@@ -59,7 +59,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, res
 
 	    var jsonInResponse = {
 			metadata: {
-				version: api.apiVersion // falta completar
+				version: api.apiVersion // TODO falta completar
 			},
 			rules: ruleArray
 		};
@@ -76,12 +76,15 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 	if (api.isEmpty(request.body.language) || api.isEmpty(request.body.blob) || api.isEmpty(request.body.active)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
+	var blobJSON = JSON.parse(request.body.blob);
+	console.log(blobJSON.name + "\n\n\n\n");
 
 	Rule.create({
 		_ref: '', //request.body._ref,
+		name: blobJSON.name,
 		language: request.body.language, 
 		blob: request.body.blob,
-		active: request.body.active	// TODO crear campo name, habiendo parseado el nombre de la rule para hallarla con facilidad
+		active: request.body.active
 	}).then(rule => {
 		/* istanbul ignore if  */
 		if (!rule) {

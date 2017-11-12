@@ -50,7 +50,6 @@ describe('Rules', function()  {
 						.get('/rules/dropRuleTable')
 						.set(token_header_flag, token)
 						.end((err, res) => {
-							console.log('HOLA');
 							res.should.have.status(200);
 							chai.request(baseUrl)
 							.get('/rules/')
@@ -128,7 +127,7 @@ describe('Rules', function()  {
 						.get('/rules/dropRuleTable')
 						.set(token_header_flag, token)
 						.end((err, res) => {
-							var blob = {"name": "Prueba",
+							var blob = {"name": "RuleNombrePrueba",
 				                    "condition": "function(R) { R.when(this.type == 'pasajero'); }",
 				                    "consequence": "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
 				                    "priority": 2};
@@ -147,7 +146,16 @@ describe('Rules', function()  {
 								res.should.have.status(201);
 								res.body.should.have.property('metadata');
 								res.body.rule.should.have.property('blob');
-								done();
+								res.body.rule.should.have.property('active');
+
+								chai.request(baseUrl)
+								.get('/rules/')
+								.set(token_header_flag, token)
+								.end((err,res) => {
+									res.should.have.status(200);
+									res.body.rules.length.should.be.eql(1);
+									done();
+								});
 							});
 						});
 					});				
