@@ -480,6 +480,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 					applicationOwner: user.applicationowner,
 					type: user.type,
 					username: user.username,
+					password: user.password,
 					facebookUserId: user.facebookuserid,
 					firstName: user.name,
 					lastName: user.lastname,
