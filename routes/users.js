@@ -304,7 +304,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				User.find({where: {facebookuserid: facebookUserId}})
 					.then(userFound => {
 						if (!userFound) {
-							return response.status(412).json({code: 0, message: "Valid Facebook user not created in server, create first userId"+facebookUserId});
+							return response.status(412).json({code: 0, message: "Valid Facebook user not created in server, create first (FB userId: "+facebookUserId+")", userId: facebookUserId});
 						}
 						else {
 							var jsonInResponse = {
