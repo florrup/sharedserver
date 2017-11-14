@@ -515,8 +515,8 @@ describe('Users', function()  {
 								.send(userToModify)
 								.end((err, res) => {
 									res.should.have.status(200);
-									res.body.username.should.equal('modifiedUsername');
-									res.body.password.should.equal('bbb');
+									res.body.user.username.should.equal('modifiedUsername');
+									res.body.user.password.should.equal('bbb');
 									done();
 								});
 							});

@@ -52,7 +52,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 			username: dummyUser.username,
 			password: dummyUser.password,
 			facebookUserId: dummyUser.facebookuserid,
-			name: dummyUser.name,
+			firstName: dummyUser.name,
 			lastName: dummyUser.lastname,
 			country: dummyUser.country,
 			email: dummyUser.email,
@@ -120,23 +120,25 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         type: item.type,
         username: item.username,
 		facebookUserId: item.facebookuserid,
-        name: item.name,
+        firstName: item.name,
         lastName: item.lastname,
         country: item.country,
         email: item.email,
         birthdate: item.birthdate
       }
+	  // console.log('USER JSON &&&&&&&&&&&&&&&&&&&&&&');
+	  // console.log(jsonUser);
         userArray.push(jsonUser);
     });
-
+	// console.log(userArray);
     var jsonInResponse = {
       metadata: {
         version: api.apiVersion // falta completar
       },
       users: userArray
     };
-
-		return response.status(200).json(jsonInResponse);
+	// console.log(jsonInResponse);
+	return response.status(200).json(jsonInResponse);
 	})
 });
 
@@ -185,7 +187,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			username: user.username,
 			password: user.password,
 			facebookUserId: '',
-			name: user.name,
+			firstName: user.name,
 			lastName: user.lastname,
 			country: user.country,
 			email: user.email,
@@ -193,7 +195,10 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		  }
 		};
 		return response.status(201).json(jsonInResponse);
-	  });
+	  })
+	.catch(function (error) {
+			return response.status(409).json({code: 0, message: "Conflict: an user already exists with that username ("+request.body.username+")"});
+	});
   }
   // request has FACEBOOK USER ID && FACEBOOK TOKEN (facebook user)
   else if (/*!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) &&*/ !api.isEmpty(request.body.fb.userId) && !api.isEmpty(request.body.fb.authToken)) {
@@ -225,15 +230,18 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			username: '',
 			password: '',
 			facebookUserId: request.body.fb.userId,
-			name: user.name,
+			firstName: user.name,
 			lastName: user.lastname,
 			country: user.country,
 			email: user.email,
 			birthdate: user.birthdate
-		  }
+			}
 		};
 		return response.status(201).json(jsonInResponse);
-	  });
+	})
+	.catch(function (error) {
+			return response.status(409).json({code: 0, message: "Conflict: an user already exists with that Facebook User ID ("+request.body.fb.userId+")"});
+	});
   }
   else {
 	  return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes username/password ó fbUserId/fbToken)"});
@@ -268,7 +276,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				type: userFound.type,
 				username: userFound.username,
 				facebookUserId: userFound.facebookuserid,
-				name: userFound.name,
+				firstName: userFound.name,
 				lastName: userFound.lastname,
 				country: userFound.country,
 				email: userFound.email,
@@ -304,7 +312,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				User.find({where: {facebookuserid: facebookUserId}})
 					.then(userFound => {
 						if (!userFound) {
-							return response.status(412).json({code: 0, message: "Valid Facebook user not created in server, create first userId"+facebookUserId});
+							return response.status(412).json({code: 0, message: "Valid Facebook user not created in server, create first (FB userId: "+facebookUserId+")", userId: facebookUserId});
 						}
 						else {
 							var jsonInResponse = {
@@ -318,7 +326,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 									type: userFound.type,
 									username: userFound.username,
 									facebookUserId: userFound.facebookuserid,
-									name: userFound.name,
+									firstName: userFound.name,
 									lastName: userFound.lastname,
 									country: userFound.country,
 									email: userFound.email,
@@ -377,8 +385,28 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
     if (!user) {
       return response.status(404).json({code: 0, message: "User inexistente"});
     }
+	
+	var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  user: {
+			id: user.id,
+			_ref: user._ref,
+			applicationOwner: user.applicationowner,
+			type: user.type,
+			username: user.username,
+			password: user.password,
+			facebookUserId: user.facebookuserid,
+			firstName: user.name,
+			lastName: user.lastname,
+			country: user.country,
+			email: user.email,
+			birthdate: user.birthdate
+			}
+		};
 
-    return response.status(200).json(user);
+    return response.status(200).json(jsonInResponse);
   }).catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -441,7 +469,28 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 			email: localEmail,
 			birthdate: localBirthdate
 		  }).then(updatedUser => {
-			return response.status(200).json(updatedUser);
+			  
+			  var jsonInResponse = {
+				  metadata: {
+					version: api.apiVersion 
+				  },
+				  user: {
+					id: user.id,
+					_ref: user._ref,
+					applicationOwner: user.applicationowner,
+					type: user.type,
+					username: user.username,
+					password: user.password,
+					facebookUserId: user.facebookuserid,
+					firstName: user.name,
+					lastName: user.lastname,
+					country: user.country,
+					email: user.email,
+					birthdate: user.birthdate
+					}
+				};
+			  
+			return response.status(200).json(jsonInResponse);
 		  });
       } else {
 		return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
