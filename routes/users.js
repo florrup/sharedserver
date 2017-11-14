@@ -195,7 +195,10 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		  }
 		};
 		return response.status(201).json(jsonInResponse);
-	  });
+	  })
+	.catch(function (error) {
+			return response.status(409).json({code: 0, message: "Conflict: an user already exists with that username ("+request.body.username+")"});
+	});
   }
   // request has FACEBOOK USER ID && FACEBOOK TOKEN (facebook user)
   else if (/*!api.isEmpty(request.body._ref) && !api.isEmpty(request.body.type) &&*/ !api.isEmpty(request.body.fb.userId) && !api.isEmpty(request.body.fb.authToken)) {
@@ -235,7 +238,10 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			}
 		};
 		return response.status(201).json(jsonInResponse);
-	  });
+	})
+	.catch(function (error) {
+			return response.status(409).json({code: 0, message: "Conflict: an user already exists with that Facebook User ID ("+request.body.fb.userId+")"});
+	});
   }
   else {
 	  return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes username/password ó fbUserId/fbToken)"});
