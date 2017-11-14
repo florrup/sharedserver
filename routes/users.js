@@ -469,7 +469,27 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 			email: localEmail,
 			birthdate: localBirthdate
 		  }).then(updatedUser => {
-			return response.status(200).json(updatedUser);
+			  
+			  var jsonInResponse = {
+				  metadata: {
+					version: api.apiVersion 
+				  },
+				  user: {
+					id: user.id,
+					_ref: user._ref,
+					applicationOwner: user.applicationowner,
+					type: user.type,
+					username: user.username,
+					facebookUserId: user.facebookuserid,
+					firstName: user.name,
+					lastName: user.lastname,
+					country: user.country,
+					email: user.email,
+					birthdate: user.birthdate
+					}
+				};
+			  
+			return response.status(200).json(jsonInResponse);
 		  });
       } else {
 		return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
