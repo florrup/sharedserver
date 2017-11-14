@@ -126,17 +126,19 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         email: item.email,
         birthdate: item.birthdate
       }
+	  // console.log('USER JSON &&&&&&&&&&&&&&&&&&&&&&');
+	  // console.log(jsonUser);
         userArray.push(jsonUser);
     });
-
+	// console.log(userArray);
     var jsonInResponse = {
       metadata: {
         version: api.apiVersion // falta completar
       },
       users: userArray
     };
-
-		return response.status(200).json(jsonInResponse);
+	// console.log(jsonInResponse);
+	return response.status(200).json(jsonInResponse);
 	})
 });
 
@@ -230,7 +232,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			country: user.country,
 			email: user.email,
 			birthdate: user.birthdate
-		  }
+			}
 		};
 		return response.status(201).json(jsonInResponse);
 	  });
@@ -377,8 +379,28 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
     if (!user) {
       return response.status(404).json({code: 0, message: "User inexistente"});
     }
+	
+	var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  user: {
+			id: user.id,
+			_ref: user._ref,
+			applicationOwner: user.applicationowner,
+			type: user.type,
+			username: user.username,
+			password: user.password,
+			facebookUserId: user.facebookuserid,
+			name: user.name,
+			lastName: user.lastname,
+			country: user.country,
+			email: user.email,
+			birthdate: user.birthdate
+			}
+		};
 
-    return response.status(200).json(user);
+    return response.status(200).json(jsonInResponse);
   }).catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
