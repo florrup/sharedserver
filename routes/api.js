@@ -9,6 +9,7 @@ router.use('/business-users', require('./business-users'));
 router.use('/rules', require('./rules'));
 router.use('/trips', require('./trips'));
 router.use('/token', require('./token'));
+router.use('/paymethods', require('./paymethods'));
 
 // API Version
 var apiVersion = '1.0';

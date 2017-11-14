@@ -6,7 +6,11 @@
         "DATABASE_USER": "yvnmgtvwznipcx",
         "DATABASE_HOST": "ec2-184-73-249-56.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
-		"DATABASE_DIALECT": "postgres"
+		"DATABASE_DIALECT": "postgres",
+		"PAYMENTS_API_URL":"https://shielded-escarpment-27661.herokuapp.com",
+		"PAYMENTS_API_VERSION_URL":"/api/v1/",
+		"PAYMENTS_API_CLIENT_ID":"9cbe347f-4b18-4968-9ccd-d97f33b16567",
+		"PAYMENTS_API_CLIENT_SECRET":"74b005ef-7cbf-4b65-a636-f2cbc83fe893"
     },
 	"test": {
         "DATABASE_PASS": "d2158d028efa41843d2788c28396c02b4bb47b9e2b0c207ad99f1c1dc266466e",
@@ -15,7 +19,11 @@
         "DATABASE_USER": "yvnmgtvwznipcx",
         "DATABASE_HOST": "ec2-184-73-249-56.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
-		"DATABASE_DIALECT": "postgres"
+		"DATABASE_DIALECT": "postgres",
+		"PAYMENTS_API_URL":"https://shielded-escarpment-27661.herokuapp.com",
+		"PAYMENTS_API_VERSION_URL":"/api/v1/",
+		"PAYMENTS_API_CLIENT_ID":"9cbe347f-4b18-4968-9ccd-d97f33b16567",
+		"PAYMENTS_API_CLIENT_SECRET":"74b005ef-7cbf-4b65-a636-f2cbc83fe893"
     },
  
 	"test2": {
@@ -25,7 +33,11 @@
         "DATABASE_USER": "yvnmgtvwznipcx",
         "DATABASE_HOST": "ec2-184-73-249-56.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
-		"DATABASE_DIALECT": "postgres"
+		"DATABASE_DIALECT": "postgres",
+		"PAYMENTS_API_URL":"https://shielded-escarpment-27661.herokuapp.com",
+		"PAYMENTS_API_VERSION_URL":"/api/v1/",
+		"PAYMENTS_API_CLIENT_ID":"9cbe347f-4b18-4968-9ccd-d97f33b16567",
+		"PAYMENTS_API_CLIENT_SECRET":"74b005ef-7cbf-4b65-a636-f2cbc83fe893"
     },
 	
     "santi_local_test": {
@@ -35,7 +47,11 @@
         "DATABASE_USER": "yvnmgtvwznipcx",
         "DATABASE_HOST": "ec2-184-73-249-56.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
-		"DATABASE_DIALECT": "postgres"
+		"DATABASE_DIALECT": "postgres",
+		"PAYMENTS_API_URL":"https://shielded-escarpment-27661.herokuapp.com",
+		"PAYMENTS_API_VERSION_URL":"/api/v1/",
+		"PAYMENTS_API_CLIENT_ID":"9cbe347f-4b18-4968-9ccd-d97f33b16567",
+		"PAYMENTS_API_CLIENT_SECRET":"74b005ef-7cbf-4b65-a636-f2cbc83fe893"
     },
  
     "production": {
@@ -45,6 +61,10 @@
         "DATABASE_USER": "nvvgpxztxxdugy",
         "DATABASE_HOST": "ec2-23-23-234-118.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
-		"DATABASE_DIALECT": "postgres"
+		"DATABASE_DIALECT": "postgres",
+		"PAYMENTS_API_URL":"https://shielded-escarpment-27661.herokuapp.com",
+		"PAYMENTS_API_VERSION_URL":"/api/v1/",
+		"PAYMENTS_API_CLIENT_ID":"9cbe347f-4b18-4968-9ccd-d97f33b16567",
+		"PAYMENTS_API_CLIENT_SECRET":"74b005ef-7cbf-4b65-a636-f2cbc83fe893"
     }
 }
