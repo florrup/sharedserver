@@ -12,6 +12,8 @@ var Trip = models.trip; // the model keyed by its name
 var Verify = require('./verify');
 var api = require('./api');
 
+const urlRequest = require('request-promise'); // to hit google api
+
 // Review this line to open table
 // CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), driverId VARCHAR(20), passangerId VARCHAR(20), startAddressStreet VARCHAR(40), startAddressLocationLat VARCHAR(40), startAddressLocationLon VARCHAR(40), startTimestamp VARCHAR(40), endAddressStreet VARCHAR(40), endAddressLocationLat VARCHAR(20), endAddressLocationLon VARCHAR(20), endTimestamp VARCHAR(20), totalTime VARCHAR(20), waitTime VARCHAR(20), travelTime VARCHAR(20), distance VARCHAR(20), route VARCHAR(20), costCurrency VARCHAR(20), costValue VARCHAR(20));
 
@@ -98,7 +100,14 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 		if (!trips) {
 			return response.status(500).json({code: 0, message: "Unexpected error at endpoint GET /trips"});
 		}
-		return response.status(200).json(trips);
+		
+		var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion
+			},
+			trips: trips
+		};
+		return response.status(200).json(jsonInResponse);
 	})
 });
 
@@ -114,7 +123,11 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		|| api.isEmpty(request.body.cost.currency) || api.isEmpty(request.cost.value)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
-
+	
+	// Payments API: cobrar al pasajero
+	
+	// Payments API: pagar al conductor
+	
 	Trip.create({
 		// id: 0,
 		_ref: '',
@@ -139,7 +152,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 	}).then(trip => {
 			/* istanbul ignore if  */
 			if (!trip) {
-				return response.status(500).json({code: 0, message: "Unexpected error"});
+				return response.status(500).json({code: 0, message: "Unexpected error while trying to save a payment"});
 			} else {
 				var jsonInResponse = {
 					id: trip.id,
@@ -185,8 +198,51 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
  *  Consultar la cotización de un viaje
  */
 router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
-	/// \brief todo implement this method
-	return response.status(500).json({code: 0, message: "This method: POST /trip/estimate is not yet implemented"});
+	
+	if (api.isEmpty(request.body.passanger) 
+			|| api.isEmpty(request.body.start.address.location.lat) || api.isEmpty(request.body.start.address.location.lon)
+			|| api.isEmpty(request.body.end.address.location.lat) || api.isEmpty(request.body.end.address.location.lat))
+	{
+		return response.status(400).json({code: 0, message: "This method: POST /trip/estimate is not yet implemented"});
+	}
+	
+	var googleAPIPath = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
+	googleAPIPath = googleAPIPath+request.body.start.address.location.lat+','+request.body.start.address.location.lon;
+	googleAPIPath = googleAPIPath+'&destination='+request.body.end.address.location.lat+','+request.body.end.address.location.lon;
+	googleAPIPath = googleAPIPath+'&alternatives=true';
+	
+	const options = {
+					method: 'GET',
+					uri: googleAPIPath,
+					/*
+					auth: {
+						bearer: paymentsToken
+					}
+					
+					headers: {
+						// 'User-Agent': 'Request-Promise',
+						Authorization: 'Bearer '+paymentsToken
+					}
+					*/
+				};
+				
+			urlRequest(options)
+				.then(googleMapsApiResponse => {
+					var res = JSON.parse(googleMapsApiResponse);
+					/// \TODO traer de rules -> Facts el precio por kilómetro para meter acá
+					var valorEstimado = 50 * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
+					
+					var jsonInResponse = {
+						metadata: {
+							version: api.apiVersion
+						},
+						cost: {
+							currency: '$AR',
+							value: valorEstimado
+						}
+					};
+					return response.status(200).json(jsonInResponse);
+				});
 });
 
 

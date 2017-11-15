@@ -26,6 +26,7 @@ describe('Trips', function()  {
 	var serversAPI = require('../routes/trips');
 
 	describe('/GET Trips', function() {
+		
 		it('it should have no permission to access servers without token', function(done) {
 			this.timeout(15000);
 			chai.request(baseUrl)
@@ -41,76 +42,48 @@ describe('Trips', function()  {
 						});
 				});
 		});
-/*
-		it('it should GET a specific server', function(done) {
+	});
+	
+	describe('/POST estimate', function() {
+	  	it('it should POST to estimate a trip', function(done) {
 			this.timeout(15000);
-
-			serversAPI.clearServersTable()
-			.then( function(fulfilled){
+			
+			chai.request(baseUrl)
+			.get('/servers/initAndWriteDummyServer/')
+			.end((err,res) => {
+				var token = res.body.serverToken;
+				
+				var tripToEstimate = {
+					passanger: 4,
+					start: {
+						address: {
+							location: {
+								lat: -34.803963,
+								lon: -58.454125
+							}
+						}
+					},
+					end: {
+						address: {
+							location: {
+								lat: -34.80198421544148,
+								lon: -58.44340190291405
+							}
+						}
+					}
+				};
 				
 				chai.request(baseUrl)
-				.post('/token/')
-				.set('content-type', 'application/json')
-				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.post('/trips/estimate')
+				.set(token_header_flag, token)
+				.send(tripToEstimate)
 				.end((err, res) => {
-					console.log('Is this body w token?: ', res.body);
-					var token = res.body.token.token;
-
-					var serverToGet = {
-						id: 12,
-						_ref: 'abc12',
-						createdBy: 12,
-						createdTime: 'testTime12',
-						name: 'Test12',
-						lastConnection: 12
-					};
-
-					chai.request(baseUrl)
-					.post('/servers/')
-					.set(token_header_flag, token)
-					.send(serverToGet)
-					.end((err, res) => {
-						chai.request(baseUrl)
-						.get('/servers/' + serverToGet.id)
-						.set(token_header_flag, token)
-						.end((err, res) => {
-							res.should.have.status(200);
-							res.body.should.have.property('metadata');
-							res.body.should.have.property('server');
-							res.body.server.name.should.equal(serverToGet.name);
-							done();
-						});
-					});
+					console.log('res:');
+					console.log(res.body);
+					res.should.have.status(200);
+					done();
 				});
 			});
 		});
-
-		it('it shouldn\'t GET a specific missing server', function(done) {
-			this.timeout(15000);
-
-			serversAPI.clearServersTable()
-			.then( function(fulfilled){
-				
-				chai.request(baseUrl)
-				.post('/token/')
-				.set('content-type', 'application/json')
-				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
-				.end((err, res) => {
-					console.log('Is this body w token?: ', res.body);
-					var token = res.body.token.token;
-
-					chai.request(baseUrl)
-					.get('/servers/' + '3')
-					.set(token_header_flag, token)
-					.end((err, res) => {
-						res.should.have.status(404);
-						res.body.should.have.property('code');
-						res.body.should.have.property('message');
-						done();
-					});
-				});
-			});
-		});
-		*/
 	});
 });
