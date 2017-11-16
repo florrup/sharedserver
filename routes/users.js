@@ -149,7 +149,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
   console.log('/user/:POST');
   console.log(request.body);
-  console.log(request.body.fb);
+  // console.log(request.body.fb);
   // si hay algún parámetro faltante
   if ((api.isEmpty(request.body.username) || api.isEmpty(request.body.password)) && api.isEmpty(request.body.fb.authToken)) {
 	  console.log('Missing either fb.authToken or username or password')
