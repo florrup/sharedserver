@@ -187,11 +187,10 @@ describe('Rules', function()  {
 									};
 
 									// Corre las exampleRules
-									// R.runExampleEngine(R.exampleRules, fact);
+									// R.runExampleEngine(R.exampleRules, fact); // Corre OK
 
 									// Corre la RuleNombrePrueba definida arriba
-									// R.runEngine(res.body.rules, fact); // TODO NO ESTÁ PUDIENDO CORRERLA
-									R.runEngine(rulesToEngine, fact);
+									R.runEngine(rulesToEngine, fact); // reason: Probando prueba string OK
 
 									done();
 								});

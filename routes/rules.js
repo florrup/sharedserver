@@ -10,12 +10,14 @@ var api = require('./api.js');
 
 var models = require('../models/db'); // loads db.js
 var Rule = models.rule; 
+var RuleChange = models.rulechange;
 
 var Verify = require('./verify');
 var RulesEngine = require('./rulesEngine');
 
-// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blob JSON, active BOOLEAN);
+// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), active BOOLEAN);
 
+// CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser INTEGER);
 
 /**
  *  Método para eliminar todas las reglas y commits asociados
@@ -25,7 +27,7 @@ router.get('/dropRuleTable', function(request, response) {
   // force: true will drop the table if it already exists
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     Rule.sync({force: true}).then(() => {
-      return response.status(200).json({});
+    	return response.status(200).json({});
     }).catch(function (error) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -118,31 +120,47 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 		  return response.status(500).json({code: 0, message: "Unexpected error"});
 		}
 		
-		var responseBlob = {
-			name: rule.name,
-			condition: rule.blobCondition,
-			consequence: rule.blobConsequence,
-			priority: rule.blobPriority
-		};
-		var jsonInResponse = {
-		  metadata: {
-			version: api.apiVersion 
-		  },
-		  rule: {
-			id: rule.id,
-			_ref: rule._ref,
-			language: rule.language,
-			blob: responseBlob,
-			active: rule.active
-		  }
-		};
-		return response.status(201).json(jsonInResponse);
+		RuleChange.create({
+			_ref: '',
+			name: request.body.blob.name,
+			blobcondition: request.body.blob.condition,
+			blobconsequence: request.body.blob.consequence,
+			blobpriority: request.body.blob.priority,
+			active: request.body.active,
+			reason: 'Creación de rule',
+			time: new Date(),
+			businessuser: 1 // TODO obtener id del businessuser que está haciendo el cambio
+		}).then(ruleChange => {	
+			if (!ruleChange) {
+			  return response.status(500).json({code: 0, message: "Unexpected error. Couldn't make the commit"});
+			}
+			var responseBlob = {
+				name: rule.name,
+				condition: rule.blobCondition,
+				consequence: rule.blobConsequence,
+				priority: rule.blobPriority
+			};
+			var jsonInResponse = {
+			  metadata: {
+				version: api.apiVersion 
+			  },
+			  rule: {
+				id: rule.id,
+				_ref: rule._ref,
+				language: rule.language,
+				blob: responseBlob,
+				active: rule.active
+			  }
+			};
+
+			return response.status(201).json(jsonInResponse);
+		})
+
 	  }).catch(function (error) {
 		/* istanbul ignore next  */
+		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
-
-  // Agregar commit del autor. Si la regla ya existe tirar error (para actualizar debe usar put)
 });
 
 /**
