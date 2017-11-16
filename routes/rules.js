@@ -132,7 +132,7 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 			businessuser: 1 // TODO obtener id del businessuser que está haciendo el cambio
 		}).then(ruleChange => {	
 			if (!ruleChange) {
-			  return response.status(500).json({code: 0, message: "Unexpected error. Couldn't make the commit"});
+			  return response.status(500).json({code: 0, message: "Unexpected error. Couldn't create the commit"});
 			}
 			var responseBlob = {
 				name: rule.name,
@@ -192,20 +192,35 @@ router.post('/run', Verify.verifyToken, Verify.verifyManagerRole, function(reque
  *  Elimina una regla
  */
 router.delete('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-	
+	console.log("RULE ID ES" + request.params.ruleId + "\n\n\n\n\n");
 	Rule.destroy({
     where: {
-		id: request.params.ruleId
+		name: request.params.ruleId
 		}
 	})
-	.then(affectedRows => {
-			if (affectedRows == 0) {
-			  return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
-			}
-			
-			/// \TODO eliminar commits de la regla en tabla de commits?
-			
+	.then(affectedRow => {
+		if (affectedRow == 0) {
+		  return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+		}
+		
+		// Crea commit de eliminación de la regla 
+		RuleChange.create({
+			_ref: '',
+			name: affectedRow.name,
+			blobcondition: affectedRow.blobCondition,
+			blobconsequence: affectedRow.blobConsequence,
+			blobpriority: affectedRow.blobPriority,
+			active: affectedRow.active,
+			reason: 'Borrado de rule',
+			time: new Date(),
+			businessuser: 1 // TODO obtener id del businessuser que está haciendo el cambio
+		}).then(ruleChange => {
+			console.log("The reason is:" + ruleChange.reason + "\n\n\n");
 			return response.status(204).json({});
+		}).catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error. Couldn't delete the commit"});
+		});
 	})
 	.catch(function (error) {
 		/* istanbul ignore next  */
