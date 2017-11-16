@@ -27,7 +27,12 @@ router.get('/dropRuleTable', function(request, response) {
   // force: true will drop the table if it already exists
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     Rule.sync({force: true}).then(() => {
-    	return response.status(200).json({});
+    	RuleChange.sync({force: true}).then(() => {
+	    	return response.status(200).json({});
+	    }).catch(function (error) {
+	      /* istanbul ignore next  */
+	      return response.status(500).json({code: 0, message: "Unexpected error"});
+	    });
     }).catch(function (error) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -59,7 +64,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, res
 			var jsonRule = {
 				id: item.id,
 			    _ref: item._ref,
-			    language: item.language,
+			    language: item.language,	// TODO falta agregar información del usuario que hizo el last commit
 			    blob: jsonRuleBlob,
 			    active: item.active
 			}
@@ -92,24 +97,14 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 		priority: request.body.blob.priority
 	};
 	var blobJSONStringified = JSON.stringify(blobJSON);
-	/*
-	var ruleJSON = {
-		name: request.body.blob.name,
-		language: request.body.language,
-		blobCondition: request.body.blob.condition,
-		blobConsequence: request.body.blob.consequence,
-		blobPriority: request.body.blob.priority,
-		active: request.body.active
-	};
-	*/
+
 	console.log('LOG BLOB:');
 	console.log(blobJSON);
 
 	Rule.create({
 		_ref: '', //request.body._ref,
 		name: request.body.blob.name,
-		language: request.body.language, // request.body.language, 
-		// blob: blobJSONStringified, // JSON.parse(request.body.rule.blob), // request.body.blob,
+		language: request.body.language, 
 		blobCondition: request.body.blob.condition,
 		blobConsequence: request.body.blob.consequence,
 		blobPriority: request.body.blob.priority,
@@ -147,7 +142,7 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 			  rule: {
 				id: rule.id,
 				_ref: rule._ref,
-				language: rule.language,
+				language: rule.language, // TODO falta poner información del usuario que hizo el post
 				blob: responseBlob,
 				active: rule.active
 			  }
@@ -234,23 +229,41 @@ router.delete('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function
 router.get('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
 	Rule.find({
 		where: {
-		  id: request.params.ruleId
+		  name: request.params.ruleId
 		}
 	}).then(rule => {
 		if (!rule) {
+			/* istanbul ignore next */
 		  return response.status(404).json({code: 0, message: "Rule inexistente"});
 		}
 
-		///\TODO get last commit and insert in response JSON
-		
-		var jsonInResponse = {
+		RuleChange.find({
+			where: {
+				name: request.params.ruleId
+			}
+		}).then(ruleChange => {
+			///\TODO get businessuser info from last commit and insert in response JSON
+			var responseBlob = {
+				name: rule.name,
+				condition: rule.blobCondition,
+				consequence: rule.blobConsequence,
+				priority: rule.blobPriority
+			};
+			var jsonInResponse = {
 				metadata: {
 					version: api.apiVersion // falta completar
 				},
-				rule: '' // api specification mentions 'facts' here
+				rule: {
+					id: rule.ruleId,
+					language: rule.language,
+					blob: responseBlob,
+					active: rule.active
+				}
 			};
-			
-		return response.status(200).json(jsonInResponse);
+				
+			return response.status(200).json(jsonInResponse);
+		})
+
 	}).catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});

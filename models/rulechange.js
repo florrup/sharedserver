@@ -22,13 +22,13 @@ module.exports = function(sequelize, DataTypes) {
     name: {
       type: Sequelize.STRING
     },
-    blobCondition: {
+    blobcondition: {
       type: Sequelize.STRING
     },
-    blobConsequence: {
+    blobconsequence: {
       type: Sequelize.STRING
     },
-    blobPriority: {
+    blobpriority: {
       type: Sequelize.STRING
     },
     active: {
@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     businessuser: {
-      type: Sequelize.INTEGER // id del business user que hizo el cambio
+      type: Sequelize.INTEGER // TODO deberiamos guardar aca un json con todos los datos del businessuser que hizo el cambio
     }
   }, {
     timestamps: false
