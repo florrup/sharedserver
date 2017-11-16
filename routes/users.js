@@ -9,6 +9,8 @@ const Sequelize = require('sequelize');
 var models = require('../models/db'); // loads db.js
 var User = models.user;
 var Car = models.car;
+var Trip = models.trip;
+var Transaction = models.transaction;
 
 var Verify = require('./verify');
 var api = require('./api');
@@ -499,6 +501,113 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
+});
+
+
+/**
+ *  Devuelve todos los viajes del usuario
+ *
+ */
+router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+	
+	// We only return trips as driver or as passanger, user can only be of one type
+	
+	var isADriver = false;
+	var tripsFound = [];
+	/* istanbul ignore next */
+	Car.findAll({
+		where: {
+		  owner: request.params.userId
+		}
+	}).then(carsFound => {
+		if (carsFound){
+			if(carsFound.length > 0){
+				isADriver = true;
+			}
+		}
+	});
+	/* istanbul ignore next */
+	if (!isADriver){
+		Trip.findAll({
+			passangerId: request.params.userId
+		}).then(tripsFoundAsPassanger => {
+			tripsFound = tripsFoundAsPassanger;
+		}).catch(function (error) {
+			return response.status(500).json({code: 0, message: "Unexpected error"});
+		});
+	/* istanbul ignore next */
+	} else {
+		Trip.findAll({
+			driverId: request.params.userId
+		}).then(tripsFoundAsPassanger => {
+			tripsFound = tripsFoundAsPassanger;
+		}).catch(function (error) {
+			return response.status(500).json({code: 0, message: "Unexpected error"});
+		});
+	}
+	/* istanbul ignore next */
+	var jsonInResponse = {
+		metadata: {
+			version: api.apiVersion
+		},
+		trips: tripsFound
+	};
+	/* istanbul ignore next */
+	return response.status(200).json(jsonInResponse);
+});
+
+/**
+ *  Devuelve todas las transacciones que hizo el usuario ¿y que no pudieron ejecutarse con la API de pagos remota?
+ *
+ */
+router.get('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+});
+
+/**
+ *  Crea un registro de pago local para afectar el balance del usuario cuando no está disponible la API de pagos remota
+ *
+ */
+router.post('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+	if (api.isEmpty(request.body.tripid) || api.isEmpty(request.body.cost.currency) || api.isEmpty(request.body.cost.value)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones al registrar pago localmente (parámetros faltantes)"});
+	}
+	
+	var description='';
+	if (!api.isEmpty(request.body.description)){
+		description = request.body.description;
+	}
+	var millisecondsEpochTime = (new Date).getTime();
+	
+	Transaction.create({
+		// id is autoincremental
+		_ref: '',
+		userid: request.params.userId,
+		tripid: request.body.tripid,
+		timestamp: millisecondsEpochTime,
+		costcurrency: request.body.cost.currency,
+		costvalue: request.body.cost.value,
+		description: description
+	}).then(newTransaction => {
+		var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion // falta completar
+			},
+			transaction: {
+				id: newTransaction.userid,
+				trip: newTransaction.tripid,
+				timestamp: newTransaction.timestamp,
+				cost: {
+					currency: newTransaction.costcurrency,
+					value: newTransaction.costvalue
+				},
+				description: newTransaction.description
+			}
+		};
+    return response.status(200).json(jsonInResponse); 
+	})
+	.catch(function (error) {
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
 });
 
 //CREATE TABLE cars(id SERIAL PRIMARY KEY, _ref VARCHAR(20), owner INT, properties jsonb[]);
