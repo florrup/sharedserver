@@ -240,9 +240,9 @@ router.get('/:businessuserId', Verify.verifyToken, Verify.verifyUserRole, functi
  */
 router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
 	console.log(request.body + ' is the body \n');
-	console.log(request.decoded.username + '\n\n\n');
+	console.log(request.body.decoded.username + '\n\n\n');
 
-	var username = request.decoded.username; // or request?
+	var username = request.body.decoded.username; // or request?
 	BusinessUser.find({
 		where: {
 			username: username
@@ -279,7 +279,7 @@ router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
  *
  */
 router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
-	var username = request.decoded.username;
+	var username = request.body.decoded.username;
 	BusinessUser.find({
 		where: {
 			username: username
