@@ -151,6 +151,10 @@ describe('Rules', function()  {
 								res.body.rule.should.have.property('_ref');
 								res.body.rule.should.have.property('language');
 								res.body.rule.should.have.property('blob');
+								res.body.rule.should.have.property('active');
+								res.body.rule.should.have.property('lastCommit');
+
+								console.log(res.body.rule.lastCommit);
 
 								chai.request(baseUrl)
 								.get('/rules/')

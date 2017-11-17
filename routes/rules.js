@@ -11,13 +11,14 @@ var api = require('./api.js');
 var models = require('../models/db'); // loads db.js
 var Rule = models.rule; 
 var RuleChange = models.rulechange;
+var BusinessUser = models.businessuser;
 
 var Verify = require('./verify');
 var RulesEngine = require('./rulesEngine');
 
 // CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), active BOOLEAN);
 
-// CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser INTEGER);
+// CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser VARCHAR(255), userinfo VARCHAR(255));
 
 /**
  *  Método para eliminar todas las reglas y commits asociados
@@ -98,9 +99,6 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 	};
 	var blobJSONStringified = JSON.stringify(blobJSON);
 
-	console.log('LOG BLOB:');
-	console.log(blobJSON);
-
 	Rule.create({
 		_ref: '', //request.body._ref,
 		name: request.body.blob.name,
@@ -115,42 +113,64 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 		  return response.status(500).json({code: 0, message: "Unexpected error"});
 		}
 		
-		RuleChange.create({
-			_ref: '',
-			name: request.body.blob.name,
-			blobcondition: request.body.blob.condition,
-			blobconsequence: request.body.blob.consequence,
-			blobpriority: request.body.blob.priority,
-			active: request.body.active,
-			reason: 'Creación de rule',
-			time: new Date(),
-			businessuser: 1 // TODO obtener id del businessuser que está haciendo el cambio
-		}).then(ruleChange => {	
-			if (!ruleChange) {
-			  return response.status(500).json({code: 0, message: "Unexpected error. Couldn't create the commit"});
+		BusinessUser.find({
+			where: {
+				username: request.decoded.username // username of the businessuser that's trying to post the rule
 			}
-			var responseBlob = {
-				name: rule.name,
-				condition: rule.blobCondition,
-				consequence: rule.blobConsequence,
-				priority: rule.blobPriority
-			};
-			var jsonInResponse = {
-			  metadata: {
-				version: api.apiVersion 
-			  },
-			  rule: {
-				id: rule.id,
-				_ref: rule._ref,
-				language: rule.language, // TODO falta poner información del usuario que hizo el post
-				blob: responseBlob,
-				active: rule.active
-			  }
+		}).then(businessuser => {
+			if (!businessuser) {
+			  return response.status(500).json({code: 0, message: "Unexpected error. Couldn't find a businessuser"});
+			}
+
+			var lastCommitJSON = {
+				author: {
+					id: businessuser.id,
+					_ref: businessuser._ref,
+					username: businessuser.username,
+					password: businessuser.password,
+					name: businessuser.name,
+					roles: businessuser.roles
+				}
 			};
 
-			return response.status(201).json(jsonInResponse);
-		})
+			RuleChange.create({
+				_ref: '',
+				name: request.body.blob.name,
+				blobcondition: request.body.blob.condition,
+				blobconsequence: request.body.blob.consequence,
+				blobpriority: request.body.blob.priority,
+				active: request.body.active,
+				reason: 'Creación de rule',
+				time: new Date(),
+				businessuser: businessuser.id,
+				userinfo: JSON.stringify(lastCommitJSON)
+			}).then(ruleChange => {	
+				if (!ruleChange) {
+				  return response.status(500).json({code: 0, message: "Unexpected error. Couldn't create the commit"});
+				}
+				var responseBlob = {
+					name: rule.name,
+					condition: rule.blobCondition,
+					consequence: rule.blobConsequence,
+					priority: rule.blobPriority
+				};
+				var jsonInResponse = {
+				  metadata: {
+					version: api.apiVersion 
+				  },
+				  rule: {
+					id: rule.id,
+					_ref: rule._ref,
+					language: rule.language, // TODO falta poner información del usuario que hizo el post
+					blob: responseBlob,
+					active: rule.active,
+					lastCommit: ruleChange.userinfo
+				  }
+				};
 
+				return response.status(201).json(jsonInResponse);
+			});
+		});
 	  }).catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);

@@ -41,7 +41,10 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     businessuser: {
-      type: Sequelize.INTEGER // TODO deberiamos guardar aca un json con todos los datos del businessuser que hizo el cambio
+      type: Sequelize.STRING // TODO deberiamos guardar aca un json con todos los datos del businessuser que hizo el cambio
+    },
+    userinfo: {
+      type: Sequelize.STRING
     }
   }, {
     timestamps: false
