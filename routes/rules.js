@@ -161,7 +161,7 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 				  rule: {
 					id: rule.id,
 					_ref: rule._ref,
-					language: rule.language, // TODO falta poner información del usuario que hizo el post
+					language: rule.language, 
 					blob: responseBlob,
 					active: rule.active,
 					lastCommit: ruleChange.userinfo
@@ -217,24 +217,44 @@ router.delete('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function
 		if (affectedRow == 0) {
 		  return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
-		
-		// Crea commit de eliminación de la regla 
-		RuleChange.create({
-			_ref: '',
-			name: affectedRow.name,
-			blobcondition: affectedRow.blobCondition,
-			blobconsequence: affectedRow.blobConsequence,
-			blobpriority: affectedRow.blobPriority,
-			active: affectedRow.active,
-			reason: 'Borrado de rule',
-			time: new Date(),
-			businessuser: 1 // TODO obtener id del businessuser que está haciendo el cambio
-		}).then(ruleChange => {
-			console.log("The reason is:" + ruleChange.reason + "\n\n\n");
-			return response.status(204).json({});
-		}).catch(function (error) {
-		/* istanbul ignore next  */
-		return response.status(500).json({code: 0, message: "Unexpected error. Couldn't delete the commit"});
+		BusinessUser.find({
+			where: {
+				username: request.decoded.username // username of the businessuser that's trying to delete the rule
+			}
+		}).then(businessuser => {
+			if (businessuser == 0) {
+			  return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
+			}
+
+			var lastCommitJSON = {
+				author: {
+					id: businessuser.id,
+					_ref: businessuser._ref,
+					username: businessuser.username,
+					password: businessuser.password,
+					name: businessuser.name,
+					roles: businessuser.roles
+				}
+			};
+
+			// Crea commit de eliminación de la regla 
+			RuleChange.create({
+				_ref: '',
+				name: affectedRow.name,
+				blobcondition: affectedRow.blobCondition,
+				blobconsequence: affectedRow.blobConsequence,
+				blobpriority: affectedRow.blobPriority,
+				active: affectedRow.active,
+				reason: 'Borrado de rule',
+				time: new Date(),
+				businessuser: businessuser.id, 
+				userinfo: JSON.stringify(lastCommitJSON)
+			}).then(ruleChange => {
+				return response.status(204).json({});
+			}).catch(function (error) {
+			/* istanbul ignore next  */
+			return response.status(500).json({code: 0, message: "Unexpected error. Couldn't delete the commit"});
+			});
 		});
 	})
 	.catch(function (error) {
@@ -256,36 +276,86 @@ router.get('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
 			/* istanbul ignore next */
 		  return response.status(404).json({code: 0, message: "Rule inexistente"});
 		}
-
-		RuleChange.find({
+		console.log("LLEGA ACA\n\n\n");
+		RuleChange.findAll({
+			limit: 1,
 			where: {
 				name: request.params.ruleId
-			}
-		}).then(ruleChange => {
-			///\TODO get businessuser info from last commit and insert in response JSON
-			var responseBlob = {
-				name: rule.name,
-				condition: rule.blobCondition,
-				consequence: rule.blobConsequence,
-				priority: rule.blobPriority
-			};
-			var jsonInResponse = {
-				metadata: {
-					version: api.apiVersion // falta completar
-				},
-				rule: {
-					id: rule.ruleId,
-					language: rule.language,
-					blob: responseBlob,
-					active: rule.active
-				}
-			};
-				
-			return response.status(200).json(jsonInResponse);
-		})
+			},
+  			order: [ [ 'id', 'DESC' ]] // por ser el id autoincremental, me quedo con el mayor
+		}).then(ruleChanges => {
+			if (ruleChanges == 0) { // there are no commits that correspond to that rule
+				var lastCommitJSON = {
+					author: {
+						id: '',
+						_ref: '',
+						username: '',
+						password: '',
+						name: '',
+						roles: ''
+					}
+				};
+				var responseBlob = {
+					name: rule.name,
+					condition: rule.blobCondition,
+					consequence: rule.blobConsequence,
+					priority: rule.blobPriority
+				};
+				var jsonInResponse = {
+					metadata: {
+						version: api.apiVersion // falta completar
+					},
+					rule: {
+						id: rule.ruleId,
+						language: rule.language,
+						blob: responseBlob,
+						active: rule.active,
+						lastCommit: JSON.stringify(lastCommitJSON)
+					}
+				};
+				return response.status(200).json(jsonInResponse);
+			} else { // there is a commit that corresponds to that rule
+				BusinessUser.find({
+					where: {
+						id: (ruleChanges[ruleChanges.length-1].businessuser).toString() // gets the id of the businessuser that made the last commit
+					}
+				}).then(businessuser => {
 
+					var lastCommitJSON = {
+						author: {
+							id: businessuser.id,
+							_ref: businessuser._ref,
+							username: businessuser.username,
+							password: businessuser.password,
+							name: businessuser.name,
+							roles: businessuser.roles
+						}
+					};
+					var responseBlob = {
+						name: rule.name,
+						condition: rule.blobCondition,
+						consequence: rule.blobConsequence,
+						priority: rule.blobPriority
+					};
+					var jsonInResponse = {
+						metadata: {
+							version: api.apiVersion 
+						},
+						rule: {
+							id: rule.ruleId,
+							language: rule.language,
+							blob: responseBlob,
+							active: rule.active,
+							lastCommit: JSON.stringify(lastCommitJSON)
+						}
+					};
+					return response.status(200).json(jsonInResponse);
+				});
+			}
+		});
 	}).catch(function (error) {
 		/* istanbul ignore next  */
+		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
 });
@@ -294,37 +364,87 @@ router.get('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
  *  Modificar una regla
  */
 router.put('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {	
-	if (api.isEmpty(request.body.rule)) {
+	if (api.isEmpty(request.body.blob)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
-
 	Rule.find({
 		where: {
-		  id: request.params.ruleId
+		  name: request.params.ruleId
 		}
 	}).then(rule => {
 		if (!rule) {
 		  return response.status(404).json({code: 0, message: "Rule inexistente"});
 		}
+		BusinessUser.find({
+			where: {
+				username: request.decoded.username // username of the businessuser that's trying to modify the rule
+			}
+		}).then(businessuser => {
+			var blobJSON = {
+				name: request.body.blob.name,
+				condition: request.body.blob.condition, 
+				consequence: request.body.blob.consequence, 
+				priority: request.body.blob.priority
+			};
+			var blobJSONStringified = JSON.stringify(blobJSON);
 
-		///\TODO get last commit and insert in response JSON
-		rule.updateAttributes({
-			language: '',
-			blob: '',
-			active: ''
-		  }).then(updatedUser => {
-			  ///\TODO insert commit in history (similar to cars)
-			return response.status(200).json(updatedUser);
-		  });
-		
-		
-		
+			rule.updateAttributes({
+				name: request.body.blob.name,
+				blobCondition: request.body.blob.condition,
+				blobConsequence: request.body.blob.consequence,
+				blobPriority: request.body.blob.priority,
+				active: request.body.active
+		  	}).then(updatedRule => {
+				var lastCommitJSON = {
+					author: {
+						id: businessuser.id,
+						_ref: businessuser._ref,
+						username: businessuser.username,
+						password: businessuser.password,
+						name: businessuser.name,
+						roles: businessuser.roles
+					}
+				};
+			  	RuleChange.create({
+					_ref: '',
+					name: updatedRule.name,
+					blobcondition: updatedRule.condition,
+					blobconsequence: updatedRule.consequence,
+					blobpriority: updatedRule.priority,
+					active: updatedRule.active,
+					reason: 'Modificación de rule',
+					time: new Date(),
+					businessuser: businessuser.id,
+					userinfo: JSON.stringify(lastCommitJSON)
+				}).then(ruleChange => {	
+					var responseBlob = {
+						name: updatedRule.name,
+						condition: updatedRule.blobCondition,
+						consequence: updatedRule.blobConsequence,
+						priority: updatedRule.blobPriority
+					};
+					var jsonInResponse = {
+					  metadata: {
+						version: api.apiVersion 
+					  },
+					  rule: {
+						id: updatedRule.id,
+						_ref: updatedRule._ref,
+						language: updatedRule.language, 
+						blob: responseBlob,
+						active: updatedRule.active,
+						lastCommit: ruleChange.userinfo
+					  }
+					};
+					return response.status(200).json(jsonInResponse);
+				});
+		  	});
+		});
 	}).catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
 });
-
 
 /**
  *  Ejecutar una regla particular

@@ -66,6 +66,60 @@ describe('Rules', function()  {
 				});
 	    	});
 	    });
+
+	   	it('it should GET a specific rule', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.get('/rules/dropRuleTable')
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							var blob = {
+									name: 'RuleNombrePrueba',
+				                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+				                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando delete rule'; R.stop(); }",
+				                    priority: 2};
+							var rule = {
+								_ref: 'abc', 
+								language: 'node-rules/javascript', 
+								blob: blob,
+								active: true
+							}
+							chai.request(baseUrl)
+							.post('/rules')
+							.set(token_header_flag, token)
+							.send(rule)
+							.end((err, res) => {
+								res.should.have.status(201);
+
+								chai.request(baseUrl)
+								.get('/rules/' + blob.name)
+								.set(token_header_flag, token)
+								.end((err,res) => {
+									res.should.have.status(200);
+									res.body.should.have.property('metadata');
+									res.body.should.have.property('rule');
+									res.body.rule.should.have.property('blob');
+									done();
+								});
+							});
+						});
+					});				
+				});
+			});
+	    });
 	});
 
 	describe('/POST rules', function() {
@@ -130,10 +184,11 @@ describe('Rules', function()  {
 						.set(token_header_flag, token)
 						.end((err, res) => {
 							var blob = {
-									name: 'RuleNombrePrueba',
-				                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
-				                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
-				                    priority: 2};
+								name: 'RuleNombrePrueba',
+			                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+			                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
+			                    priority: 2
+			                };
 							var rule = {
 								_ref: 'abc', 
 								language: 'node-rules/javascript', 
@@ -204,7 +259,78 @@ describe('Rules', function()  {
 				});
 			});
 	    });
+	});
 
+	describe('/PUT rules', function() {
+	 	it('it should PUT an existing rule', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.get('/rules/dropRuleTable')
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							var blob = {
+								name: 'RuleNombrePrueba',
+			                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+			                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
+			                    priority: 2
+			                };
+							var rule = {
+								_ref: 'abc', 
+								language: 'node-rules/javascript', 
+								blob: blob,
+								active: true
+							}
+							chai.request(baseUrl)
+							.post('/rules')
+							.set(token_header_flag, token)
+							.send(rule)
+							.end((err, res) => {
+								res.should.have.status(201);
+								var newBlob = {
+									name: 'RuleNombrePruebaModificado',
+				                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+				                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando prueba string'; R.stop(); }",
+				                    priority: 2
+				                };
+								var newRule = {
+									_ref: 'abc', 
+									language: 'node-rules/javascript', 
+									blob: newBlob,
+									active: false
+								}
+								chai.request(baseUrl)
+								.put('/rules/' + blob.name)
+								.send(newRule)
+								.set(token_header_flag, token)
+								.end((err,res) => {
+									res.should.have.status(200);
+									res.body.rule.active.should.equal(newRule.active);
+									res.body.rule.blob.name.should.equal(newBlob.name);
+
+									done();
+								});
+							});
+						});
+					});				
+				});
+			});
+	    });
+	});
+	
+	describe('/DELETE rules', function() {
 	   	it('it should DELETE a rule', function(done) {
 		    this.timeout(15000);
 		    businessUsersAPI.clearBusinessUsersTable()
@@ -247,60 +373,6 @@ describe('Rules', function()  {
 								.set(token_header_flag, token)
 								.end((err,res) => {
 									res.should.have.status(204);
-									done();
-								});
-							});
-						});
-					});				
-				});
-			});
-	    });
-
-	   	it('it should GET a specific rule', function(done) {
-		    this.timeout(15000);
-		    businessUsersAPI.clearBusinessUsersTable()
-			.then( function(fulfilled){
-				chai.request(baseUrl)
-				.get('/business-users/initAndWriteDummyBusinessUser/') 
-				.end((err, res) => {
-
-					chai.request(baseUrl)
-					.post('/token/')
-					.set('content-type', 'application/json')
-					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
-					.end((err, res) => {
-						var token = res.body.token.token;
-
-						chai.request(baseUrl)
-						.get('/rules/dropRuleTable')
-						.set(token_header_flag, token)
-						.end((err, res) => {
-							var blob = {
-									name: 'RuleNombrePrueba',
-				                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
-				                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando delete rule'; R.stop(); }",
-				                    priority: 2};
-							var rule = {
-								_ref: 'abc', 
-								language: 'node-rules/javascript', 
-								blob: blob,
-								active: true
-							}
-							chai.request(baseUrl)
-							.post('/rules')
-							.set(token_header_flag, token)
-							.send(rule)
-							.end((err, res) => {
-								res.should.have.status(201);
-
-								chai.request(baseUrl)
-								.get('/rules/' + blob.name)
-								.set(token_header_flag, token)
-								.end((err,res) => {
-									res.should.have.status(200);
-									res.body.should.have.property('metadata');
-									res.body.should.have.property('rule');
-									res.body.rule.should.have.property('blob');
 									done();
 								});
 							});
