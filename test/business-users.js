@@ -602,7 +602,7 @@ describe('BusinessUsers', function()  {
 			});
 	    });
 	});
-/*
+
 	describe('/GET ME business user', function() {
 	  	it('it should GET ME business users from database', function(done) {
 		    this.timeout(15000);
@@ -626,6 +626,50 @@ describe('BusinessUsers', function()  {
 						.set(token_header_flag, token)
 						.end((err, res) => {
 							res.should.have.status(200);
+							res.body.should.have.property('businessUser');
+							res.body.businessUser.should.have.property('username');
+							res.body.businessUser.password.should.equal('aaa');
+							done();
+						});
+					});				
+				});
+			});
+	    });
+
+
+		it('it should PUT ME existing business user', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						console.log('Is this body w token?: ', res.body);
+						var token = res.body.token.token;
+						var businessuserToPut = {
+							username: 'tommy',
+						    password: 'bbb',
+						    name: 'Tommy',
+						    surname: 'Black'
+						};
+						
+						chai.request(baseUrl)
+						.put('/business-users/me')
+						.set(token_header_flag, token)
+						.send(businessuserToPut)
+						.end((err, res) => {
+							res.should.have.status(200);
+							res.body.should.have.property('businessUser');
+							res.body.businessUser.should.have.property('username');
+							res.body.businessUser.password.should.equal('bbb');
+							res.body.businessUser.name.should.equal('Tommy');
 							done();
 						});
 					});				
@@ -633,5 +677,4 @@ describe('BusinessUsers', function()  {
 			});
 	    });
 	});
-*/
 });
