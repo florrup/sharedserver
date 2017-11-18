@@ -456,6 +456,27 @@ router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, functi
  *  Obtener el historial de commits realizados sobre una regla particular
  */
 router.get('/:ruleId/commits', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
+	RuleChange.findAll({})
+	.then(rulechanges => {
+		/* istanbul ignore if  */
+	    if (!rulechanges) {
+	      return response.status(500).json({code: 0, message: "Unexpected error"});
+	    }
+
+		var changesArray = [];
+		rulechanges.forEach(function(item) {
+			//JSON.parse(item.userinfo);
+		    changesArray.push(item.userinfo);
+		});
+
+	    var jsonInResponse = {
+			metadata: {
+				version: api.apiVersion // falta completar
+			},
+			commits: changesArray
+		};
+		return response.status(200).json(jsonInResponse);
+	});
 });
 
 /**

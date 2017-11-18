@@ -382,4 +382,61 @@ describe('Rules', function()  {
 			});
 	    });
 	});
+
+	describe('/GET COMMITS of rules', function() {
+	   	it('it should GET a COMMIT of a specific rule', function(done) {
+		    this.timeout(15000);
+		    businessUsersAPI.clearBusinessUsersTable()
+			.then( function(fulfilled){
+				chai.request(baseUrl)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
+				.end((err, res) => {
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						var token = res.body.token.token;
+
+						chai.request(baseUrl)
+						.get('/rules/dropRuleTable')
+						.set(token_header_flag, token)
+						.end((err, res) => {
+							var blob = {
+									name: 'RuleNombrePrueba',
+				                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+				                    consequence: "function(R) { this.puedeViajar = true; this.reason = 'Probando delete rule'; R.stop(); }",
+				                    priority: 2};
+							var rule = {
+								_ref: 'abc', 
+								language: 'node-rules/javascript', 
+								blob: blob,
+								active: true
+							}
+							chai.request(baseUrl)
+							.post('/rules')
+							.set(token_header_flag, token)
+							.send(rule)
+							.end((err, res) => {
+								res.should.have.status(201);
+
+								chai.request(baseUrl)
+								.get('/rules/' + blob.name + '/commits/')
+								.set(token_header_flag, token)
+								.end((err,res) => {
+									res.should.have.status(200);
+									res.body.should.have.property('commits');
+									res.body.commits.length.should.equal(1);
+									console.log(res.body.commits);
+									done();
+								});
+							});
+						});
+					});				
+				});
+			});
+	    });
+	});
+
 });
