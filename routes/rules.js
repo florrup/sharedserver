@@ -450,6 +450,43 @@ router.put('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
  *  Ejecutar una regla particular
  */
 router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
+	var fact = request.body.blob;
+	console.log(fact);
+
+	Rule.find({
+		where: {
+		  name: request.params.ruleId
+		}
+	}).then(rule => {
+		if (!rule) {
+			/* istanbul ignore next  */
+			return response.status(500).json({code: 0, message: "No rule was found"});
+		}
+		var rulesToEngine = [];
+		var singleRule = {
+			name: rule.name,
+			condition: rule.blobCondition,
+			consequence: rule.blobConsequence,
+			priority: rule.blobPriority
+		};
+		rulesToEngine.push(singleRule);
+		RulesEngine.runEngine(rulesToEngine, fact);
+
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  facts: {
+			language: request.body.language, 
+			blob: request.body.blob			
+		  }
+		};
+		return response.status(200).json(jsonInResponse);
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		console.log(error);
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
 });
 
 /**
@@ -465,8 +502,8 @@ router.get('/:ruleId/commits', Verify.verifyToken, Verify.verifyManagerRole, fun
 
 		var changesArray = [];
 		rulechanges.forEach(function(item) {
-			//JSON.parse(item.userinfo);
-		    changesArray.push(item.userinfo);
+			var parsed = JSON.parse(item.userinfo);
+		    changesArray.push(parsed);
 		});
 
 	    var jsonInResponse = {
