@@ -182,25 +182,52 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
  *  Ejecuta un set de reglas
  */
 router.post('/run', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-  // si hay algún parámetro faltante
-  
-  if (api.isEmpty(request.body.rules) || api.isEmpty(request.body.facts)) {
-    return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
-  }
+    // si hay algún parámetro faltante
+    console.log(request.body);
+	if (api.isEmpty(request.body.facts)) {
+		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
+	} 
 
-  // body contiene: rules and facts
-  
-  // NOTE the api asks for "facts" in the response, after running the rules we have 'events':
-  // rules + facts -----> events (in compliance with rules and facts)
-  
-    var jsonInResponse = {
-		metadata: {
-			version: api.apiVersion // falta completar
-		},
-		events: '' // api specification mentions 'facts' here
-	};
-		
-  return response.status(200).json(jsonInResponse);
+	var fact = request.body.facts.blob;
+
+	Rule.findAll({
+		where: {
+		  active: true
+		}
+	}).then(rules => {
+		if (!rules) {
+			/* istanbul ignore next  */
+			return response.status(500).json({code: 0, message: "No rule was found"});
+		}
+
+		var rulesToEngine = [];
+		for (var i = 0, len = rules.length; i < len; i++) {
+		  	var singleRule = {
+				name: rules[i].name,
+				condition: rules[i].blobCondition,
+				consequence: rules[i].blobConsequence,
+				priority: rules[i].blobPriority
+			};
+			rulesToEngine.push(singleRule);
+		}
+
+		RulesEngine.runEngine(rulesToEngine, fact);
+
+		var jsonInResponse = {
+		  metadata: {
+			version: api.apiVersion 
+		  },
+		  facts: {
+			language: request.body.facts.language, 
+			blob: fact			// TODO este debería ser el fact devuelto por el runEngine
+		  }
+		};
+		return response.status(200).json(jsonInResponse);
+	}).catch(function (error) {
+		/* istanbul ignore next  */
+		console.log(error);
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
 });
 
 /**

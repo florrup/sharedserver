@@ -214,7 +214,7 @@ function runEngine(rules, fact) {
         } else {
             console.log("No puede viajar: " + data.reason);
         }
-    });    
+    });
 }
 
 module.exports.runEngine = runEngine;
