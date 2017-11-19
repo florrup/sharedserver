@@ -29,6 +29,10 @@ app.get('/', function(request, response) {
   response.render('pages/index');
 });
 
+app.get('/login', function(request, response) {
+  response.render('pages/login');
+});
+
 app.get('/users', function(request, response) {
   response.render('pages/users');
 });
