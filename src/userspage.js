@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import { Footer, Menu, Header, Banner, GeneralStats, List } from './components';
 
+import GlobalStrings from './components/GlobalStrings'
+
 class UsersPage extends Component {
 
  constructor(props) {
@@ -34,13 +36,13 @@ class UsersPage extends Component {
 
   render() {
     const {people} = this.state;
-
+    
     return (
       <div id="wrapper">
 
         <div id="main">
           <div className="inner">
-            <Header title="Llevame! Aplicación de Gestión" link="/"/>
+            <Header title={GlobalStrings.headerTitle} link="/"/>
 
             <Banner title="UsersPage" subtitle="A free and fully responsive site template"
             content="Hello, Users"/>

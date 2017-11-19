@@ -1,6 +1,8 @@
 import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 
+import GlobalStrings from './components/GlobalStrings'
+
 import { Footer, Menu, Header, Banner, GeneralStats } from './components';
 
 class AppServersPage extends Component {
@@ -13,7 +15,7 @@ class AppServersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="Llevame! Aplicación de Gestión" link="/"/>
+              <Header title={GlobalStrings.headerTitle} link="/"/>
 
               <Banner title="AppServersPage" subtitle="A free and fully responsive site template"
               content="Hello, AppServersPage"/>

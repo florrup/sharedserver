@@ -4,9 +4,7 @@ export default (props) => {
   console.log("People are " + props.people)
   const people = props.people;
 
-  var rows = [];
   console.log(people.length)
-
 	return (
     <div className="">
     <table id="simple-board">

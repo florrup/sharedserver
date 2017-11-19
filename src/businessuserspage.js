@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 
 import { Footer, Menu, Header, Banner, GeneralStats } from './components';
 
+import GlobalStrings from './components/GlobalStrings'
+
 class BusinessUsersPage extends Component {
 
   render() {
@@ -13,7 +15,7 @@ class BusinessUsersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="Llevame! Aplicación de Gestión" link="/"/>
+              <Header title={GlobalStrings.headerTitle} link="/"/>
 
               <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
               content="Hello, BusinessUsers"/>

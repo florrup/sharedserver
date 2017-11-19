@@ -1,7 +1,10 @@
 import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
+
 import { Footer, Menu, Header, Banner, GeneralStats } from './components';
+
+import GlobalStrings from './components/GlobalStrings'
 
 class Login extends React.Component {
 
@@ -58,7 +61,7 @@ class Login extends React.Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="Llevame! Aplicación de Gestión" link="/"/>
+              <Header title={GlobalStrings.headerTitle} link="/"/>
 
               <Banner title="LoginPage" subtitle="A free and fully responsive site template"
               content="Hello, log in"/>
