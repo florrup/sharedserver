@@ -36,12 +36,10 @@ class UsersPage extends Component {
     const {people} = this.state;
 
     return (
-
       <div id="wrapper">
 
         <div id="main">
           <div className="inner">
-
             <Header title="Llevame! Aplicación de Gestión" link="/"/>
 
             <Banner title="UsersPage" subtitle="A free and fully responsive site template"
