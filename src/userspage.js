@@ -1,11 +1,11 @@
 import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import { Footer, Menu, Header, Banner, GeneralStats } from './components';
+import { Footer, Menu, Header, Banner, GeneralStats, List } from './components';
 
 class UsersPage extends Component {
 
-/*  constructor(props) {
+ constructor(props) {
     super(props);
 
     this.state = {// populate state with data that comes from api
@@ -16,20 +16,25 @@ class UsersPage extends Component {
   }
 
   getPeople() {
-    var axiosHeader = { headers: {"x-access-token": token} };
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
     return axios.get('http://localhost:5000/api/users', axiosHeader)
     .then((response) => {
-      console.log(response.data);
-      this.setState( { people: response.data.results } )
+      console.log(response.data)
+      //console.log('Metadata' + response.data.metadata);
+      //console.log('Users' + response.data.users);
+      this.setState( { people: response.data.users } )
     });
   }
 
   componentDidMount() {
     this.getPeople();
   }
-*/
+
 
   render() {
+    const {people} = this.state;
+
     return (
 
       <div id="wrapper">
@@ -37,10 +42,11 @@ class UsersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title="Llevame! Aplicación de Gestión" link="/"/>
+            <Header title="Llevame! Aplicación de Gestión" link="/"/>
 
-              <Banner title="UsersPage" subtitle="A free and fully responsive site template"
-              content="Hello, Users"/>
+            <Banner title="UsersPage" subtitle="A free and fully responsive site template"
+            content="Hello, Users"/>
+            <List people={people} />
           </div>
         </div>
 

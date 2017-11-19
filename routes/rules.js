@@ -91,10 +91,11 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 	if (api.isEmpty(request.body.language) || api.isEmpty(request.body.blob) || api.isEmpty(request.body.active)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
+
 	var blobJSON = {
 		name: request.body.blob.name,
-		condition: request.body.blob.condition, // JSON.stringify(request.body.blob.condition),
-		consequence: request.body.blob.consequence, // JSON.stringify(request.body.blob.consequence),
+		condition: request.body.blob.condition,
+		consequence: request.body.blob.consequence,
 		priority: request.body.blob.priority
 	};
 	var blobJSONStringified = JSON.stringify(blobJSON);
@@ -129,6 +130,7 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 					username: businessuser.username,
 					password: businessuser.password,
 					name: businessuser.name,
+					surname: businessuser.surname,
 					roles: businessuser.roles
 				}
 			};
@@ -303,7 +305,7 @@ router.get('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
 			/* istanbul ignore next */
 		  return response.status(404).json({code: 0, message: "Rule inexistente"});
 		}
-		console.log("LLEGA ACA\n\n\n");
+
 		RuleChange.findAll({
 			limit: 1,
 			where: {

@@ -16,6 +16,8 @@ class Login extends React.Component {
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
 
+    this.getToken = this.getToken.bind(this);
+
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -29,7 +31,23 @@ class Login extends React.Component {
 
   handleSubmit(event) {
     alert('A name was submitted: ' + this.state.username + ' with password' + this.state.password);
+    this.getToken();
     event.preventDefault();
+  }
+
+  getToken() {
+    var infoToSend = {BusinessUserCredentials:{ username: this.state.username, password: this.state.password }};
+
+    return axios.post('http://localhost:5000/api/token', infoToSend)
+    .then((response) => {
+      if (response.status == 201) {
+        console.log(response.data.token.token); // this gets the token 
+        localStorage.setItem('token', response.data.token.token);
+      } 
+    })
+    .catch(function(error) {
+      console.log("Invalid");
+    });
   }
 
   render() {
@@ -55,7 +73,7 @@ class Login extends React.Component {
                   Password:
                   <input type="text" value={this.state.password} onChange={this.handlePasswordChange} />
                 </label>
-                <input type="submit" value="Submit" />
+                <input type="submit" value="Login" />
               </form>
 
           </div>
