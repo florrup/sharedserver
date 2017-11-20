@@ -557,16 +557,17 @@ router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, fun
 });
 
 /**
- *  Devuelve todas las transacciones que hizo el usuario ¿y que no pudieron ejecutarse con la API de pagos remota?
- *
+ *  Devuelve todas las transacciones que hizo el usuario
  */
 router.get('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 });
 
 /**
+ *	******* DEPRECATED *******
  *  Crea un registro de pago local para afectar el balance del usuario cuando no está disponible la API de pagos remota
- *
+ *	******* DEPRECATED *******
  */
+/*
 router.post('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 	if (api.isEmpty(request.body.tripid) || api.isEmpty(request.body.cost.currency) || api.isEmpty(request.body.cost.value)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones al registrar pago localmente (parámetros faltantes)"});
@@ -609,6 +610,7 @@ router.post('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppR
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
 });
+*/
 
 //CREATE TABLE cars(id SERIAL PRIMARY KEY, _ref VARCHAR(20), owner INT, properties jsonb[]);
 

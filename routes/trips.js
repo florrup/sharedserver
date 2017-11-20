@@ -8,14 +8,24 @@ const Sequelize = require('sequelize');
 
 var models = require('../models/db'); // loads db.js
 var Trip = models.trip; // the model keyed by its name
+var Transaction = models.transaction;
+var PendingPayment = models.pendingpayment;
 
 var Verify = require('./verify');
 var api = require('./api');
 
+var paymethods = require('./paymethods');
+
 const urlRequest = require('request-promise'); // to hit google api
 
+// API URL for payments
+var path = require('path');
+var environment = process.env.NODE_ENV || "development"; // default is development
+var config = require(path.join(__dirname, '..', 'config', 'config.json'))[environment];
+var payments_base_url = config.PAYMENTS_API_URL + config.PAYMENTS_API_VERSION_URL;
+
 // Review this line to open table
-// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), driverId VARCHAR(20), passangerId VARCHAR(20), startAddressStreet VARCHAR(40), startAddressLocationLat VARCHAR(40), startAddressLocationLon VARCHAR(40), startTimestamp VARCHAR(40), endAddressStreet VARCHAR(40), endAddressLocationLat VARCHAR(20), endAddressLocationLon VARCHAR(20), endTimestamp VARCHAR(20), totalTime VARCHAR(20), waitTime VARCHAR(20), travelTime VARCHAR(20), distance VARCHAR(20), route VARCHAR(20), costCurrency VARCHAR(20), costValue VARCHAR(20));
+// CREATE TABLE trips(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), driverid VARCHAR(20), passengerid VARCHAR(20), startaddressstreet VARCHAR(40), startaddresslocationlat VARCHAR(40), startaddresslocationlon VARCHAR(40), starttimestamp VARCHAR(40), endaddressstreet VARCHAR(40), endaddresslocationlat VARCHAR(20), endaddresslocationlon VARCHAR(20), endtimestamp VARCHAR(20), totaltime VARCHAR(20), waittime VARCHAR(20), traveltime VARCHAR(20), distance VARCHAR(20), route VARCHAR(50), costcurrency VARCHAR(20), costvalue VARCHAR(20));
 
 /**
  * Test method to empty the trips database and create a dummy app trip (without valid data) in order to make further tests
@@ -32,26 +42,26 @@ router.get('/initAndWriteDummyTrip', function(request, response) {
 		// Table created
 		
 		var dummyTrip = {
-			id: 0,
+			// id: 0,
 			_ref: 'abc',
-			applicationOwner: '',
-			driverId: 0,
-			passangerId: 1,
-			startAddressStreet: 'Juncal 1234',
-			startAddressLocationLat: -34.617096,
-			startAddressLocationLon: -58.368441,
-			startTimestamp: 0,
-			endAddressStreet: 'Malabia 1234',
-			endAddressLocationLat: -34.617096,
-			endAddressLocationLon: -58.368441,
-			endTimestamp: 0,
-			totalTime: 3600,
-			waitTime: 1000,
-			travelTime: 2600,
+			applicationowner: '',
+			driverid: 0,
+			passengerid: 1,
+			startaddressstreet: 'Juncal 1234',
+			startaddresslocationlat: -34.617096,
+			startaddresslocationlon: -58.368441,
+			starttimestamp: 0,
+			endaddressstreet: 'Malabia 1234',
+			endaddresslocationlat: -34.617096,
+			endaddresslocationlon: -58.368441,
+			endtimestamp: 0,
+			totaltime: 3600,
+			waittime: 1000,
+			traveltime: 2600,
 			distance: 15000,
 			route: 'Por la calle de abajo',
-			costCurrency: '$AR',
-			costValue: 500
+			costcurrency: '$AR',
+			costvalue: 500
 		};
 		
 		Trip.create(dummyTrip)
@@ -77,24 +87,24 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 	Trip.findAll({
 		attributes: ['id', 
 						'_ref', 
-						'applicationOwner', 
-						'driverId', 
-						'passangerId', 
-						'startAddressStreet', 
-						'startAddressLocationLat', 
-						'startAddressLocationLon', 
-						'startTimestamp',
-						'endAddressStreet',
-						'endAddressLocationLat',
-						'endAddressLocationLon',
-						'endTimestamp',
-						'totalTime',
-						'waitTime',
-						'travelTime',
+						'applicationowner', 
+						'driverid', 
+						'passengerid', 
+						'startaddressstreet', 
+						'startaddresslocationlat', 
+						'startaddresslocationlon', 
+						'starttimestamp',
+						'endaddressstreet',
+						'endaddresslocationlat',
+						'endaddresslocationlon',
+						'endtimestamp',
+						'totaltime',
+						'waittime',
+						'traveltime',
 						'distance',
 						'route',
-						'costCurrency',
-						'costValue']
+						'costcurrency',
+						'costvalue']
 	}).then(trips => {
 		/* istanbul ignore if  */
 		if (!trips) {
@@ -112,86 +122,241 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 });
 
 /**
- *  Da de alta un trip
+ *  Da de alta un trip y ejecuta los pagos correspondientes al conductor y al pasajero
  */
 router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
-	if (api.isEmpty(request.body.driver) || api.isEmpty(request.body.passanger) || api.isEmpty(request.body.start.address.street)
-		|| api.isEmpty(request.body.start.address.location.latitude) || api.isEmpty(request.body.start.address.location.longitude)
-		|| api.isEmpty(request.body.start.timestamp) || api.isEmpty(request.body.end.address.street) || api.isEmpty(request.body.end.address.location.latitude) 
-		|| api.isEmpty(request.body.end.address.location.longitude) || api.isEmpty(request.body.end.Timestamp) || api.isEmpty(request.body.totalTime)
-		|| api.isEmpty(request.body.waitTime) || api.isEmpty(request.body.travelTime) || api.isEmpty(request.body.distance) || api.isEmpty(request.body.route)
-		|| api.isEmpty(request.body.cost.currency) || api.isEmpty(request.cost.value)) {
+	
+	if ( api.isEmpty(request.body.trip.driver) || api.isEmpty(request.body.trip.passenger) || api.isEmpty(request.body.trip.start.address.street)
+		|| api.isEmpty(request.body.trip.start.address.location.lat) || api.isEmpty(request.body.trip.start.address.location.lon)
+		|| api.isEmpty(request.body.trip.start.timestamp) || api.isEmpty(request.body.trip.end.address.street) || api.isEmpty(request.body.trip.end.address.location.lat) 
+		|| api.isEmpty(request.body.trip.end.address.location.lon) || api.isEmpty(request.body.trip.end.timestamp) || api.isEmpty(request.body.trip.totalTime)
+		||  api.isEmpty(request.body.trip.waitTime) || api.isEmpty(request.body.trip.travelTime) || api.isEmpty(request.body.trip.distance) || api.isEmpty(request.body.trip.route)
+		/*|| api.isEmpty(request.body.trip.cost.currency) || api.isEmpty(request.trip.cost.value)*/
+		|| api.isEmpty(request.body.paymethod.paymethod) || api.isEmpty(request.body.paymethod.parameters.ccvv)) {
+		
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
 	
-	// Payments API: cobrar al pasajero
+	/// \TODO get this values from rules engine
+	var passengerCost = 300;
+	var driverEarn = 200;
 	
-	// Payments API: pagar al conductor
+	// var passengerPaymentParameters = JSON.parse(request.body.paymethod.parameters);
+	var passengerPaymentData = {
+		paymethod: request.body.paymethod.paymethod,
+		ccvv: request.body.paymethod.parameters.ccvv,
+		expiration_month: request.body.paymethod.parameters.expiration_month,
+		expiration_year: request.body.paymethod.parameters.expiration_year,
+		number: request.body.paymethod.parameters.number,
+		type: request.body.paymethod.parameters.type 
+	};
 	
+	var driverPaymentData = {
+		paymethod: 'cash',
+		ccvv: '',
+		expiration_month: '',
+		expiration_year: '',
+		number: '',
+		type: 'direct payment'
+	};
+	
+	// Trip creation in Local Data Base
 	Trip.create({
-		// id: 0,
-		_ref: '',
-		applicationOwner: '',
-		driverId: request.body.driver,
-		passangerId: request.body.passanger,
-		startAddressStreet: request.body.start.address.street,
-		startAddressLocationLat: request.body.start.address.location.latitude,
-		startAddressLocationLon: request.body.start.address.location.longitude,
-		startTimestamp: request.body.start.timestamp,
-		endAddressStreet: request.body.end.address.street,
-		endAddressLocationLat: request.body.end.address.location.latitude,
-		endAddressLocationLon: request.body.end.address.location.longitude,
-		endTimestamp: request.body.end.Timestamp,
-		totalTime: request.body.totalTime,
-		waitTime: request.body.waitTime,
-		travelTime: request.body.travelTime,
-		distance: request.body.distance,
-		route: request.body.route,
-		costCurrency: request.body.cost.currency,
-		costValue: request.body.cost.value
-	}).then(trip => {
-			/* istanbul ignore if  */
-			if (!trip) {
-				return response.status(500).json({code: 0, message: "Unexpected error while trying to save a payment"});
-			} else {
-				var jsonInResponse = {
-					id: trip.id,
-					applicationOwner: trip.applicationOwner,
-					driver: trip.driverId,
-					passanger: trip.passangerId,
-					start: {
-						address: {
-							street: trip.startAddressStreet,
-							location: {
-								lat: trip.startAddressLocationLat,
-								lon: trip.startAddressLocationLon
-							}
-						},
-						timestamp: trip.startTimestamp
-					},
-					end: {
-						address: {
-							street: trip.endAddressStreet,
-							location: {
-								lat: trip.endAddressLocationLat,
-								lon: trip.endAddressLocationLon
-							}
-						},
-						timestamp: trip.endTimestamp
-					},
-					totalTime: trip.totalTime,
-					waitTime: trip.waitTime,
-					travelTime: trip.travelTime,
-					distance: trip.distance,
-					route: trip.route,
-					cost: {
-						currency: trip.costCurrency,
-						value: trip.costValue
-					}
-				}
-				return response.status(201).json(jsonInResponse);
-			}
+			// id: 0,
+			_ref: '',
+			applicationowner: '',
+			driverid: request.body.trip.driver,
+			passengerid: request.body.trip.passenger,
+			startaddressstreet: request.body.trip.start.address.street,
+			startaddresslocationlat: request.body.trip.start.address.location.lat,
+			startaddresslocationlon: request.body.trip.start.address.location.lon,
+			starttimestamp: request.body.trip.start.timestamp,
+			endaddressstreet: request.body.trip.end.address.street,
+			endaddresslocationlat: request.body.trip.end.address.location.lat,
+			endaddresslocationlon: request.body.trip.end.address.location.lon,
+			endtimestamp: request.body.trip.end.Timestamp,
+			totaltime: request.body.trip.totalTime,
+			waittime: request.body.trip.waitTime,
+			traveltime: request.body.trip.travelTime,
+			distance: request.body.trip.distance,
+			route: request.body.trip.route,
+			costcurrency: process.env.PESOSARG,
+			costvalue: passengerCost
+		}).then(trip => {
+				/* istanbul ignore if  */
+				if (!trip) {
+					return response.status(500).json({code: 0, message: "Unexpected error while trying to save a payment"});
+				} else {
+					
+					var actualTime = (new Date).getTime();
+					// Transaction to the passenger
+					Transaction.create({
+						// id: ...autoincremental,
+						_ref: '',
+						userid: request.body.trip.passenger,
+						tripid: trip.id, // ID recently created by our database
+						timestamp: actualTime.toString(),
+						costcurrency: process.env.PESOSARG,
+						costvalue: -passengerCost,
+						description: 'Trip Payment (cost as passenger)'
+					})
+					.then(localTransactionPassenger => {
+						
+						var actualTime = (new Date).getTime();
+						// Transaction to the driver
+						Transaction.create({
+							// id: ...autoincremental,
+							_ref: '',
+							userid: request.body.trip.driver,
+							tripid: trip.id, // ID recently created by our database
+							timestamp: actualTime,
+							costcurrency: process.env.PESOSARG,
+							costvalue: driverEarn,
+							description: 'Trip Payment (earn as Driver)'
+						})
+						.then(localTransactionDriver => {
+						
+							// Remote API payment call
+							paymethods.getPaymentsToken()
+							.then(function(fulfilled){
+								var paymentsToken = paymethods.getLocalPaymentsToken();
+								
+								// Payment for the passenger to remote API
+								const optionsPassenger = {
+											method: 'POST',
+											uri: payments_base_url+'payments',
+											headers: {
+												Authorization: 'Bearer '+paymentsToken
+											},
+											body: {
+												transaction_id: localTransactionPassenger.id,
+												currency: process.env.PESOSARG,
+												value: localTransactionPassenger.costvalue,
+												paymentMethod: {
+													ccvv: passengerPaymentData.ccvv,
+													expiration_month: passengerPaymentData.expiration_month,
+													expiration_year: passengerPaymentData.expiration_year,
+													method: passengerPaymentData.paymethod,
+													number: passengerPaymentData.number,
+													type: passengerPaymentData.type
+												}
+											},
+											json: true
+								};
+								urlRequest(optionsPassenger)
+									.then(paymentsPassengerResponse => {
+										// var resPassenger = JSON.parse(paymentsPassengerResponse);
+										// console.log('Payments API returned: ' + resPassenger)
+										
+										const optionsPassenger = {
+											method: 'POST',
+											uri: payments_base_url+'payments',
+											headers: {
+												Authorization: 'Bearer '+paymentsToken
+											},
+											body: {
+												transaction_id: localTransactionDriver.id,
+												currency: process.env.PESOSARG,
+												value: localTransactionDriver.costvalue,
+												paymentMethod: {
+													ccvv: driverPaymentData.ccvv,
+													expiration_month: driverPaymentData.expiration_month,
+													expiration_year: driverPaymentData.expiration_year,
+													method: driverPaymentData.paymethod,
+													number: driverPaymentData.number,
+													type: driverPaymentData.type
+												}
+											},
+											json: true
+										};
+										
+										// Payment for the driver
+										urlRequest(optionsPassenger)
+											.then(paymentsDriverResponse => {
+												
+												// Payments were locally saved and remotely proccessed, return ok
+												
+												var jsonInResponse = {
+													id: trip.id,
+													applicationOwner: trip.applicationowner,
+													driver: trip.driverid,
+													passenger: trip.passengerid,
+													start: {
+														address: {
+															street: trip.startaddressstreet,
+															location: {
+																lat: trip.startaddresslocationlat,
+																lon: trip.startaddresslocationlon
+															}
+														},
+														timestamp: trip.starttimestamp
+													},
+													end: {
+														address: {
+															street: trip.endaddressstreet,
+															location: {
+																lat: trip.endaddresslocationlat,
+																lon: trip.endaddresslocationlon
+															}
+														},
+														timestamp: trip.endtimestamp
+													},
+													totalTime: trip.totaltime,
+													waitTime: trip.waittime,
+													travelTime: trip.traveltime,
+													distance: trip.distance,
+													route: trip.route,
+													cost: {
+														currency: trip.costcurrency,
+														value: trip.costvalue
+													}
+												}
+												return response.status(201).json(jsonInResponse);
+											})
+											.catch (function(reason) {
+												console.log('Error while trying to pay for the DRIVER');
+												console.log('Saving Transactions INFO for further proccessing...');
+												console.log(JSON.parse(localTransactionDriver));
+												console.log(JSON.parse(driverPaymentData));
+												saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
+												return response.status(500).json({code: 0, message: "Error while trying to pay to the DRIVER. PASSENGER was paid, driver payment data was saved for further proccessing"});
+											});
+								})
+								.catch (function(reason) {
+									console.log('Error while trying to pay for the PASSENGER');
+									console.log('Saving Transactions INFO for further proccessing...');
+									console.log(JSON.parse(localTransactionPassenger));
+									console.log(JSON.parse(passengerPaymentData));
+									console.log(JSON.parse(localTransactionDriver));
+									console.log(JSON.parse(driverPaymentData));
+									saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
+									saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
+									return response.status(500).json({code: 0, message: "Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
+								});
+							})
+							.catch (function(reason) {
+								console.log('Error while trying to get payments API Token');
+								
+								console.log('Saving Transactions INFO for further proccessing...');
+								console.log(JSON.parse(localTransactionPassenger));
+								console.log(JSON.parse(passengerPaymentData));
+								console.log(JSON.parse(localTransactionDriver));
+								console.log(JSON.parse(driverPaymentData));
+								saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
+								saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
+								return response.status(500).json({code: 0, message: "Error while trying to get available payment token. Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
+							});
+						});
+					});
+				};
+			});
+		/* Lets comment for now for more descriptive error messages
+		.catch (function(reason) {
+			console.log('Error while trying to get available payment methods, could not get Payments API Token');
+			return response.status(500).json({code: 0, message: "Error while trying to get available payment methods."});
 		});
+		*/
+	
 });
 
 /**
@@ -199,11 +364,11 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
  */
 router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(request, response) {
 	
-	if (api.isEmpty(request.body.passanger) 
+	if (api.isEmpty(request.body.passenger) 
 			|| api.isEmpty(request.body.start.address.location.lat) || api.isEmpty(request.body.start.address.location.lon)
 			|| api.isEmpty(request.body.end.address.location.lat) || api.isEmpty(request.body.end.address.location.lat))
 	{
-		return response.status(400).json({code: 0, message: "This method: POST /trip/estimate is not yet implemented"});
+		return response.status(400).json({code: 0, message: "Parameters error"});
 	}
 	
 	var googleAPIPath = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
@@ -229,6 +394,7 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 			urlRequest(options)
 				.then(googleMapsApiResponse => {
 					var res = JSON.parse(googleMapsApiResponse);
+					
 					/// \TODO traer de rules -> Facts el precio por kilómetro para meter acá
 					var valorEstimado = 50 * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
 					
@@ -266,37 +432,37 @@ router.get('/:tripId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
 			
 			trip: {
 				id: trip.id,
-				applicationOwner: trip.applicationOwner,
-				driver: trip.driverId,
-				passanger: trip.passangerId,
+				applicationOwner: trip.applicationowner,
+				driver: trip.driverid,
+				passenger: trip.passengerid,
 				start: {
 					address: {
-						street: trip.startAddressStreet,
+						street: trip.startaddressstreet,
 						location: {
-							lat: trip.startAddressLocationLat,
-							lon: trip.startAddressLocationLon
+							lat: trip.startaddresslocationlat,
+							lon: trip.startaddresslocationlon
 						}
 					},
-					timestamp: trip.startTimestamp
+					timestamp: trip.starttimestamp
 				},
 				end: {
 					address: {
-						street: trip.endAddressStreet,
+						street: trip.endaddressstreet,
 						location: {
-							lat: trip.endAddressLocationLat,
-							lon: trip.endAddressLocationLon
+							lat: trip.endaddresslocationlat,
+							lon: trip.endaddresslocationlon
 						}
 					},
-					timestamp: trip.endTimestamp
+					timestamp: trip.endtimestamp
 				},
-				totalTime: trip.totalTime,
-				waitTime: trip.waitTime,
-				travelTime: trip.travelTime,
+				totalTime: trip.totaltime,
+				waitTime: trip.waittime,
+				travelTime: trip.traveltime,
 				distance: trip.distance,
 				route: trip.route,
 				cost: {
-					currency: trip.costCurrency,
-					value: trip.costValue
+					currency: trip.costcurrency,
+					value: trip.costvalue
 				}
 			}
 		};
@@ -331,3 +497,28 @@ function clearTripsTable(){
 }
 
 module.exports.clearTripsTable = clearTripsTable;
+
+/**
+ * This method handles unfulfilled payments.
+ * Unfulfilled payment is saved at local data base with needed parameters for further fulfillment
+ * Params[in] payment stores the payment structure from local database
+ * Params[in] payment_data stores the extra data needed to hit the remote payment api
+**/
+function saveUnfulfilledPaymentData(payment, payment_data){
+	PendingPayment.create({
+		// pendingtransactionid; this id is autoincremental handled by database
+		originaltransactionid: payment.id,
+		_ref: payment._ref,
+		userid: payment.userid,
+		tripid: payment.tripid,
+		timestamp: payment.timestamp,
+		costcurrency: payment.costcurrency,
+		costvalue: payment.costValue,
+		description: payment.description,
+		paymethod: payment_data.paymethod,
+		expiration_month: payment_data.expiration_month,
+		expiration_year: payment_data.expiration_year,
+		number: payment_data.number,
+		type: payment_data.type 
+	});
+}

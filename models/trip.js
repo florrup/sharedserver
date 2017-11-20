@@ -9,7 +9,7 @@ var Sequelize = require("sequelize");
  *  - id
  *  - applicationOwner
  *  - driverId
- *  - passangerId
+ *  - passengerId
  *  - startAddressStreet (string)
  *  - startAddressLocationLat
  *  - startAddressLocationLong
@@ -39,52 +39,52 @@ module.exports = function(sequelize, DataTypes) {
 		_ref: {
 			type: Sequelize.STRING
 		},
-		applicationOwner: {
+		applicationowner: {
 			type: Sequelize.STRING
 		},
-		driverId: {
+		driverid: {
 			type: Sequelize.INTEGER,
 			allowNull: false
 		},
-		passangerId: {
+		passengerid: {
 			type: Sequelize.INTEGER,
 			allowNull: false
 		},
-		startAddressStreet: {
+		startaddressstreet: {
 			type: Sequelize.STRING
 		},
-		startAddressLocationLat: {
+		startaddresslocationlat: {
 			type: Sequelize.INTEGER,
 			allowNull: false
 		},
-		startAddressLocationLon: {
+		startaddresslocationlon: {
 			type: Sequelize.INTEGER,
 			allowNull: false
 		},
-		startTimestamp: {
+		starttimestamp: {
 			type: Sequelize.INTEGER // epoch time
 		},
 		endAddressStreet: {
 			type: Sequelize.STRING // Street Address (optional)
 		},
-		endAddressLocationLat: {
+		endaddresslocationlat: {
 			type: Sequelize.INTEGER, // Latitude
 			allowNull: false
 		},
-		endAddressLocationLon: {
+		endaddresslocationlon: {
 			type: Sequelize.INTEGER, // Longitude
 			allowNull: false
 		},
-		endTimestamp: {
+		endtimestamp: {
 			type: Sequelize.INTEGER // epoch time
 		},
 		totalTime: {
 			type: Sequelize.INTEGER // seconds
 		},
-		waitTime: {
+		waittime: {
 			type: Sequelize.INTEGER // seconds
 		},
-		travelTime: {
+		traveltime: {
 			type: Sequelize.INTEGER // seconds
 		},
 		distance: {
@@ -93,11 +93,11 @@ module.exports = function(sequelize, DataTypes) {
 		route: {
 			type: Sequelize.STRING // to be defined...
 		},
-		costCurrency: {
+		costcurrency: {
 			type: Sequelize.STRING, // $AR, $USD, US DOLLARS, etc
 			allowNull: false
 		},
-		costValue: {
+		costvalue: {
 			type: Sequelize.INTEGER, // currency amount, ie 10.45; 11,57
 			allowNull: false
 		}

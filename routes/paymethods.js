@@ -23,7 +23,6 @@ var payments_base_url = config.PAYMENTS_API_URL + config.PAYMENTS_API_VERSION_UR
 
 /**
  *  Obtener los métodos de pago disponibles
- *
  */
 router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
 
@@ -88,7 +87,7 @@ module.exports = router;
 
 
 /**
- *  This method gets a valid token from payments API
+ *  This method gets a valid token from remote payments API and load its value in local variable
  */
 function getPaymentsToken(){
 	if (typeof paymentsToken === "undefined"){
@@ -121,5 +120,18 @@ function getPaymentsToken(){
 		})
   })
 };
-
 module.exports.getPaymentsToken = getPaymentsToken;
+
+/**
+ * Returns the local variable used to store the remote token API
+ * PRE: the function getPaymentsToken() defined above should be called first to load this variable, otherwise the token returned could be NULL
+**/
+getLocalPaymentsToken = function (){
+	if (typeof paymentsToken === "undefined"){
+		paymentsToken = '';
+	};
+	return paymentsToken; // may return empty token
+}
+
+module.exports.getLocalPaymentsToken = getLocalPaymentsToken;
+
