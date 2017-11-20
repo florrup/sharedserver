@@ -33,7 +33,7 @@ const sequelize = new Sequelize(config.DATABASE, config.DATABASE_USER, config.DA
   //logging: false
 });
 
-var db        = {};
+var db = {};
 
 fs
   .readdirSync(__dirname)

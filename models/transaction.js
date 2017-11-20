@@ -3,7 +3,7 @@
 
 var Sequelize = require("sequelize");
 
-//CREATE TABLE transactions(id SERIAL PRIMARY KEY, _ref VARCHAR(20), userid INT NOT NULL, tripid INT NOT NULL, timestamp VARCHAR(30), costcurrency VARCHAR(20) NOT NULL, costvalue INT NOT NULL, description VARCHAR(50));
+//CREATE TABLE transactions(id SERIAL PRIMARY KEY, _ref VARCHAR(20), remotetransactionid VARCHAR(50), userid INT NOT NULL, tripid INT NOT NULL, timestamp VARCHAR(30), costcurrency VARCHAR(20) NOT NULL, costvalue INT NOT NULL, description VARCHAR(50));
 
 /**
  * Tabla utilizada para guardar transacciones offline cuando la API remota de pagos no está disponible
@@ -20,6 +20,9 @@ module.exports = function(sequelize, DataTypes) {
     _ref: {
       type: Sequelize.STRING
     },
+	remotetransactionid: {
+		type: Sequelize.STRING
+	},
     userid: {
       type: Sequelize.INTEGER, // the id of the owner of the car
       allowNull: false

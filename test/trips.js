@@ -1,10 +1,16 @@
 process.env.DATABASE_URL = 'postgres://nvvgpxztxxdugy:794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281@ec2-23-23-234-118.compute-1.amazonaws.com:5432/de2pgllaiv55c3';
-
+/*
 process.env.DATABASE_USER='nvvgpxztxxdugy';
 process.env.DATABASE_HOST='ec2-23-23-234-118.compute-1.amazonaws.com';
 process.env.DATABASE='de2pgllaiv55c3';
 process.env.DATABASE_PASS='794bac95662fe3643cd76663cac5d8aab38e124878b513e5a796068e9ebbe281';
-
+*/
+/*
+process.env.DATABASE_USER='yvnmgtvwznipcx';
+process.env.DATABASE_HOST='ec2-184-73-249-56.compute-1.amazonaws.com';
+process.env.DATABASE='d2gv0cr5bou448';
+process.env.DATABASE_PASS='d2158d028efa41843d2788c28396c02b4bb47b9e2b0c207ad99f1c1dc266466e';
+*/
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var baseUrl = 'http://localhost:5000/api';
@@ -128,6 +134,7 @@ describe('Trips', function()  {
 									.set(token_header_flag, token)
 									.send(firstUser)
 									.end((err, res) => {
+										console.log(res.body);
 										res.should.have.status(201);
 										var userId1 = res.body.user.id;
 										// console.log('New User ID: '+userId1);
@@ -214,6 +221,8 @@ describe('Trips', function()  {
 													.get('/users/'+userId1+'/transactions')
 													.set(token_header_flag, token)
 													.end((err, res) => {
+														console.log('Transactions from User: '+userId1);
+														console.log(res.body);
 														res.should.have.status(200);
 														res.body.transactions.length.should.be.eql(1);
 														done();
