@@ -513,7 +513,7 @@ router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, fun
 	// We only return trips as driver or as passanger, user can only be of one type
 	
 	var isADriver = false;
-	var tripsFound = [];
+	var tripsArray = [];
 	/* istanbul ignore next */
 	Car.findAll({
 		where: {
@@ -529,18 +529,95 @@ router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, fun
 	/* istanbul ignore next */
 	if (!isADriver){
 		Trip.findAll({
-			passangerId: request.params.userId
-		}).then(tripsFoundAsPassanger => {
-			tripsFound = tripsFoundAsPassanger;
+			where: {
+				passangerid: request.params.userId
+			}
+		}).then(tripsFoundAsDriver => {
+			tripsFoundAsDriver.forEach(function(item) {
+				var jsonTrip = {
+					id: item.id,
+					_ref: item._ref,
+					applicationOwner: item.applicationowner,
+					driver: item.driverid,
+					passenger: item.passengerid,
+					start: {
+						address: {
+							street: item.startaddressstreet,
+							location: {
+								lat: item.startaddresslocationlat,
+								lon: item.startaddresslocationlon
+							}
+						},
+						timestamp: item.starttimestamp
+					},
+					end: {
+						address: {
+							street: item.endaddressstreet,
+							location: {
+								lat: item.endaddresslocationlat,
+								lon: item.endaddresslocationlon
+							}
+						},
+						timestamp: item.endtimestamp
+					},
+					totalTime: item.totalTime,
+					waitTime: item.waittime,
+					travelTime: item.traveltime,
+					distance: item.distance,
+					route: item.route,
+					costCurrency: item.costcurrency,
+					costValue: item.costvalue
+				};
+				tripsArray.push(jsonTrip);
+			});
+			
 		}).catch(function (error) {
 			return response.status(500).json({code: 0, message: "Unexpected error"});
 		});
 	/* istanbul ignore next */
 	} else {
 		Trip.findAll({
-			driverId: request.params.userId
+			where: {
+				driverid: request.params.userId
+			}
 		}).then(tripsFoundAsPassanger => {
-			tripsFound = tripsFoundAsPassanger;
+			tripsFoundAsPassanger.forEach(function(item) {
+				var jsonTrip = {
+					id: item.id,
+					_ref: item._ref,
+					applicationOwner: item.applicationowner,
+					driver: item.driverid,
+					passenger: item.passengerid,
+					start: {
+						address: {
+							street: item.startaddressstreet,
+							location: {
+								lat: item.startaddresslocationlat,
+								lon: item.startaddresslocationlon
+							}
+						},
+						timestamp: item.starttimestamp
+					},
+					end: {
+						address: {
+							street: item.endaddressstreet,
+							location: {
+								lat: item.endaddresslocationlat,
+								lon: item.endaddresslocationlon
+							}
+						},
+						timestamp: item.endtimestamp
+					},
+					totalTime: item.totalTime,
+					waitTime: item.waittime,
+					travelTime: item.traveltime,
+					distance: item.distance,
+					route: item.route,
+					costCurrency: item.costcurrency,
+					costValue: item.costvalue
+				};
+				tripsArray.push(jsonTrip);
+			});
 		}).catch(function (error) {
 			return response.status(500).json({code: 0, message: "Unexpected error"});
 		});
@@ -550,7 +627,7 @@ router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, fun
 		metadata: {
 			version: api.apiVersion
 		},
-		trips: tripsFound
+		trips: tripsArray
 	};
 	/* istanbul ignore next */
 	return response.status(200).json(jsonInResponse);
@@ -560,6 +637,55 @@ router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, fun
  *  Devuelve todas las transacciones que hizo el usuario
  */
 router.get('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
+	
+	User.findOne({
+		where: {
+			id: request.params.userId
+		}
+	})
+	.then( user => {
+		if (!user){
+			return response.status(500).json({code: 0, message: "User does not exist, can't get its transactions"});
+		}
+		console.log('AAAAAAAAAAA');
+		Transaction.findAll({
+			where: {
+				userid: request.params.userId
+			}
+		}).then(transactions => {
+			console.log('BBBBBBBBBBBBBBb');
+			var arrayTransactions = [];
+			
+			transactions.forEach(function(item) {
+				var jsonTransaction = {
+					id: item.id,
+					_ref: item._ref,
+					userId: item.userid,
+					tripId: item.tripid,
+					costCurrency: item.costcurrency,
+					costValue: item.costvalue,
+					description: item.description
+				}
+				arrayTransactions.push(jsonTransaction);
+			});
+			console.log('UserID: '+request.params.userId);
+			console.log(arrayTransactions);
+			var jsonInResponse = {
+				metadata:  {
+					version: api.apiVersion
+				},
+				transactions: arrayTransactions // JSON.parse(transactions)
+			};
+			return response.status(200).json(jsonInResponse);
+		})/*
+		.catch(function (error) {
+			return response.status(500).json({code: 0, message: "Unexpected error"});
+		});*/
+	})
+	.catch(function (error) {
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
+
 });
 
 /**

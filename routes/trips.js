@@ -111,12 +111,54 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 			return response.status(500).json({code: 0, message: "Unexpected error at endpoint GET /trips"});
 		}
 		
+		var tripsArray = [];
+		trips.forEach(function(item) {
+		  var jsonTrip = {
+			id: item.id,
+			_ref: item._ref,
+			applicationOwner: item.applicationowner,
+			driver: item.driverid,
+			passenger: item.passengerid,
+			start: {
+				address: {
+					street: item.startaddressstreet,
+					location: {
+						lat: item.startaddresslocationlat,
+						lon: item.startaddresslocationlon
+					}
+				},
+				timestamp: item.starttimestamp
+			},
+			end: {
+				address: {
+					street: item.endaddressstreet,
+					location: {
+						lat: item.endaddresslocationlat,
+						lon: item.endaddresslocationlon
+					}
+				},
+				timestamp: item.endtimestamp
+			},
+			totalTime: item.totalTime,
+			waitTime: item.waittime,
+			travelTime: item.traveltime,
+			distance: item.distance,
+			route: item.route,
+			costCurrency: item.costcurrency,
+			costValue: item.costvalue
+		  };
+		  // console.log('USER JSON &&&&&&&&&&&&&&&&&&&&&&');
+		  // console.log(jsonUser);
+			tripsArray.push(jsonTrip);
+		});
+		
 		var jsonInResponse = {
 			metadata: {
 				version: api.apiVersion
 			},
-			trips: trips
+			trips: tripsArray
 		};
+		console.log(jsonInResponse);
 		return response.status(200).json(jsonInResponse);
 	})
 });
@@ -245,10 +287,10 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 								};
 								urlRequest(optionsPassenger)
 									.then(paymentsPassengerResponse => {
-										// var resPassenger = JSON.parse(paymentsPassengerResponse);
-										// console.log('Payments API returned: ' + resPassenger)
+										var resPassenger = JSON.stringify(paymentsPassengerResponse);
+										console.log('Payments API returned: ' + resPassenger);
 										
-										const optionsPassenger = {
+										const optionsDriver = {
 											method: 'POST',
 											uri: payments_base_url+'payments',
 											headers: {
@@ -271,9 +313,10 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 										};
 										
 										// Payment for the driver
-										urlRequest(optionsPassenger)
+										urlRequest(optionsDriver)
 											.then(paymentsDriverResponse => {
-												
+												var resDriver = JSON.stringify(paymentsDriverResponse);
+												console.log('Payments API returned: ' + resDriver);
 												// Payments were locally saved and remotely proccessed, return ok
 												
 												var jsonInResponse = {

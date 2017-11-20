@@ -64,7 +64,7 @@ module.exports = function(sequelize, DataTypes) {
 		starttimestamp: {
 			type: Sequelize.INTEGER // epoch time
 		},
-		endAddressStreet: {
+		endaddressstreet: {
 			type: Sequelize.STRING // Street Address (optional)
 		},
 		endaddresslocationlat: {
@@ -78,7 +78,7 @@ module.exports = function(sequelize, DataTypes) {
 		endtimestamp: {
 			type: Sequelize.INTEGER // epoch time
 		},
-		totalTime: {
+		totaltime: {
 			type: Sequelize.INTEGER // seconds
 		},
 		waittime: {
