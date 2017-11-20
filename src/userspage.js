@@ -1,7 +1,7 @@
 import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import { Footer, Menu, Header, Banner, GeneralStats, List } from './components';
+import { Footer, Menu, Header, Banner, GeneralStats, UserList } from './components';
 
 import GlobalStrings from './components/GlobalStrings'
 
@@ -46,7 +46,7 @@ class UsersPage extends Component {
 
             <Banner title="UsersPage" subtitle="A free and fully responsive site template"
             content="Hello, Users"/>
-            <List people={people} />
+            <UserList people={people} />
           </div>
         </div>
 
