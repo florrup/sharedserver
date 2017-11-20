@@ -29,6 +29,32 @@ class BusinessUsersPage extends Component {
     });
   }
 
+  addBusinessUser(event) {
+    event.preventDefault();
+    console.log(this.refs.name.value);
+    console.log(this.refs.surname.value);
+    var businessRoles = (this.refs.roles.value).split(","); // Toma el string separado por comas que se ingresa y lo convierte en array
+
+    var businessUserToPost = {
+      _ref: '',
+      username: this.refs.username.value,
+      password: this.refs.password.value,
+      name: this.refs.name.value,
+      surname: this.refs.surname.value,
+      roles: businessRoles
+    }
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    return axios.post('http://localhost:5000/api/business-users', businessUserToPost, axiosHeader)
+    .then((response) => {
+      console.log(response.data)
+      //console.log('Metadata' + response.data.metadata);
+      //console.log('BusinessUsers' + response.data.businessUser);
+      //this.setState( { businesspeople: this.state.businesspeople.push(businessUserToPost) } ) // TODO pushear esto para que se actualice la pantalla
+    });
+  }
+
   componentDidMount() {
     this.getBusinessPeople();
   }
@@ -44,11 +70,20 @@ class BusinessUsersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title={GlobalStrings.headerTitle} link="/"/>
+            <Header title={GlobalStrings.headerTitle} link="/"/>
 
-              <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
-              content="Hello, BusinessUsers"/>
-              <BusinessUserList header={tableHeader} businesspeople={businesspeople} />
+            <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
+            content="Hello, BusinessUsers"/>
+            <BusinessUserList header={tableHeader} businesspeople={businesspeople} />
+            <br />
+            <form onSubmit={this.addBusinessUser.bind(this)}>
+              <label>Username: <input type="text" ref="username" /></label>
+              <label>Password: <input type="text" ref="password" /></label>
+              <label>Name: <input type="text" ref="name" /></label>
+              <label>Surname: <input type="text" ref="surname" /></label>
+              <label>Roles: <input type="text" ref="roles" /></label>
+              <button type="submit">Add new Business User</button>
+            </form> 
           </div>
         </div>
 

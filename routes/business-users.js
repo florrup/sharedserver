@@ -127,6 +127,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, r
 		return response.status(201).json(jsonInResponse);
 	}).catch(function (error) {
 		/* istanbul ignore next  */
+		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
