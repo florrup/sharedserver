@@ -8,7 +8,8 @@ module.exports = {
 		userpage: './src/userspage.js',
 		businessuserpage: './src/businessuserspage.js',
 		appserverpage: './src/appserverspage.js',
-		loginpage: './src/loginpage.js'
+		loginpage: './src/loginpage.js',
+		rulespage: './src/rulespage.js'
 	},
 	output: {
 		path: path.join(__dirname, 'public'),

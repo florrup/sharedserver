@@ -45,6 +45,10 @@ app.get('/appservers', function(request, response) {
   response.render('pages/appservers');
 });
 
+app.get('/rules', function(request, response) {
+  response.render('pages/rules');
+});
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
