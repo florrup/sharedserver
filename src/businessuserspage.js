@@ -12,6 +12,7 @@ class BusinessUsersPage extends Component {
 
     this.state = {// populate state with data that comes from api
       businesspeople: [],
+      message: '',
     } 
 
     this.getBusinessPeople = this.getBusinessPeople.bind(this);
@@ -67,6 +68,29 @@ class BusinessUsersPage extends Component {
     });
   }
 
+  /* Modifies a business user */
+  modifyBusinessUser(event) {
+    event.preventDefault();
+    console.log(this.refs.id.value);
+    var businessRoles = (this.refs.roles.value).split(","); // Toma el string separado por comas que se ingresa y lo convierte en array
+
+    var businessUserToModify = {
+      _ref: '',
+      username: this.refs.username.value,
+      password: this.refs.password.value,
+      name: this.refs.name.value,
+      surname: this.refs.surname.value,
+      roles: businessRoles
+    }
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    return axios.put('http://localhost:5000/api/business-users/' + this.refs.id.value, businessUserToModify, axiosHeader) 
+    .then((response) => {
+      this.getBusinessPeople();  
+    });
+  }
+
   componentDidMount() {
     this.getBusinessPeople();
   }
@@ -86,7 +110,9 @@ class BusinessUsersPage extends Component {
             <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
             content="Hello, BusinessUsers"/>
             <BusinessUserList header={tableHeader} businesspeople={businesspeople} />
-            <br />
+            <br/>
+            <div>{this.state.message}</div>
+            <br/>
             <CollapseButton name="Add Businessuser">
               <br/>
               <form onSubmit={this.addBusinessUser.bind(this)}>
@@ -105,6 +131,19 @@ class BusinessUsersPage extends Component {
                 <label>BusinessUser ID: <input type="text" ref="id" /></label>
                 <center><button type="submit">Delete Business User</button></center>
               </form>
+            </CollapseButton>
+            <br/><br/>
+            <CollapseButton name="Modify Businessuser">
+              <br/>
+              <form onSubmit={this.modifyBusinessUser.bind(this)}>
+                <label>Id: <input type="text" ref="id" /></label>
+                <label>Username: <input type="text" ref="username" /></label>
+                <label>Password: <input type="text" ref="password" /></label>
+                <label>Name: <input type="text" ref="name" /></label>
+                <label>Surname: <input type="text" ref="surname" /></label>
+                <label>Roles: <input type="text" ref="roles" /></label>
+                <center><button type="submit">Modify Business User</button></center>
+              </form> 
             </CollapseButton>
           </div>
         </div>
