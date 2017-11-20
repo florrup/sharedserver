@@ -5,6 +5,7 @@ import Banner from './Banner';
 import GeneralStats from './GeneralStats';
 import UserList from './UserList';
 import BusinessUserList from './BusinessUserList';
+import CollapseButton from './CollapseButton';
 
 export {
 	Footer,
@@ -13,5 +14,6 @@ export {
 	Banner,
 	GeneralStats,
 	UserList,
-	BusinessUserList
+	BusinessUserList,
+	CollapseButton
 }

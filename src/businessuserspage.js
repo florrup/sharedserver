@@ -1,7 +1,7 @@
 import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import { Footer, Menu, Header, Banner, GeneralStats, BusinessUserList } from './components';
+import { Footer, Menu, Header, Banner, GeneralStats, BusinessUserList, CollapseButton } from './components';
 
 import GlobalStrings from './components/GlobalStrings'
 
@@ -17,6 +17,7 @@ class BusinessUsersPage extends Component {
     this.getBusinessPeople = this.getBusinessPeople.bind(this);
   }
 
+  /* Displays business users on screen */
   getBusinessPeople() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
@@ -29,6 +30,7 @@ class BusinessUsersPage extends Component {
     });
   }
 
+  /* Adds a new business user to the database */
   addBusinessUser(event) {
     event.preventDefault();
     console.log(this.refs.name.value);
@@ -48,10 +50,20 @@ class BusinessUsersPage extends Component {
     var axiosHeader = { headers: {'x-access-token': localToken} };
     return axios.post('http://localhost:5000/api/business-users', businessUserToPost, axiosHeader)
     .then((response) => {
-      console.log(response.data)
-      //console.log('Metadata' + response.data.metadata);
-      //console.log('BusinessUsers' + response.data.businessUser);
-      //this.setState( { businesspeople: this.state.businesspeople.push(businessUserToPost) } ) // TODO pushear esto para que se actualice la pantalla
+      this.getBusinessPeople();  
+    });
+  }
+
+  /* Deletes a business user from the database */
+  deleteBusinessUser(event) {
+    event.preventDefault();
+    console.log(this.refs.id.value);
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    return axios.delete('http://localhost:5000/api/business-users/' + this.refs.id.value, axiosHeader) 
+    .then((response) => {
+      this.getBusinessPeople();  
     });
   }
 
@@ -64,7 +76,6 @@ class BusinessUsersPage extends Component {
     var tableHeader = ["Id", "Username", "Password", "Name", "Surname", "Roles"];
 
     return (
-
       <div id="wrapper">
 
         <div id="main">
@@ -76,14 +87,25 @@ class BusinessUsersPage extends Component {
             content="Hello, BusinessUsers"/>
             <BusinessUserList header={tableHeader} businesspeople={businesspeople} />
             <br />
-            <form onSubmit={this.addBusinessUser.bind(this)}>
-              <label>Username: <input type="text" ref="username" /></label>
-              <label>Password: <input type="text" ref="password" /></label>
-              <label>Name: <input type="text" ref="name" /></label>
-              <label>Surname: <input type="text" ref="surname" /></label>
-              <label>Roles: <input type="text" ref="roles" /></label>
-              <button type="submit">Add new Business User</button>
-            </form> 
+            <CollapseButton name="Add Businessuser">
+              <br/>
+              <form onSubmit={this.addBusinessUser.bind(this)}>
+                <label>Username: <input type="text" ref="username" /></label>
+                <label>Password: <input type="text" ref="password" /></label>
+                <label>Name: <input type="text" ref="name" /></label>
+                <label>Surname: <input type="text" ref="surname" /></label>
+                <label>Roles: <input type="text" ref="roles" /></label>
+                <center><button type="submit">Add new Business User</button></center>
+              </form> 
+            </CollapseButton>
+            <br/><br/>
+            <CollapseButton name="Delete Businessuser">
+              <br/>
+              <form onSubmit={this.deleteBusinessUser.bind(this)}>
+                <label>BusinessUser ID: <input type="text" ref="id" /></label>
+                <center><button type="submit">Delete Business User</button></center>
+              </form>
+            </CollapseButton>
           </div>
         </div>
 
