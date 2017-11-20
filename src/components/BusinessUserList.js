@@ -3,19 +3,21 @@ import React, { Component } from 'react';
 export default (props) => {
   //console.log("People are " + props.businesspeople)
   const businesspeople = props.businesspeople;
+  const header = props.header;
 
   //console.log(businesspeople.length)
 	return (
     <div className="">
     <table id="simple-board">
       <tbody key="userbody">
-        <tr key="headers">
-          <td><strong>ID</strong></td>
-          <td><strong>Username</strong></td>
-          <td>Password</td>
-          <td>Name</td>
-          <td>Surname</td>
-          <td>Roles</td>
+        <tr key={header}>
+          {
+            header.map((h) => {
+              return (
+                <td key={h}><strong>{h}</strong></td>
+              )
+            })
+          }
         </tr>
         {
           businesspeople.map((p) => {

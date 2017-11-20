@@ -3,21 +3,21 @@ import React, { Component } from 'react';
 export default (props) => {
   console.log("People are " + props.people)
   const people = props.people;
+  const header = props.header;
 
   console.log(people.length)
 	return (
     <div className="">
     <table id="simple-board">
       <tbody key="userbody">
-        <tr key="headers">
-          <td><strong>ID</strong></td>
-          <td><strong>Username</strong></td>
-          <td>Type</td>
-          <td>First Name</td>
-          <td>Last Name</td>
-          <td>Email</td>
-          <td>Country</td>
-          <td>Birthdate</td>
+        <tr key={header}>
+          {
+            header.map((h) => {
+              return (
+                <td key={h}><strong>{h}</strong></td>
+              )
+            })
+          }
         </tr>
         {
           people.map((p) => {

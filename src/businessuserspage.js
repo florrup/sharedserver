@@ -35,6 +35,7 @@ class BusinessUsersPage extends Component {
 
   render() {
     const {businesspeople} = this.state;
+    var tableHeader = ["Id", "Username", "Password", "Name", "Surname", "Roles"];
 
     return (
 
@@ -47,7 +48,7 @@ class BusinessUsersPage extends Component {
 
               <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
               content="Hello, BusinessUsers"/>
-              <BusinessUserList businesspeople={businesspeople} />
+              <BusinessUserList header={tableHeader} businesspeople={businesspeople} />
           </div>
         </div>
 

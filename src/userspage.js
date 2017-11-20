@@ -10,11 +10,17 @@ class UsersPage extends Component {
  constructor(props) {
     super(props);
 
-    this.state = {// populate state with data that comes from api
+    this.state = { // populate state with data that comes from api
       people: [],
-    } 
+      search: '',
+    };
 
     this.getPeople = this.getPeople.bind(this);
+  }
+
+  // For the filters
+  updateSearch(event) {
+    this.setState({ search: event.target.value} );
   }
 
   getPeople() {
@@ -33,10 +39,15 @@ class UsersPage extends Component {
     this.getPeople();
   }
 
-
   render() {
     const {people} = this.state;
-    
+    var tableHeader = ["Id", "Username", "Type", "First Name", "Last Name", "Email", "Country", "Birthdate"];
+  
+    let filteredUsers = this.state.people.filter(
+      (user) => {
+        return user.username.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1;
+      }
+    )
     return (
       <div id="wrapper">
 
@@ -46,7 +57,13 @@ class UsersPage extends Component {
 
             <Banner title="UsersPage" subtitle="A free and fully responsive site template"
             content="Hello, Users"/>
-            <UserList people={people} />
+            <UserList header={tableHeader} people={filteredUsers} />
+            <label>
+              Filter by username: 
+              <input type="text"
+                value={this.state.search}
+                onChange={this.updateSearch.bind(this)} />
+            </label>
           </div>
         </div>
 
