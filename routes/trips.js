@@ -522,3 +522,25 @@ function saveUnfulfilledPaymentData(payment, payment_data){
 		type: payment_data.type 
 	});
 }
+
+/**
+ *  This method clears the application transactions database
+ */
+function clearTransactionsTable(){
+  return new Promise(
+    function (resolve, reject) {
+      Transaction.destroy({
+		  where: {},
+		  truncate: true
+      })
+      .then(affectedRows => {
+        if (affectedRows == 0) {
+          // database was already empty
+        }
+        resolve(true);
+      })
+      // .catch(reject(false));
+  })
+};
+
+module.exports.clearTransactionsTable = clearTransactionsTable;
