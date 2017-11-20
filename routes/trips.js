@@ -19,11 +19,11 @@ var paymethods = require('./paymethods');
 const urlRequest = require('request-promise'); // to hit payments api
 
 // Scheduled tasks: proccess again rejected payments
-/*
 var schedule = require('node-schedule');
-var j = schedule.scheduleJob('15 * * * * *', function(){
+var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script every minute when seconds are in "15"
 	console.log('Processing rejected payments...');
 
+	var proccessedPayments = 0;
 	PendingPayment.findAll({
 		attributes: ['pendingtransactionid', 
 						'originaltransactionid', 
@@ -41,15 +41,81 @@ var j = schedule.scheduleJob('15 * * * * *', function(){
 						'type']
 	}).then(paymentsToBeProccessed => {
 		// Proccess payments
+		var rejectedPayments = [];
+		var rejectedPaymentsData = [];
+		paymentsToBeProccessed.forEach(function(payment) {
+			proccessedPayments = proccessedPayments + 1;
+			const optionsPayment = {
+				method: 'POST',
+				uri: payments_base_url+'payments',
+				headers: {
+					Authorization: 'Bearer '+paymentsToken
+				},
+				body: {
+					transaction_id: '',// localTransactionPassenger.id, // this is ignored by remote API
+					currency: process.env.PESOSARG,
+					value: payment.costvalue,
+					paymentMethod: {
+						expiration_month: payment.expiration_month,
+						expiration_year: payment.expiration_year,
+						method: payment.paymethod,
+						number: payment.number,
+						type: payment.type
+					}
+				},
+				json: true
+			};
+			urlRequest(optionsPayment)
+				.then(paymentsApiResponse => {
+				})
+				.catch (function(reason) {
+					console.log('Pending payment was rejected again, it will be saved for further processing...');
+					
+					var localTransaction = {
+						id: payment.originaltransactionid,
+						_ref: payment._ref,
+						remotetransactionid: '',
+						userid: payment.userid,
+						tripid: payment.tripid,
+						timestamp: payment.timestamp,
+						costcurrency: payment.costcurrency,
+						costvalue: payment.costvalue,
+						description: payment.description
+					};
+					
+					var paymentData = {
+						paymethod: payment.paymethod,
+						ccvv: '',
+						expiration_month: payment.expiration_month,
+						expiration_year: payment.expiration_year,
+						number: payment.number,
+						type: payment.type
+					};
+					rejectedPayments.push(localTransaction);
+					rejectedPaymentsData.push(paymentData);
+				});
+		});
+		
+		// We clean the pending payments and save again all the rejected payments (failed again after being in this list)...
+		clearPendingPaymentsTable()
+		.then( function(fulfilled){
+			var failedAgain = 0;
+			for (var i=0; i<rejectedPayments.length; i++) {
+				saveUnfulfilledPaymentData(rejectedPayments[i], rejectedPaymentsData[i]);
+				failedAgain = failedAgain + 1;
+			}
+			console.log('Finished to process rejected payments again.');
+			console.log(proccessedPayments + ' payments were proccessed in total');
+			console.log(failedAgain + ' payments failed again to be proccessed');
+		});
+		
 	})
-	/* Lets comment for now for more descriptive error messages
+	// Lets comment for now for more descriptive error messages ?
 	.catch (function(reason) {
 		console.log('Error while trying to get available payment methods, could not get Payments API Token');
-		return response.status(500).json({code: 0, message: "Error while trying to get available payment methods."});
 	});
-	*//*
 });
-*/
+
 
 // API URL for payments
 var path = require('path');
@@ -420,7 +486,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 												saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
 												return response.status(500).json({code: 0, message: "Error while trying to pay to the DRIVER. PASSENGER was paid, driver payment data was saved for further proccessing"});
 											});
-								})/*
+								})
 								.catch (function(reason) {
 									console.log('Error while trying to pay for the PASSENGER');
 									console.log('Saving Transactions INFO for further proccessing...');
@@ -431,7 +497,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 									saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
 									saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
 									return response.status(500).json({code: 0, message: "Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
-								});*/
+								});
 							})
 							.catch (function(reason) {
 								console.log('Error while trying to get payments API Token');
@@ -643,3 +709,25 @@ function clearTransactionsTable(){
 };
 
 module.exports.clearTransactionsTable = clearTransactionsTable;
+
+/**
+ *  This method clears the application transactions database
+ */
+function clearPendingPaymentsTable(){
+  return new Promise(
+    function (resolve, reject) {
+      PendingPayment.destroy({
+		  where: {},
+		  truncate: true
+      })
+      .then(affectedRows => {
+        if (affectedRows == 0) {
+          // database was already empty
+        }
+        resolve(true);
+      })
+      // .catch(reject(false));
+  })
+};
+
+module.exports.clearPendingPaymentsTable = clearPendingPaymentsTable;
