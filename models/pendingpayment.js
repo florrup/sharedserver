@@ -3,7 +3,7 @@
 
 var Sequelize = require("sequelize");
 
-//CREATE TABLE transactions(pendingtransactionid SERIAL PRIMARY KEY, _ref VARCHAR(20), userid INT NOT NULL, tripid INT NOT NULL, timestamp INT, costcurrency VARCHAR(20) NOT NULL, costvalue INT NOT NULL, description VARCHAR(50));
+//CREATE TABLE pendingpayments(pendingtransactionid SERIAL PRIMARY KEY, _ref VARCHAR(20), originaltransactionid INT, userid INT NOT NULL, tripid INT NOT NULL, timestamp VARCHAR(30), costcurrency VARCHAR(20) NOT NULL, costvalue INT NOT NULL, description VARCHAR(200), paymethod VARCHAR(50), expiration_month INT, expiration_year INT, number VARCHAR(30), type VARCHAR(100));
 
 /**
  * Tabla utilizada para guardar transacciones offline cuando la API remota de pagos no está disponible
@@ -17,13 +17,13 @@ module.exports = function(sequelize, DataTypes) {
       unique: true,
       autoIncrement: true // from 1 onwards
     },
+    _ref: {
+      type: Sequelize.STRING
+    },
 	originaltransactionid: {
 		type: Sequelize.INTEGER, // the id of the original stored transaction to be persisted
 		allowNull: false
 	},
-    _ref: {
-      type: Sequelize.STRING
-    },
     userid: {
       type: Sequelize.INTEGER, // the id of the owner of the car
       allowNull: false
@@ -33,7 +33,7 @@ module.exports = function(sequelize, DataTypes) {
 		allowNull: false
 	},
 	timestamp: {
-		type: Sequelize.INTEGER
+		type: Sequelize.STRING
 	},
 	costcurrency: {
 		type: Sequelize.STRING,
@@ -55,7 +55,7 @@ module.exports = function(sequelize, DataTypes) {
 	expiration_year: {
 		type: Sequelize.STRING
 	},
-	number: {
+	number: {	// credit card number if paymethod is credit card...
 		type: Sequelize.STRING
 	},
 	type: {

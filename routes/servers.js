@@ -26,7 +26,8 @@ router.get('/initAndWriteDummyServer', function(request, response) {
   // Test code: dummy register and table initialization:
   // force: true will drop the table if it already exists
   /* istanbul ignore else  */
-	if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){
+	/* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){*/
+		
 	  Server.sync({force: true}).then(() => {
 		// Table created
 		
@@ -63,10 +64,11 @@ router.get('/initAndWriteDummyServer', function(request, response) {
 				// mhhh, wth!
 			});
 	    });
+		/*
 	} else {
-		/* istanbul ignore next  */
+		/* istanbul ignore next  */ /*
 		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
-	}
+	}*/
 });
 
 /**

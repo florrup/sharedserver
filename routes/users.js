@@ -28,75 +28,75 @@ const urlRequest = require('request-promise'); // to hit facebook api
 router.get('/initAndWriteDummyUser', function(request, response) {
 	// Test code: dummy register and table initialization:
 	// force: true will drop the table if it already exists
-	if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){
+	/* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){ */
 		User.sync({force: true}).then(() => {
-		  // Table created
+		// Table created
 
-      var dummyUser = {
-        _ref: 'aaa',
-        applicationowner: 'hi',
-        type: 'conductor',
-        username: 'johnny',
-        password: 'aaa',
-		facebookuserid: '',
-        name: 'John',
-        lastname: 'Hancock',
-        country: 'Argentina',
-        email: 'johnny123@gmail.com',
-        birthdate: '24/05/1992'
-      };
-		  User.create(dummyUser)
-      .then(() => {
-		  var dummyUserToAnswer = {
-			_ref: dummyUser._ref,
-			applicationOwner: dummyUser.applicationowner,
-			type: dummyUser.type,
-			username: dummyUser.username,
-			password: dummyUser.password,
-			facebookUserId: dummyUser.facebookuserid,
-			firstName: dummyUser.name,
-			lastName: dummyUser.lastname,
-			country: dummyUser.country,
-			email: dummyUser.email,
-			birthdate: dummyUser.birthdate
-		  };
-        return response.status(200).json(dummyUserToAnswer);
-      })
-      .catch(error => {
-        return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
-      // mhhh, wth!
-      })
-		})
+			var dummyUser = {
+				_ref: 'aaa',
+				applicationowner: 'hi',
+				type: 'conductor',
+				username: 'johnny',
+				password: 'aaa',
+				facebookuserid: '',
+				name: 'John',
+				lastname: 'Hancock',
+				country: 'Argentina',
+				email: 'johnny123@gmail.com',
+				birthdate: '24/05/1992'
+			  };
+			User.create(dummyUser)
+				.then(() => {
+					var dummyUserToAnswer = {
+						_ref: dummyUser._ref,
+						applicationOwner: dummyUser.applicationowner,
+						type: dummyUser.type,
+						username: dummyUser.username,
+						password: dummyUser.password,
+						facebookUserId: dummyUser.facebookuserid,
+						firstName: dummyUser.name,
+						lastName: dummyUser.lastname,
+						country: dummyUser.country,
+						email: dummyUser.email,
+						birthdate: dummyUser.birthdate
+					};
+					return response.status(200).json(dummyUserToAnswer);
+				})
+				.catch(error => {
+					return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
+					// mhhh, wth!
+				});
+		});/*
 	}
 	else {
 		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
-	}
+	}*/
 });
 
 router.get('/dropUserTable', function(request, response) {
   // Test code: dummy register and table initialization:
   // force: true will drop the table if it already exists
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  /* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') { */
     User.sync({force: true}).then(() => {
       return response.status(200).json({});
     }).catch(function (error) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
     });
-  }
+  /* } */
 });
 
 router.get('/dropCarTable', function(request, response) {
   // Test code: dummy register and table initialization:
   // force: true will drop the table if it already exists
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  /* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') { */
     Car.sync({force: true}).then(() => {
       return response.status(200).json({});
     }).catch(function (error) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
     });
-  }
+  /* } */
 });
 
 /**

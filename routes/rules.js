@@ -26,7 +26,7 @@ var RulesEngine = require('./rulesEngine');
 router.get('/dropRuleTable', function(request, response) {
   // Test code: dummy register and table initialization:
   // force: true will drop the table if it already exists
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  /* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') { */
     Rule.sync({force: true}).then(() => {
     	RuleChange.sync({force: true}).then(() => {
 	    	return response.status(200).json({});
@@ -38,7 +38,7 @@ router.get('/dropRuleTable', function(request, response) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
     });
-  }
+  /* } */
 });
 
 /**

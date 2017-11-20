@@ -16,7 +16,106 @@ var api = require('./api');
 
 var paymethods = require('./paymethods');
 
-const urlRequest = require('request-promise'); // to hit google api
+const urlRequest = require('request-promise'); // to hit payments api
+
+// Scheduled tasks: proccess again rejected payments
+var schedule = require('node-schedule');
+var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script every minute when seconds are in "15"
+	console.log('Processing rejected payments...');
+
+	var proccessedPayments = 0;
+	PendingPayment.findAll({
+		attributes: ['pendingtransactionid', 
+						'originaltransactionid', 
+						'_ref', 
+						'userid', 
+						'tripid', 
+						'timestamp', 
+						'costcurrency', 
+						'costvalue', 
+						'description',
+						'paymethod',
+						'expiration_month',
+						'expiration_year',
+						'number',
+						'type']
+	}).then(paymentsToBeProccessed => {
+		// Proccess payments
+		var rejectedPayments = [];
+		var rejectedPaymentsData = [];
+		paymentsToBeProccessed.forEach(function(payment) {
+			proccessedPayments = proccessedPayments + 1;
+			const optionsPayment = {
+				method: 'POST',
+				uri: payments_base_url+'payments',
+				headers: {
+					Authorization: 'Bearer '+paymentsToken
+				},
+				body: {
+					transaction_id: '',// localTransactionPassenger.id, // this is ignored by remote API
+					currency: process.env.PESOSARG,
+					value: payment.costvalue,
+					paymentMethod: {
+						expiration_month: payment.expiration_month,
+						expiration_year: payment.expiration_year,
+						method: payment.paymethod,
+						number: payment.number,
+						type: payment.type
+					}
+				},
+				json: true
+			};
+			urlRequest(optionsPayment)
+				.then(paymentsApiResponse => {
+				})
+				.catch (function(reason) {
+					console.log('Pending payment was rejected again, it will be saved for further processing...');
+					
+					var localTransaction = {
+						id: payment.originaltransactionid,
+						_ref: payment._ref,
+						remotetransactionid: '',
+						userid: payment.userid,
+						tripid: payment.tripid,
+						timestamp: payment.timestamp,
+						costcurrency: payment.costcurrency,
+						costvalue: payment.costvalue,
+						description: payment.description
+					};
+					
+					var paymentData = {
+						paymethod: payment.paymethod,
+						ccvv: '',
+						expiration_month: payment.expiration_month,
+						expiration_year: payment.expiration_year,
+						number: payment.number,
+						type: payment.type
+					};
+					rejectedPayments.push(localTransaction);
+					rejectedPaymentsData.push(paymentData);
+				});
+		});
+		
+		// We clean the pending payments and save again all the rejected payments (failed again after being in this list)...
+		clearPendingPaymentsTable()
+		.then( function(fulfilled){
+			var failedAgain = 0;
+			for (var i=0; i<rejectedPayments.length; i++) {
+				saveUnfulfilledPaymentData(rejectedPayments[i], rejectedPaymentsData[i]);
+				failedAgain = failedAgain + 1;
+			}
+			console.log('Finished to process rejected payments again.');
+			console.log(proccessedPayments + ' payments were proccessed in total');
+			console.log(failedAgain + ' payments failed again to be proccessed');
+		});
+		
+	})
+	// Lets comment for now for more descriptive error messages ?
+	.catch (function(reason) {
+		console.log('Error while trying to get available payment methods, could not get Payments API Token');
+	});
+});
+
 
 // API URL for payments
 var path = require('path');
@@ -37,7 +136,7 @@ router.get('/initAndWriteDummyTrip', function(request, response) {
   // Test code: dummy register and table initialization:
   // force: true will drop the table if it already exists
   /* istanbul ignore else  */
-	if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){
+	/* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'){ */
 	  Trip.sync({force: true}).then(() => {
 		// Table created
 		
@@ -72,11 +171,11 @@ router.get('/initAndWriteDummyTrip', function(request, response) {
 				return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy trip for testing."});
 				// mhhh, wth!
 			});
-	    });
+	    }); /*
 	} else {
-		/* istanbul ignore next  */
+		 */ /* istanbul ignore next  */ /*
 		return response.status(500).json({code: 0, message: "Incorrect environment to use testing exclusive methods"});
-	}
+	}*/
 });
 
 /**
@@ -235,6 +334,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 					Transaction.create({
 						// id: ...autoincremental,
 						_ref: '',
+						remotetransactionid: '',
 						userid: request.body.trip.passenger,
 						tripid: trip.id, // ID recently created by our database
 						timestamp: actualTime.toString(),
@@ -243,12 +343,12 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 						description: 'Trip Payment (cost as passenger)'
 					})
 					.then(localTransactionPassenger => {
-						
 						var actualTime = (new Date).getTime();
 						// Transaction to the driver
 						Transaction.create({
 							// id: ...autoincremental,
 							_ref: '',
+							remotetransactionid: '',
 							userid: request.body.trip.driver,
 							tripid: trip.id, // ID recently created by our database
 							timestamp: actualTime,
@@ -271,7 +371,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 												Authorization: 'Bearer '+paymentsToken
 											},
 											body: {
-												transaction_id: localTransactionPassenger.id,
+												transaction_id: '',// localTransactionPassenger.id, // this is ignored by remote API
 												currency: process.env.PESOSARG,
 												value: localTransactionPassenger.costvalue,
 												paymentMethod: {
@@ -290,6 +390,18 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 										var resPassenger = JSON.stringify(paymentsPassengerResponse);
 										console.log('Payments API returned: ' + resPassenger);
 										
+										var passengerRemotePaymentId = paymentsPassengerResponse.transaction_id;
+										// console.log('NEW ID IS: '+passengerRemotePaymentId);
+										// this PAYMENTID is assigned remotely! 
+										
+										localTransactionPassenger.updateAttributes({
+											remotetransactionid: passengerRemotePaymentId
+										}).then(updatedLocalTransactionPassenger => {
+											console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionPassenger));
+										}).catch (function(reason) {
+											console.log('Error saving locally remote payment ID for driver Payment ID is'+passengerRemotePaymentId);
+										});
+										
 										const optionsDriver = {
 											method: 'POST',
 											uri: payments_base_url+'payments',
@@ -297,7 +409,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 												Authorization: 'Bearer '+paymentsToken
 											},
 											body: {
-												transaction_id: localTransactionDriver.id,
+												transaction_id: '', // localTransactionDriver.id, // parameter set remotely by payments api
 												currency: process.env.PESOSARG,
 												value: localTransactionDriver.costvalue,
 												paymentMethod: {
@@ -317,6 +429,16 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 											.then(paymentsDriverResponse => {
 												var resDriver = JSON.stringify(paymentsDriverResponse);
 												console.log('Payments API returned: ' + resDriver);
+												
+												var driverRemotePaymentId = paymentsDriverResponse.transaction_id;
+												// this PAYMENTID is assigned remotely! 
+												localTransactionDriver.updateAttributes({
+													remotetransactionid: driverRemotePaymentId
+												}).then(updatedLocalTransactionDriver => {
+													console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionDriver));
+												}).catch (function(reason) {
+													console.log('Error saving locally remote payment ID for driver Payment ID is'+driverRemotePaymentId);
+												});
 												// Payments were locally saved and remotely proccessed, return ok
 												
 												var jsonInResponse = {
@@ -587,3 +709,25 @@ function clearTransactionsTable(){
 };
 
 module.exports.clearTransactionsTable = clearTransactionsTable;
+
+/**
+ *  This method clears the application transactions database
+ */
+function clearPendingPaymentsTable(){
+  return new Promise(
+    function (resolve, reject) {
+      PendingPayment.destroy({
+		  where: {},
+		  truncate: true
+      })
+      .then(affectedRows => {
+        if (affectedRows == 0) {
+          // database was already empty
+        }
+        resolve(true);
+      })
+      // .catch(reject(false));
+  })
+};
+
+module.exports.clearPendingPaymentsTable = clearPendingPaymentsTable;
