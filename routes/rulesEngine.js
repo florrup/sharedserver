@@ -20,7 +20,8 @@ var exampleRules = [
 {
 	"name": "dominioLlevame",
     "condition": function(R) {
-        R.when(this.type == "pasajero" && this.email === "florencia@llevame.com"); // TODO parsear email
+		var eMailBonus = this.email.endsWith("@llevame.com");
+        R.when(this.type == "pasajero" &&  eMailBonus); // TODO parsear email
     },
     "consequence": function(R) {
         this.puedeViajar = true;
