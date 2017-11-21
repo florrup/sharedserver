@@ -550,7 +550,49 @@ router.get('/:ruleId/commits', Verify.verifyToken, Verify.verifyManagerRole, fun
  *	Si se pasa el valor lastCommit se el estado actual de la regla en el motor
  */
 router.get('/:ruleId/commits/:commitId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-	
+	RuleChange.findAll({
+		where: {
+			id: request.params.commitId
+		}
+	})
+	.then(ruleChange => {
+		
+		Rule.findAll({
+			where: {
+				name: ruleChange.name
+			}
+		})
+		.then(rule => {
+			var responseBlob = {
+				name: ruleChange.name,
+				condition: ruleChange.blobCondition,
+				consequence: ruleChange.blobConsequence,
+				priority: ruleChange.blobPriority
+			};
+			var jsonInResponse = {
+				metadata: {
+					version: api.apiVersion 
+				},
+				rule: {
+					id: ruleChange.id,
+					_ref: updatedRule._ref,
+					language: rule.language, // this is the only attribute needed from rule
+					blob: responseBlob,
+					active: ruleChange.active,
+					lastCommit: ruleChange.businessuser // ID de business user que hizo el commit buscado
+				}
+			};
+			return response.status(200).json(jsonInResponse);
+		})
+		.catch(function (error) {
+			/* istanbul ignore next  */
+			return response.status(500).json({code: 0, message: "Unexpected error"});
+	    });
+	})
+	.catch(function (error) {
+		/* istanbul ignore next  */
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
 });
 
 module.exports = router;
