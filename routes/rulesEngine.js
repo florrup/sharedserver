@@ -21,10 +21,11 @@ var exampleRules = [
 	"name": "dominioLlevame",
     "condition": function(R) {
 		var eMailBonus = this.email.endsWith("@llevame.com");
-        R.when(this.type == "pasajero" &&  eMailBonus); // TODO parsear email
+        R.when(this.type == "pasajero" &&  eMailBonus);
     },
     "consequence": function(R) {
         this.puedeViajar = true;
+		this.costoTotal = 0; // free ride!!
         this.reason = "El pasajero viaja gratis por tener un email con domino Llevame";
         R.stop();
     },
@@ -54,8 +55,9 @@ var exampleRules = [
     		var hora = arr[0];
     		var minutos = arr[1];
     		var segundos = arr[2];
+			var horaInt = parseInt(hora);
     		console.log(arr);
-            R.when(this.type == "pasajero" && this.dia == "miercoles"); // TODO falta chequear horario
+            R.when(this.type == "pasajero" && this.dia == "miercoles" && horaInt <= 16 && horaInt >= 15);
         }
     },
     "consequence": function(R) {
@@ -88,7 +90,8 @@ var exampleRules = [
     	   var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
     	   var arr = (this.hora).split(":");
 		   var hora = arr[0];
-           R.when(this.type == "pasajero" && dias.includes(this.dia)); // TODO falta chequear horario
+		   var horaInt = parseInt(hora);
+           R.when(this.type == "pasajero" && dias.includes(this.dia) && horaInt <= 19 && horaInt >= 17);
        }
     },
     "consequence": function(R) {
