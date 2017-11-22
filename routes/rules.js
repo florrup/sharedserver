@@ -212,8 +212,12 @@ router.post('/run', Verify.verifyToken, Verify.verifyManagerRole, function(reque
 			};
 			rulesToEngine.push(singleRule);
 		}
-
-		RulesEngine.runEngine(rulesToEngine, fact);
+		var rulesResult;
+		RulesEngine.runEngine(rulesToEngine, fact)
+			.then(data => {rulesResult = data})
+			.catch( function (error) {
+				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
+			});
 
 		var jsonInResponse = {
 		  metadata: {
@@ -499,7 +503,12 @@ router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, functi
 			priority: rule.blobPriority
 		};
 		rulesToEngine.push(singleRule);
-		RulesEngine.runEngine(rulesToEngine, fact);
+		var rulesResult;
+		RulesEngine.runEngine(rulesToEngine, fact)
+			.then(data => {rulesResult = data})
+			.catch( function (error) {
+				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
+			});
 
 		var jsonInResponse = {
 		  metadata: {

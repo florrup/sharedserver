@@ -37,6 +37,7 @@ var exampleRules = [
     },
     "consequence": function(R) {
         this.costoTotal = this.costoTotal + (this.kmRecorridos * 15);
+		this.costoPorKilometro = 15;
         this.reason = "Se cobran 15ARS por km recorrido";
         console.log("Llega aca");
         console.log(this.costoTotal);
@@ -156,6 +157,23 @@ var fact = {
     "primerViaje": true,
 };
 
+var getSampleFacts = function(){
+	var fact = {
+		"type": "pasajero",
+		"saldo": 15,
+		"email": "florencia@gmail.com",
+		"kmRecorridos": 2,
+		"costoTotal": 0,
+		"dia": "miercoles", // TODO cambiar esto por fecha actual
+		"hora": "15:20:58",
+		"viajesHoy": 5,
+		"primerViaje": true,
+	}; // example fact to use in trip estimate
+	return fact;
+};
+
+module.exports.getSampleFacts = getSampleFacts;
+
 R.execute(fact, function(data) {
     if (data.puedeViajar) {
         console.log("Puede viajar con costo: " + data.costoTotal + "\n" + data.reason);
@@ -164,7 +182,8 @@ R.execute(fact, function(data) {
     }
 });
 
-module.exports = R;
+// module.exports = R; // esta línea pisaba los exports que haya habido antes
+module.exports.R = R; // ok
 
 module.exports.exampleRules = exampleRules;
 
@@ -186,8 +205,8 @@ module.exports.runExampleEngine = runExampleEngine;
 // Función para correr cualquier set de rules sacadas de la bd
 function runEngine(rules, fact) {
     /* Creating Rule Engine instance and registering rule */
-    var R2 = new RuleEngine(exampleRules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
 
+    var R2 = new RuleEngine(exampleRules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
     // Remueve todos los exampleRules
     R2.init();
 
@@ -208,6 +227,14 @@ function runEngine(rules, fact) {
 	console.log('-----------------------');
     R2.fromJSON(store);
 
+	return new Promise((resolve, reject) => {
+        try {
+            R2.execute(fact, resolve);
+        } catch (error) {
+            reject(error);
+        }
+    });
+	/*
     R2.execute(fact, function(data) {
         if (data.puedeViajar) {
             console.log("Puede viajar con costo: " + data.costoTotal + "\n" + data.reason);
@@ -215,6 +242,7 @@ function runEngine(rules, fact) {
             console.log("No puede viajar: " + data.reason);
         }
     });
+	*/
 }
 
 module.exports.runEngine = runEngine;

@@ -57,37 +57,72 @@ describe('Trips', function()  {
 			chai.request(baseUrl)
 			.get('/servers/initAndWriteDummyServer/')
 			.end((err,res) => {
-				var token = res.body.serverToken;
-				
-				var tripToEstimate = {
-					passenger: 4,
-					start: {
-						address: {
-							location: {
-								lat: -34.803963,
-								lon: -58.454125
-							}
-						}
-					},
-					end: {
-						address: {
-							location: {
-								lat: -34.80198421544148,
-								lon: -58.44340190291405
-							}
-						}
-					}
-				};
-				
+				var serverToken = res.body.serverToken;
 				chai.request(baseUrl)
-				.post('/trips/estimate')
-				.set(token_header_flag, token)
-				.send(tripToEstimate)
+				.get('/business-users/initAndWriteDummyBusinessUser/') 
 				.end((err, res) => {
-					console.log('res:');
-					console.log(res.body);
-					res.should.have.status(200);
-					done();
+
+					chai.request(baseUrl)
+					.post('/token/')
+					.set('content-type', 'application/json')
+					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+					.end((err, res) => {
+						var businessUserToken = res.body.token.token;
+
+						chai.request(baseUrl)
+						.get('/rules/dropRuleTable')
+						.set(token_header_flag, businessUserToken)
+						.end((err, res) => {
+							var blob = {
+								name: 'RuleNombrePrueba',
+			                    condition: "function(R) { R.when(this.type == 'pasajero'); }",
+			                    consequence: "function(R) { this.puedeViajar = true; this.costoPorKilometro = 15; this.reason = 'Probando prueba string'; R.stop(); }",
+			                    priority: 2
+			                };
+							var rule = {
+								_ref: 'abc', 
+								language: 'node-rules/javascript', 
+								blob: blob,
+								active: true
+							}
+							chai.request(baseUrl)
+							.post('/rules')
+							.set(token_header_flag, businessUserToken)
+							.send(rule)
+							.end((err, res) => {
+								var tripToEstimate = {
+									passenger: 4,
+									start: {
+										address: {
+											location: {
+												lat: -34.803963,
+												lon: -58.454125
+											}
+										}
+									},
+									end: {
+										address: {
+											location: {
+												lat: -34.80198421544148,
+												lon: -58.44340190291405
+											}
+										}
+									}
+								};
+								
+								chai.request(baseUrl)
+								.post('/trips/estimate')
+								.set(token_header_flag, serverToken)
+								.send(tripToEstimate)
+								.end((err, res) => {
+									console.log('res:');
+									console.log(res.body);
+									res.should.have.status(200);
+									done();
+								});
+							});
+						});
+					});
 				});
 			});
 		});

@@ -568,6 +568,7 @@ describe('Rules', function()  {
 							.set(token_header_flag, token)
 							.end((err,res) => {
 								res.should.have.status(200);
+								console.log(res.body);
 								res.body.should.have.property('facts');
 								res.body.facts.should.have.property('blob');
 								done();

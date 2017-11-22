@@ -18,6 +18,10 @@ var paymethods = require('./paymethods');
 
 const urlRequest = require('request-promise'); // to hit payments api
 
+var RulesEngine = require('./rulesEngine'); // to estimate a trip
+var models = require('../models/db'); // loads db.js
+var Rule = models.rule; 
+
 // Scheduled tasks: proccess again rejected payments
 var schedule = require('node-schedule');
 var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script every minute when seconds are in "15"
@@ -536,6 +540,49 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 		return response.status(400).json({code: 0, message: "Parameters error"});
 	}
 	
+	// Run rules to get price per kilometer and may be other stuff to estimate a trip...
+	var rulesResult;
+	var pricePerKilometer;	
+	Rule.findAll({
+		where: {
+		  active: true
+		}
+	}).then(rules => {
+		if (!rules) {
+			/* istanbul ignore next  */
+			return response.status(500).json({code: 0, message: "No rule was found"});
+		}
+		var rulesToEngine = [];
+		for (var i = 0, len = rules.length; i < len; i++) {
+		  	var singleRule = {
+				name: rules[i].name,
+				condition: rules[i].blobCondition,
+				consequence: rules[i].blobConsequence,
+				priority: rules[i].blobPriority
+			};
+			rulesToEngine.push(singleRule);
+		}
+		// console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
+		var facts = RulesEngine.getSampleFacts();
+		RulesEngine.runEngine(rulesToEngine, facts)
+			.then(data => {
+				// console.log('#################### Assigned costo por kilometro...??');
+				rulesResult = data;
+				pricePerKilometer = rulesResult.costoPorKilometro;
+				
+				console.log(rulesResult);
+			})
+			.catch( function (error) {
+				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
+			});
+	})
+	.catch(function (error) {
+		/* istanbul ignore next  */
+		console.log(error);
+		return response.status(500).json({code: 0, message: "Unexpected error"});
+	});
+	
+	
 	var googleAPIPath = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
 	googleAPIPath = googleAPIPath+request.body.start.address.location.lat+','+request.body.start.address.location.lon;
 	googleAPIPath = googleAPIPath+'&destination='+request.body.end.address.location.lat+','+request.body.end.address.location.lon;
@@ -560,8 +607,8 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				.then(googleMapsApiResponse => {
 					var res = JSON.parse(googleMapsApiResponse);
 					
-					/// \TODO traer de rules -> Facts el precio por kilómetro para meter acá
-					var valorEstimado = 50 * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
+					console.log('Costo por kilómetro traído de rules: ' + pricePerKilometer);
+					var valorEstimado = pricePerKilometer * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
 					
 					var jsonInResponse = {
 						metadata: {
