@@ -571,6 +571,45 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				pricePerKilometer = rulesResult.costoPorKilometro;
 				
 				console.log(rulesResult);
+				
+				var googleAPIPath = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
+				googleAPIPath = googleAPIPath+request.body.start.address.location.lat+','+request.body.start.address.location.lon;
+				googleAPIPath = googleAPIPath+'&destination='+request.body.end.address.location.lat+','+request.body.end.address.location.lon;
+				googleAPIPath = googleAPIPath+'&alternatives=true';
+				
+				const options = {
+								method: 'GET',
+								uri: googleAPIPath,
+								/*
+								auth: {
+									bearer: paymentsToken
+								}
+								
+								headers: {
+									// 'User-Agent': 'Request-Promise',
+									Authorization: 'Bearer '+paymentsToken
+								}
+								*/
+							};
+							
+						urlRequest(options)
+							.then(googleMapsApiResponse => {
+								var res = JSON.parse(googleMapsApiResponse);
+								
+								console.log('Costo por kilómetro traído de rules: ' + pricePerKilometer);
+								var valorEstimado = pricePerKilometer * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
+								
+								var jsonInResponse = {
+									metadata: {
+										version: api.apiVersion
+									},
+									cost: {
+										currency: '$AR',
+										value: valorEstimado
+									}
+								};
+								return response.status(200).json(jsonInResponse);
+							});
 			})
 			.catch( function (error) {
 				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
@@ -581,46 +620,6 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
-	
-	
-	var googleAPIPath = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
-	googleAPIPath = googleAPIPath+request.body.start.address.location.lat+','+request.body.start.address.location.lon;
-	googleAPIPath = googleAPIPath+'&destination='+request.body.end.address.location.lat+','+request.body.end.address.location.lon;
-	googleAPIPath = googleAPIPath+'&alternatives=true';
-	
-	const options = {
-					method: 'GET',
-					uri: googleAPIPath,
-					/*
-					auth: {
-						bearer: paymentsToken
-					}
-					
-					headers: {
-						// 'User-Agent': 'Request-Promise',
-						Authorization: 'Bearer '+paymentsToken
-					}
-					*/
-				};
-				
-			urlRequest(options)
-				.then(googleMapsApiResponse => {
-					var res = JSON.parse(googleMapsApiResponse);
-					
-					console.log('Costo por kilómetro traído de rules: ' + pricePerKilometer);
-					var valorEstimado = pricePerKilometer * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
-					
-					var jsonInResponse = {
-						metadata: {
-							version: api.apiVersion
-						},
-						cost: {
-							currency: '$AR',
-							value: valorEstimado
-						}
-					};
-					return response.status(200).json(jsonInResponse);
-				});
 });
 
 
