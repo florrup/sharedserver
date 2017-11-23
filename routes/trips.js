@@ -10,6 +10,8 @@ var models = require('../models/db'); // loads db.js
 var Trip = models.trip; // the model keyed by its name
 var Transaction = models.transaction;
 var PendingPayment = models.pendingpayment;
+var User = models.user;
+var Rule = models.rule; 
 
 var Verify = require('./verify');
 var api = require('./api');
@@ -19,8 +21,8 @@ var paymethods = require('./paymethods');
 const urlRequest = require('request-promise'); // to hit payments api
 
 var RulesEngine = require('./rulesEngine'); // to estimate a trip
-var models = require('../models/db'); // loads db.js
-var Rule = models.rule; 
+
+// CREATE TABLE trips(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), driverid INT NOT NULL, passengerid INT NOT NULL, startaddressstreet VARCHAR(100), startaddresslocationlat INT NOT NULL, startaddresslocationlon INT NOT NULL, starttimestamp INT, endaddressstreet VARCHAR(100), endaddresslocationlat INT NOT NULL, endaddresslocationlon INT NOT NULL, endtimestamp INT, totaltime INT, waittime INT, traveltime INT, distance INT, route VARCHAR(100), costcurrency VARCHAR(15) NOT NULL, costvalue INT NOT NULL);
 
 // Scheduled tasks: proccess again rejected payments
 var schedule = require('node-schedule');
@@ -183,7 +185,7 @@ router.get('/initAndWriteDummyTrip', function(request, response) {
 });
 
 /**
- *  Devuelve toda la información acerca de todos los application trips.
+ *  Devuelve toda la información acerca de todos los trips.
  *
  */
 router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request, response) {
@@ -283,248 +285,275 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 	}
 	
 	/// \TODO get this values from rules engine
-	var passengerCost = 300;
-	var driverEarn = 200;
 	
-	// var passengerPaymentParameters = JSON.parse(request.body.paymethod.parameters);
-	var passengerPaymentData = {
-		paymethod: request.body.paymethod.paymethod,
-		ccvv: request.body.paymethod.parameters.ccvv,
-		expiration_month: request.body.paymethod.parameters.expiration_month,
-		expiration_year: request.body.paymethod.parameters.expiration_year,
-		number: request.body.paymethod.parameters.number,
-		type: request.body.paymethod.parameters.type 
-	};
-	
-	var driverPaymentData = {
-		paymethod: 'cash',
-		ccvv: '',
-		expiration_month: '',
-		expiration_year: '',
-		number: '',
-		type: 'direct payment'
-	};
-	
-	// Trip creation in Local Data Base
-	Trip.create({
-			// id: 0,
-			_ref: '',
-			applicationowner: '',
-			driverid: request.body.trip.driver,
-			passengerid: request.body.trip.passenger,
-			startaddressstreet: request.body.trip.start.address.street,
-			startaddresslocationlat: request.body.trip.start.address.location.lat,
-			startaddresslocationlon: request.body.trip.start.address.location.lon,
-			starttimestamp: request.body.trip.start.timestamp,
-			endaddressstreet: request.body.trip.end.address.street,
-			endaddresslocationlat: request.body.trip.end.address.location.lat,
-			endaddresslocationlon: request.body.trip.end.address.location.lon,
-			endtimestamp: request.body.trip.end.Timestamp,
-			totaltime: request.body.trip.totalTime,
-			waittime: request.body.trip.waitTime,
-			traveltime: request.body.trip.travelTime,
-			distance: request.body.trip.distance,
-			route: request.body.trip.route,
-			costcurrency: process.env.PESOSARG,
-			costvalue: passengerCost
-		}).then(trip => {
-				/* istanbul ignore if  */
-				if (!trip) {
-					return response.status(500).json({code: 0, message: "Unexpected error while trying to save a payment"});
-				} else {
+	console.log('GETTING FACTS!!! Driver ID: '+request.body.trip.driver);
+	getFacts(request.body.trip.driver, 'conductor', request.body.trip.distance)
+		.then( factsDriver => {
+			console.log('DRIVER FACTS!!!');
+			console.log(factsDriver);
+			
+			getFacts(request.body.trip.passenger, 'pasajero', request.body.trip.distance)
+				.then( factsPassenger => {
+					console.log('PASSENGER FACTS!!!');
+					console.log(factsPassenger);
 					
-					var actualTime = (new Date).getTime();
-					// Transaction to the passenger
-					Transaction.create({
-						// id: ...autoincremental,
-						_ref: '',
-						remotetransactionid: '',
-						userid: request.body.trip.passenger,
-						tripid: trip.id, // ID recently created by our database
-						timestamp: actualTime.toString(),
-						costcurrency: process.env.PESOSARG,
-						costvalue: -passengerCost,
-						description: 'Trip Payment (cost as passenger)'
-					})
-					.then(localTransactionPassenger => {
-						var actualTime = (new Date).getTime();
-						// Transaction to the driver
-						Transaction.create({
-							// id: ...autoincremental,
-							_ref: '',
-							remotetransactionid: '',
-							userid: request.body.trip.driver,
-							tripid: trip.id, // ID recently created by our database
-							timestamp: actualTime,
-							costcurrency: process.env.PESOSARG,
-							costvalue: driverEarn,
-							description: 'Trip Payment (earn as Driver)'
-						})
-						.then(localTransactionDriver => {
-						
-							// Remote API payment call
-							paymethods.getPaymentsToken()
-							.then(function(fulfilled){
-								var paymentsToken = paymethods.getLocalPaymentsToken();
-								
-								// Payment for the passenger to remote API
-								const optionsPassenger = {
-											method: 'POST',
-											uri: payments_base_url+'payments',
-											headers: {
-												Authorization: 'Bearer '+paymentsToken
-											},
-											body: {
-												transaction_id: '',// localTransactionPassenger.id, // this is ignored by remote API
-												currency: process.env.PESOSARG,
-												value: localTransactionPassenger.costvalue,
-												paymentMethod: {
-													ccvv: passengerPaymentData.ccvv,
-													expiration_month: passengerPaymentData.expiration_month,
-													expiration_year: passengerPaymentData.expiration_year,
-													method: passengerPaymentData.paymethod,
-													number: passengerPaymentData.number,
-													type: passengerPaymentData.type
-												}
-											},
-											json: true
-								};
-								urlRequest(optionsPassenger)
-									.then(paymentsPassengerResponse => {
-										var resPassenger = JSON.stringify(paymentsPassengerResponse);
-										console.log('Payments API returned: ' + resPassenger);
-										
-										var passengerRemotePaymentId = paymentsPassengerResponse.transaction_id;
-										// console.log('NEW ID IS: '+passengerRemotePaymentId);
-										// this PAYMENTID is assigned remotely! 
-										
-										localTransactionPassenger.updateAttributes({
-											remotetransactionid: passengerRemotePaymentId
-										}).then(updatedLocalTransactionPassenger => {
-											console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionPassenger));
-										}).catch (function(reason) {
-											console.log('Error saving locally remote payment ID for driver Payment ID is'+passengerRemotePaymentId);
-										});
-										
-										const optionsDriver = {
-											method: 'POST',
-											uri: payments_base_url+'payments',
-											headers: {
-												Authorization: 'Bearer '+paymentsToken
-											},
-											body: {
-												transaction_id: '', // localTransactionDriver.id, // parameter set remotely by payments api
-												currency: process.env.PESOSARG,
-												value: localTransactionDriver.costvalue,
-												paymentMethod: {
-													ccvv: driverPaymentData.ccvv,
-													expiration_month: driverPaymentData.expiration_month,
-													expiration_year: driverPaymentData.expiration_year,
-													method: driverPaymentData.paymethod,
-													number: driverPaymentData.number,
-													type: driverPaymentData.type
-												}
-											},
-											json: true
+					runRules(factsDriver)
+						.then( rulesResultDriver => {
+							console.log('RULES RESULT!!!');
+							console.log(rulesResultDriver);
+							
+							var passengerCost = 300;
+							var driverEarn = 200;
+							
+							// var passengerPaymentParameters = JSON.parse(request.body.paymethod.parameters);
+							var passengerPaymentData = {
+								paymethod: request.body.paymethod.paymethod,
+								ccvv: request.body.paymethod.parameters.ccvv,
+								expiration_month: request.body.paymethod.parameters.expiration_month,
+								expiration_year: request.body.paymethod.parameters.expiration_year,
+								number: request.body.paymethod.parameters.number,
+								type: request.body.paymethod.parameters.type 
+							};
+							
+							var driverPaymentData = {
+								paymethod: 'cash',
+								ccvv: '',
+								expiration_month: '',
+								expiration_year: '',
+								number: '',
+								type: 'direct payment'
+							};
+							
+							// Trip creation in Local Data Base
+							Trip.create({
+									// id: 0,
+									_ref: '',
+									applicationowner: '',
+									driverid: request.body.trip.driver,
+									passengerid: request.body.trip.passenger,
+									startaddressstreet: request.body.trip.start.address.street,
+									startaddresslocationlat: request.body.trip.start.address.location.lat,
+									startaddresslocationlon: request.body.trip.start.address.location.lon,
+									starttimestamp: request.body.trip.start.timestamp,
+									endaddressstreet: request.body.trip.end.address.street,
+									endaddresslocationlat: request.body.trip.end.address.location.lat,
+									endaddresslocationlon: request.body.trip.end.address.location.lon,
+									endtimestamp: request.body.trip.end.Timestamp,
+									totaltime: request.body.trip.totalTime,
+									waittime: request.body.trip.waitTime,
+									traveltime: request.body.trip.travelTime,
+									distance: request.body.trip.distance,
+									route: request.body.trip.route,
+									costcurrency: process.env.PESOSARG,
+									costvalue: passengerCost
+								}).then(trip => {
+										/* istanbul ignore if  */
+										if (!trip) {
+											return response.status(500).json({code: 0, message: "Unexpected error while trying to save a trip locally"});
+										} else {
+											
+														
+													var actualTime = (new Date).getTime();
+													// Transaction to the passenger
+													Transaction.create({
+														// id: ...autoincremental,
+														_ref: '',
+														remotetransactionid: '',
+														userid: request.body.trip.passenger,
+														tripid: trip.id, // ID recently created by our database
+														timestamp: actualTime.toString(),
+														costcurrency: process.env.PESOSARG,
+														costvalue: -passengerCost,
+														description: 'Trip Payment (cost as passenger)'
+													})
+													.then(localTransactionPassenger => {
+														var actualTime = (new Date).getTime();
+														// Transaction to the driver
+														Transaction.create({
+															// id: ...autoincremental,
+															_ref: '',
+															remotetransactionid: '',
+															userid: request.body.trip.driver,
+															tripid: trip.id, // ID recently created by our database
+															timestamp: actualTime,
+															costcurrency: process.env.PESOSARG,
+															costvalue: driverEarn,
+															description: 'Trip Payment (earn as Driver)'
+														})
+														.then(localTransactionDriver => {
+															
+															
+															
+																	// Remote API payment call
+																	paymethods.getPaymentsToken()
+																	.then(function(fulfilled){
+																		var paymentsToken = paymethods.getLocalPaymentsToken();
+																		
+																		// Payment for the passenger to remote API
+																		const optionsPassenger = {
+																					method: 'POST',
+																					uri: payments_base_url+'payments',
+																					headers: {
+																						Authorization: 'Bearer '+paymentsToken
+																					},
+																					body: {
+																						transaction_id: '',// localTransactionPassenger.id, // this is ignored by remote API
+																						currency: process.env.PESOSARG,
+																						value: localTransactionPassenger.costvalue,
+																						paymentMethod: {
+																							ccvv: passengerPaymentData.ccvv,
+																							expiration_month: passengerPaymentData.expiration_month,
+																							expiration_year: passengerPaymentData.expiration_year,
+																							method: passengerPaymentData.paymethod,
+																							number: passengerPaymentData.number,
+																							type: passengerPaymentData.type
+																						}
+																					},
+																					json: true
+																		};
+																		urlRequest(optionsPassenger)
+																			.then(paymentsPassengerResponse => {
+																				var resPassenger = JSON.stringify(paymentsPassengerResponse);
+																				console.log('Payments API returned: ' + resPassenger);
+																				
+																				var passengerRemotePaymentId = paymentsPassengerResponse.transaction_id;
+																				// console.log('NEW ID IS: '+passengerRemotePaymentId);
+																				// this PAYMENTID is assigned remotely! 
+																				
+																				localTransactionPassenger.updateAttributes({
+																					remotetransactionid: passengerRemotePaymentId
+																				}).then(updatedLocalTransactionPassenger => {
+																					console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionPassenger));
+																				}).catch (function(reason) {
+																					console.log('Error saving locally remote payment ID for driver Payment ID is'+passengerRemotePaymentId);
+																				});
+																				
+																				const optionsDriver = {
+																					method: 'POST',
+																					uri: payments_base_url+'payments',
+																					headers: {
+																						Authorization: 'Bearer '+paymentsToken
+																					},
+																					body: {
+																						transaction_id: '', // localTransactionDriver.id, // parameter set remotely by payments api
+																						currency: process.env.PESOSARG,
+																						value: localTransactionDriver.costvalue,
+																						paymentMethod: {
+																							ccvv: driverPaymentData.ccvv,
+																							expiration_month: driverPaymentData.expiration_month,
+																							expiration_year: driverPaymentData.expiration_year,
+																							method: driverPaymentData.paymethod,
+																							number: driverPaymentData.number,
+																							type: driverPaymentData.type
+																						}
+																					},
+																					json: true
+																				};
+																				
+																				// Payment for the driver
+																				urlRequest(optionsDriver)
+																					.then(paymentsDriverResponse => {
+																						var resDriver = JSON.stringify(paymentsDriverResponse);
+																						console.log('Payments API returned: ' + resDriver);
+																						
+																						var driverRemotePaymentId = paymentsDriverResponse.transaction_id;
+																						// this PAYMENTID is assigned remotely! 
+																						localTransactionDriver.updateAttributes({
+																							remotetransactionid: driverRemotePaymentId
+																						}).then(updatedLocalTransactionDriver => {
+																							console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionDriver));
+																						}).catch (function(reason) {
+																							console.log('Error saving locally remote payment ID for driver Payment ID is'+driverRemotePaymentId);
+																						});
+																						// Payments were locally saved and remotely proccessed, return ok
+																						
+																						var jsonInResponse = {
+																							id: trip.id,
+																							applicationOwner: trip.applicationowner,
+																							driver: trip.driverid,
+																							passenger: trip.passengerid,
+																							start: {
+																								address: {
+																									street: trip.startaddressstreet,
+																									location: {
+																										lat: trip.startaddresslocationlat,
+																										lon: trip.startaddresslocationlon
+																									}
+																								},
+																								timestamp: trip.starttimestamp
+																							},
+																							end: {
+																								address: {
+																									street: trip.endaddressstreet,
+																									location: {
+																										lat: trip.endaddresslocationlat,
+																										lon: trip.endaddresslocationlon
+																									}
+																								},
+																								timestamp: trip.endtimestamp
+																							},
+																							totalTime: trip.totaltime,
+																							waitTime: trip.waittime,
+																							travelTime: trip.traveltime,
+																							distance: trip.distance,
+																							route: trip.route,
+																							cost: {
+																								currency: trip.costcurrency,
+																								value: trip.costvalue
+																							}
+																						}
+																						return response.status(201).json(jsonInResponse);
+																					})
+																					.catch (function(reason) {
+																						console.log('Error while trying to pay for the DRIVER');
+																						console.log('Saving Transactions INFO for further proccessing...');
+																						console.log(JSON.parse(localTransactionDriver));
+																						console.log(JSON.parse(driverPaymentData));
+																						saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
+																						return response.status(500).json({code: 0, message: "Error while trying to pay to the DRIVER. PASSENGER was paid, driver payment data was saved for further proccessing"});
+																					});
+																		})
+																		.catch (function(reason) {
+																			console.log('Error while trying to pay for the PASSENGER');
+																			console.log('Saving Transactions INFO for further proccessing...');
+																			console.log(JSON.parse(localTransactionPassenger));
+																			console.log(JSON.parse(passengerPaymentData));
+																			console.log(JSON.parse(localTransactionDriver));
+																			console.log(JSON.parse(driverPaymentData));
+																			saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
+																			saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
+																			return response.status(500).json({code: 0, message: "Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
+																		});
+																	})
+																	.catch (function(reason) {
+																		console.log('Error while trying to get payments API Token');
+																		
+																		console.log('Saving Transactions INFO for further proccessing...');
+																		console.log(JSON.parse(localTransactionPassenger));
+																		console.log(JSON.parse(passengerPaymentData));
+																		console.log(JSON.parse(localTransactionDriver));
+																		console.log(JSON.parse(driverPaymentData));
+																		saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
+																		saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
+																		return response.status(500).json({code: 0, message: "Error while trying to get available payment token. Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
+																	});
+																})
+																
+												})
 										};
-										
-										// Payment for the driver
-										urlRequest(optionsDriver)
-											.then(paymentsDriverResponse => {
-												var resDriver = JSON.stringify(paymentsDriverResponse);
-												console.log('Payments API returned: ' + resDriver);
-												
-												var driverRemotePaymentId = paymentsDriverResponse.transaction_id;
-												// this PAYMENTID is assigned remotely! 
-												localTransactionDriver.updateAttributes({
-													remotetransactionid: driverRemotePaymentId
-												}).then(updatedLocalTransactionDriver => {
-													console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionDriver));
-												}).catch (function(reason) {
-													console.log('Error saving locally remote payment ID for driver Payment ID is'+driverRemotePaymentId);
-												});
-												// Payments were locally saved and remotely proccessed, return ok
-												
-												var jsonInResponse = {
-													id: trip.id,
-													applicationOwner: trip.applicationowner,
-													driver: trip.driverid,
-													passenger: trip.passengerid,
-													start: {
-														address: {
-															street: trip.startaddressstreet,
-															location: {
-																lat: trip.startaddresslocationlat,
-																lon: trip.startaddresslocationlon
-															}
-														},
-														timestamp: trip.starttimestamp
-													},
-													end: {
-														address: {
-															street: trip.endaddressstreet,
-															location: {
-																lat: trip.endaddresslocationlat,
-																lon: trip.endaddresslocationlon
-															}
-														},
-														timestamp: trip.endtimestamp
-													},
-													totalTime: trip.totaltime,
-													waitTime: trip.waittime,
-													travelTime: trip.traveltime,
-													distance: trip.distance,
-													route: trip.route,
-													cost: {
-														currency: trip.costcurrency,
-														value: trip.costvalue
-													}
-												}
-												return response.status(201).json(jsonInResponse);
-											})
-											.catch (function(reason) {
-												console.log('Error while trying to pay for the DRIVER');
-												console.log('Saving Transactions INFO for further proccessing...');
-												console.log(JSON.parse(localTransactionDriver));
-												console.log(JSON.parse(driverPaymentData));
-												saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
-												return response.status(500).json({code: 0, message: "Error while trying to pay to the DRIVER. PASSENGER was paid, driver payment data was saved for further proccessing"});
-											});
-								})
+									});
+								/* Lets comment for now for more descriptive error messages
 								.catch (function(reason) {
-									console.log('Error while trying to pay for the PASSENGER');
-									console.log('Saving Transactions INFO for further proccessing...');
-									console.log(JSON.parse(localTransactionPassenger));
-									console.log(JSON.parse(passengerPaymentData));
-									console.log(JSON.parse(localTransactionDriver));
-									console.log(JSON.parse(driverPaymentData));
-									saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
-									saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
-									return response.status(500).json({code: 0, message: "Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
+									console.log('Error while trying to get available payment methods, could not get Payments API Token');
+									return response.status(500).json({code: 0, message: "Error while trying to get available payment methods."});
 								});
-							})
-							.catch (function(reason) {
-								console.log('Error while trying to get payments API Token');
-								
-								console.log('Saving Transactions INFO for further proccessing...');
-								console.log(JSON.parse(localTransactionPassenger));
-								console.log(JSON.parse(passengerPaymentData));
-								console.log(JSON.parse(localTransactionDriver));
-								console.log(JSON.parse(driverPaymentData));
-								saveUnfulfilledPaymentData(localTransactionPassenger, passengerPaymentData);
-								saveUnfulfilledPaymentData(localTransactionDriver, driverPaymentData);
-								return response.status(500).json({code: 0, message: "Error while trying to get available payment token. Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
-							});
+								*/
 						});
-					});
-				};
 			});
-		/* Lets comment for now for more descriptive error messages
-		.catch (function(reason) {
-			console.log('Error while trying to get available payment methods, could not get Payments API Token');
-			return response.status(500).json({code: 0, message: "Error while trying to get available payment methods."});
+			
 		});
-		*/
+	
+	
 	
 });
 
@@ -580,24 +609,15 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				const options = {
 								method: 'GET',
 								uri: googleAPIPath,
-								/*
-								auth: {
-									bearer: paymentsToken
-								}
-								
-								headers: {
-									// 'User-Agent': 'Request-Promise',
-									Authorization: 'Bearer '+paymentsToken
-								}
-								*/
 							};
 							
 						urlRequest(options)
 							.then(googleMapsApiResponse => {
 								var res = JSON.parse(googleMapsApiResponse);
+								var tripDistanceKm = res.routes[0].legs[0].distance.value / 1000; // response distance is in meters, tripDistance in kilometers
 								
 								console.log('Costo por kilómetro traído de rules: ' + pricePerKilometer);
-								var valorEstimado = pricePerKilometer * res.routes[0].legs[0].distance.value / 1000 /*distance is in meters*/;
+								var valorEstimado = pricePerKilometer * tripDistanceKm ;
 								
 								var jsonInResponse = {
 									metadata: {
@@ -777,3 +797,193 @@ function clearPendingPaymentsTable(){
 };
 
 module.exports.clearPendingPaymentsTable = clearPendingPaymentsTable;
+
+function getDayOfWeekName(){
+	var d = new Date();
+	var weekday = new Array(7);
+	weekday[0] = 'domingo';
+	weekday[1] = 'lunes';
+	weekday[2] = 'martes';
+	weekday[3] = 'miercoles'; // día de descuento!!
+	weekday[4] = 'jueves';
+	weekday[5] = 'viernes';
+	weekday[6] = 'sabado';
+	return weekday[d.getDay()];
+}
+
+function checkTime(i){
+	if (i < 10){
+		i = "0" + i;
+	}
+	return i;
+}
+
+function getLocalStandardXTime(){
+	var d = new Date();
+	var h = d.getHours();
+	var m = d.getMinutes();
+	var s = d.getSeconds();
+	h = checkTime(h);
+	m = checkTime(m);
+	s = checkTime(s);
+	var hh_mm_ss = h+':'+ m +':'+s;
+	return hh_mm_ss;
+	
+}
+
+/** 
+ * Gets the facts to run rules engine to get the price (cost or earnings) for a user (passenger or driver)
+**/
+function getFacts(userId, typeOfUser, travelDistance){
+	
+	return new Promise( function (resolve, reject) {
+		var dayOfWeek = getDayOfWeekName();
+		console.log('Dia de la SEMANA: '+dayOfWeek);
+		var time = getLocalStandardXTime();
+		var today = new Date();
+		today.setFullYear(today.getFullYear(), today.getMonth(), today.getDate());
+		var epochToday = today.getTime();
+		
+		User.find({
+			where: {
+				id: userId
+			}
+		})
+		.then( userFound => {
+			console.log('USER FOUND $ FACTS: '+userFound.id)
+			console.log(userFound); // ok
+			if (typeOfUser == 'pasajero'){
+				Trip.findAll({
+					where: {
+						passengerid: userFound.id
+					}
+				})
+				.then( trips => {
+					var viajesHoy = 0;
+					trips.forEach(function(singleTrip){
+						if (singleTrip.starttimestamp > epochToday){
+							viajesHoy = viajesHoy + 1;
+						}
+					});
+					
+					var primerViajeHoy = false;
+					if (viajesHoy > 0){
+						primerViajeHoy = true;
+					}
+					
+					var fact = {
+						"type": typeOfUser,
+						"saldo": userFound.balance,
+						"email": userFound.email,
+						"kmRecorridos": travelDistance,
+						"costoTotal": 0, // starts in zero
+						"dia": dayOfWeek, // TODO cambiar esto por fecha actual
+						"hora": time,
+						"viajesHoy": viajesHoy,
+						"primerViaje": primerViajeHoy,
+					};
+					resolve(fact);
+				})
+				.catch(function (error) {
+					/* istanbul ignore next  */
+					console.log(error);
+					reject(false);
+				});
+			}
+			else if (typeOfUser == 'conductor') {
+				console.log('ASDFASDFASDFASDFASDF');
+				Trip.findAll({
+					where: {
+						driverid: userFound.id
+					}
+				})
+				.then( trips => {
+					console.log('AAAAAAAA');
+					if (trips){
+						console.log('TTTTTTTTTT');
+						var viajesHoy = 0;
+						trips.forEach(function(singleTrip){
+							if (singleTrip.starttimestamp > epochToday){
+								viajesHoy = viajesHoy + 1;
+							}
+						});
+						
+						var primerViajeHoy = true;
+						if (viajesHoy > 0){
+							primerViajeHoy = false;
+						}
+						
+						var fact = {
+							"type": typeOfUser,
+							"saldo": userFound.balance,
+							"email": userFound.email,
+							"kmRecorridos": travelDistance,
+							"costoTotal": 0, // starts in zero
+							"dia": dayOfWeek, // TODO cambiar esto por fecha actual
+							"hora": time,
+							"viajesHoy": viajesHoy,
+							"primerViaje": primerViajeHoy,
+						};
+						console.log('Actual Facts:');
+						console.log(fact);
+						resolve(fact);
+					}
+				})/*
+				.catch(function (error) {
+					/* istanbul ignore next  */ /*
+					console.log(error);
+					reject(false);
+				});*/
+			}
+			
+		});/*
+		.catch(function (error) {
+			/* istanbul ignore next  *//*
+			console.log(error);
+			reject(false);
+		});*/
+			
+	});
+};
+
+function runRules(userFacts){ // can be a driver or passenger
+	return new Promise( function (resolve, reject) {
+		
+		var rulesResult;	
+		Rule.findAll({
+			where: {
+			  active: true
+			}
+		}).then(rules => {
+			console.log('Rules Run endend successfully');
+			if (!rules) {
+				/* istanbul ignore next  */ 
+				reject(false);
+			}
+			var rulesToEngine = [];
+			for (var i = 0, len = rules.length; i < len; i++) {
+				var singleRule = {
+					name: rules[i].name,
+					condition: rules[i].blobCondition,
+					consequence: rules[i].blobConsequence,
+					priority: rules[i].blobPriority
+				};
+				rulesToEngine.push(singleRule);
+			}
+			console.log('Rules injected to Rules Engine:');
+			console.log(rulesToEngine);
+			// var facts = RulesEngine.getSampleFacts();
+			RulesEngine.runEngine(rulesToEngine, userFacts)
+				.then(data => {
+					// console.log('#################### Assigned costo por kilometro...??');
+					console.log(data);
+					resolve(data);
+				})
+				.catch(function (error) {
+					/* istanbul ignore next  */
+					console.log(error);
+					reject(false);
+				});
+		});
+	})
+};

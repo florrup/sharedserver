@@ -117,7 +117,7 @@ var exampleRules = [
     },
     "priority": 7 // descuentos tienen misma prioridad
 },
-/**** Last Rule ****/
+/**** Rule 8 (Last for Passengers) ****/
 {
 	"name": "50ARSMinimo",
     "condition": function(R) {
@@ -131,7 +131,37 @@ var exampleRules = [
         R.stop();
     },
     "priority": 1
-}];
+},
+{
+	"name": "conductor10ARSporKm",
+    "condition": function(R) {
+        R.when(this.type == "conductor" && this.kmRecorridos > 0);
+    },
+    "consequence": function(R) {
+        this.costoTotal = this.costoTotal + (this.kmRecorridos * 10);
+		this.costoPorKilometro = 10; // setted to be read 
+        this.reason = "Se pagan 10ARS por km recorrido";
+        // console.log("Llega aca");
+        // console.log(this.costoTotal);
+        R.next();
+    },
+    "priority": 8
+},
+{
+	"name": "30ARSMinimoConductor",
+    "condition": function(R) {
+        R.when(this.type == "conductor" && this.costoTotal < 30);
+    },
+    "consequence": function(R) {
+        this.puedeViajar = true;
+        this.reason = "El costo minimo es de 50ARS";
+        this.costoTotal = 50;
+        console.log("Paso por aca");
+        R.stop();
+    },
+    "priority": 1
+}
+];
 
 /* Creating Rule Engine instance and registering rule */
 var R = new RuleEngine(exampleRules, {ignoreFactChanges: true}); // so as not to run the rules in a loop
@@ -232,20 +262,20 @@ function runEngine(rules, fact) {
     R2.fromJSON(store);
 
 	return new Promise((resolve, reject) => {
-        try {
-            R2.execute(fact, resolve);
-        } catch (error) {
-            reject(error);
-        }
-    });
+		try {
+			R2.execute(fact, resolve);
+		} catch (error) {
+			reject(error);
+		}
+	});
 	/*
-    R2.execute(fact, function(data) {
-        if (data.puedeViajar) {
-            console.log("Puede viajar con costo: " + data.costoTotal + "\n" + data.reason);
-        } else {
-            console.log("No puede viajar: " + data.reason);
-        }
-    });
+	R2.execute(fact, function(data) {
+		if (data.puedeViajar) {
+			console.log("Puede viajar con costo: " + data.costoTotal + "\n" + data.reason);
+		} else {
+			console.log("No puede viajar: " + data.reason);
+		}
+	});
 	*/
 }
 

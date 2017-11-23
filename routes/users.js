@@ -17,7 +17,7 @@ var api = require('./api');
 
 const urlRequest = require('request-promise'); // to hit facebook api
 
-// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), facebookuserid VARCHAR(255),name VARCHAR(40), lastname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20));
+// CREATE TABLE users(id SERIAL PRIMARY KEY, _ref VARCHAR(20), applicationowner VARCHAR(20), type VARCHAR(20), username VARCHAR(40), password VARCHAR(40), facebookuserid VARCHAR(255),name VARCHAR(40), lastname VARCHAR(40), country VARCHAR(40), email VARCHAR(40), birthdate VARCHAR(20), balance INT);
 
 /**
  * Test method to empty the users database and create a dummy user in order to make further tests
@@ -43,7 +43,8 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 				lastname: 'Hancock',
 				country: 'Argentina',
 				email: 'johnny123@gmail.com',
-				birthdate: '24/05/1992'
+				birthdate: '24/05/1992',
+				balance: 5000
 			  };
 			User.create(dummyUser)
 				.then(() => {
@@ -58,7 +59,8 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 						lastName: dummyUser.lastname,
 						country: dummyUser.country,
 						email: dummyUser.email,
-						birthdate: dummyUser.birthdate
+						birthdate: dummyUser.birthdate,
+						balance: dummyUser.balance
 					};
 					return response.status(200).json(dummyUserToAnswer);
 				})
@@ -126,7 +128,8 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
         lastName: item.lastname,
         country: item.country,
         email: item.email,
-        birthdate: item.birthdate
+        birthdate: item.birthdate,
+		balance: item.balance
       }
 	  // console.log('USER JSON &&&&&&&&&&&&&&&&&&&&&&');
 	  // console.log(jsonUser);
@@ -172,6 +175,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		country: '', // request.body.country,
 		email: '', // request.body.email,
 		birthdate: '', // request.body.birthdate
+		balance: 0
 	  }).then(user => {
 		/* istanbul ignore if  */
 		if (!user) {
@@ -193,7 +197,8 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			lastName: user.lastname,
 			country: user.country,
 			email: user.email,
-			birthdate: user.birthdate
+			birthdate: user.birthdate,
+			balance: user.balance
 		  }
 		};
 		return response.status(201).json(jsonInResponse);
@@ -214,7 +219,8 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		lastname: '', // request.body.lastName,
 		country: '', // request.body.country,
 		email: '', // request.body.email,
-		birthdate: '' // request.body.birthdate
+		birthdate: '', // request.body.birthdate
+		balance: 0
 	  }).then(user => {
 		/* istanbul ignore if  */
 		if (!user) {
@@ -236,7 +242,8 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 			lastName: user.lastname,
 			country: user.country,
 			email: user.email,
-			birthdate: user.birthdate
+			birthdate: user.birthdate,
+			balance: user.balance
 			}
 		};
 		return response.status(201).json(jsonInResponse);
@@ -282,7 +289,8 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				lastName: userFound.lastname,
 				country: userFound.country,
 				email: userFound.email,
-				birthdate: userFound.birthdate
+				birthdate: userFound.birthdate,
+				balance: userFound.balance
 			  }
 			};
 			return response.status(200).json(jsonInResponse);
@@ -332,7 +340,8 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 									lastName: userFound.lastname,
 									country: userFound.country,
 									email: userFound.email,
-									birthdate: userFound.birthdate
+									birthdate: userFound.birthdate,
+									balance: userFound.balance
 								}
 							};
 							return response.status(200).json(jsonInResponse);
@@ -404,7 +413,8 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
 			lastName: user.lastname,
 			country: user.country,
 			email: user.email,
-			birthdate: user.birthdate
+			birthdate: user.birthdate,
+			balance: user.balance
 			}
 		};
 
@@ -445,6 +455,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 		  var localCountry = user.country;
 		  var localEmail = user.email;
 		  var localBirthdate = user.birthdate;
+		  var localBalance = user.balance;
 		  
 		  if (!api.isEmpty(request.body._ref)){localRef=request.body._ref;}
 		  if (!api.isEmpty(request.body.applicationOwner)){localApplicationOwner=request.body.applicationOwner;}
@@ -457,6 +468,7 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 		  if (!api.isEmpty(request.body.country)){localCountry=request.body.country;}
 		  if (!api.isEmpty(request.body.email)){localEmail=request.body.email;}
 		  if (!api.isEmpty(request.body.birthdate)){localBirthdate=request.body.birthdate;}
+		  // localBalance... balance is not modified in this method
 		  
 		  user.updateAttributes({
 			_ref: localRef,
@@ -469,7 +481,8 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 			lastname: localLastName,
 			country: localCountry,
 			email: localEmail,
-			birthdate: localBirthdate
+			birthdate: localBirthdate,
+			balance: localBalance
 		  }).then(updatedUser => {
 			  
 			  var jsonInResponse = {
@@ -488,7 +501,8 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
 					lastName: user.lastname,
 					country: user.country,
 					email: user.email,
-					birthdate: user.birthdate
+					birthdate: user.birthdate,
+					balance: user.balance
 					}
 				};
 			  

@@ -52,7 +52,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     birthdate: {
       type: Sequelize.STRING
-    }
+    },
+	balance: {
+		type: Sequelize.INTEGER
+	}
   }, {
     timestamps: false
   }, {
