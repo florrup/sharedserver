@@ -531,7 +531,11 @@ router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, functi
  *  Obtener el historial de commits realizados sobre una regla particular
  */
 router.get('/:ruleId/commits', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
-	RuleChange.findAll({})
+	RuleChange.findAll({
+		where: {
+			name: request.params.ruleId
+		}
+	})
 	.then(rulechanges => {
 		/* istanbul ignore if  */
 	    if (!rulechanges) {
@@ -540,8 +544,29 @@ router.get('/:ruleId/commits', Verify.verifyToken, Verify.verifyManagerRole, fun
 
 		var changesArray = [];
 		rulechanges.forEach(function(item) {
+			var responseBlob = {
+				name: item.name,
+				condition: item.blobcondition,
+				consequence: item.blobconsequence,
+				priority: item.blobpriority
+			};
+			var singleRuleInResponse = {
+			  metadata: {
+				version: api.apiVersion 
+			  },
+			  rule: {
+				id: item.id,
+				_ref: item._ref,
+				language: item.language, 
+				blob: responseBlob,
+				active: item.active,
+				lastCommit: item.userinfo
+			  },
+			  reason: item.reason
+			};			
 			var parsed = JSON.parse(item.userinfo);
-		    changesArray.push(parsed);
+			
+		    changesArray.push(singleRuleInResponse);
 		});
 
 	    var jsonInResponse = {

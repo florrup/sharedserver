@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import GlobalStrings from './components/GlobalStrings'
 
-import { Footer, Menu, Header, Banner, GeneralStats, RulesList, CollapseButton } from './components';
+import { Footer, Menu, Header, Banner, GeneralStats, RulesList, CollapseButton, RuleChangesList } from './components';
 
 class RulesPage extends Component {
 
@@ -13,9 +13,11 @@ class RulesPage extends Component {
 
     this.state = { // populate state with data that comes from api
       rules: [],
+      ruleChanges: [],
     } 
 
     this.getRules = this.getRules.bind(this);
+    this.getRuleChanges = this.getRuleChanges.bind(this);
   }
 
   /* Displays rules on screen */
@@ -24,10 +26,23 @@ class RulesPage extends Component {
     var axiosHeader = { headers: {'x-access-token': localToken} };
     return axios.get('http://localhost:5000/api/rules', axiosHeader)
     .then((response) => {
-      console.log(response.data.rules)
-      //console.log('Metadata' + response.data.metadata);
-      //console.log('BusinessUsers' + response.data.businessUser);
+      console.log(response.data.rules);
       this.setState( { rules: response.data.rules } )
+    });
+  }
+
+  /* Displays a specific rule changes on screen when user clicks a button */
+  getRuleChanges(event) {
+    event.preventDefault();
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    console.log(this.refs.name.value);
+    return axios.get('http://localhost:5000/api/rules/' + this.refs.name.value + '/commits', axiosHeader)
+    .then((response) => {
+      console.log('Commits are ' + response.data.commits);
+      this.setState( { ruleChanges: [] } );
+      this.setState( { ruleChanges: response.data.commits } );
     });
   }
 
@@ -104,6 +119,8 @@ class RulesPage extends Component {
   render() {
     const {rules} = this.state;
     var tableHeader = ["Id", "Name", "Language", "Blob", "Active"];
+    const {ruleChanges} = this.state;
+    var changesTableHeader = ["Id", "Name", "Blob", "Active", "Reason", "User Info"]; // add reason, userinfo, etc
 
     return (
       <div id="wrapper">
@@ -140,15 +157,21 @@ class RulesPage extends Component {
             <CollapseButton name="Modify Rule">
               <br/>
               <form onSubmit={this.modifyRule.bind(this)}>
-                  <label>Name: <input type="text" ref="name" /></label>
-                  <label>Condition: <input type="text" ref="condition" /></label>
-                  <label>Consequence: <input type="text" ref="consequence" /></label>
-                  <label>Priority: <input type="text" ref="priority" /></label>
-                  <label>Language: <input type="text" ref="language" /></label>
-                  <label>Active: <input type="text" ref="active" /></label>
-                  <center><button type="submit">Modify Rule</button></center>
+                <label>Name: <input type="text" ref="name" /></label>
+                <label>Condition: <input type="text" ref="condition" /></label>
+                <label>Consequence: <input type="text" ref="consequence" /></label>
+                <label>Priority: <input type="text" ref="priority" /></label>
+                <label>Language: <input type="text" ref="language" /></label>
+                <label>Active: <input type="text" ref="active" /></label>
+                <center><button type="submit">Modify Rule</button></center>
               </form> 
             </CollapseButton>
+            <br/><br/>
+            <RuleChangesList header={changesTableHeader} rulechanges={ruleChanges} />
+            <form onSubmit={this.getRuleChanges.bind(this)}>
+              <label>Name: <input type="text" ref="name" /></label>
+              <center><button type="submit">Get Changes</button></center>
+            </form> 
           </div>
         </div>
         <div id="sidebar">

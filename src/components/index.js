@@ -7,6 +7,7 @@ import UserList from './UserList';
 import BusinessUserList from './BusinessUserList';
 import ServerList from './ServerList';
 import RulesList from './RulesList';
+import RuleChangesList from './RuleChangesList';
 import CollapseButton from './CollapseButton';
 
 export {
@@ -19,5 +20,6 @@ export {
 	BusinessUserList,
 	CollapseButton,
 	ServerList,
-	RulesList
+	RulesList,
+	RuleChangesList
 }
