@@ -73,6 +73,26 @@ var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script eve
 			};
 			urlRequest(optionsPayment)
 				.then(paymentsApiResponse => {
+					// Previously rejected payment was proccessed ok now!
+					
+					User.find({
+						where: {
+							id: payment.userid
+						}
+					})
+					.then ( userFound => {
+						var balanceToUpdate = userFound.balance;
+						// Here the transaction value is deducted from the balance (-a - (-a) = 0 ;  a - a= 0 balanced accounts remain in zero)
+						balanceToUpdate = balanceToUpdate - payment.costValue; // negative numbers for payments, positive for incomes
+						userFound.updateAttributes({
+							balance: balanceToUpdate
+						})
+						.then ( updatedUser => {
+							console.log('Updated balance in user for rejected transaction.');
+							console.log('User ID: '+ payment.userid + ' has now balance = ' + balanceToUpdate);
+						});
+					});
+					
 				})
 				.catch (function(reason) {
 					console.log('Pending payment was rejected again, it will be saved for further processing...');
@@ -384,8 +404,6 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 																	description: 'Trip Payment (earn as Driver)'
 																})
 																.then(localTransactionDriver => {
-																	
-																	
 																	
 																			// Remote API payment call
 																			paymethods.getPaymentsToken()
@@ -755,6 +773,22 @@ function saveUnfulfilledPaymentData(payment, payment_data){
 		expiration_year: payment_data.expiration_year,
 		number: payment_data.number,
 		type: payment_data.type 
+	});
+	// this calls are async between themselves, we asume not failures here
+	User.find({
+		where: {
+			id: payment.userid
+		}
+	})
+	.then ( userFound => {
+		var balanceToUpdate = userFound.balance;
+		balanceToUpdate = balanceToUpdate + payment.costValue; // negative numbers for payments, positive for incomes
+		userFound.updateAttributes({
+			balance: balanceToUpdate
+		})
+		.then( updatedUser => {
+			console.log('Updated balance in user for rejected transaction');
+		});
 	});
 }
 
