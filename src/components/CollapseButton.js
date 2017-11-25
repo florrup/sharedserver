@@ -32,7 +32,7 @@ class CollapseButton extends Component {
 
     return(
       <div className="addusersbutton">
-        <button onClick={this.close}>Hide info</button>
+        <button onClick={this.close}>Ocultar info</button>
         <div>{this.props.children}</div>
       </div>
     )

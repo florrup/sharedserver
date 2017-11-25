@@ -112,15 +112,29 @@ class RulesPage extends Component {
     });
   }
 
+  /* Runs a rule from the database */
+  runRule(event) {
+    event.preventDefault();
+    console.log(this.refs.name.value);
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    var fact = this.refs.fact.value;
+    return axios.post('http://localhost:5000/api/rules/' + this.refs.name.value + '/run', fact, axiosHeader) 
+    .then((response) => {
+      console.log(response);  
+    });
+  }
+
   componentDidMount() {
     this.getRules();
   }
 
   render() {
     const {rules} = this.state;
-    var tableHeader = ["Id", "Name", "Language", "Blob", "Active"];
+    var tableHeader = ["Id", "Nombre", "Lenguaje", "Cuerpo", "Activa"];
     const {ruleChanges} = this.state;
-    var changesTableHeader = ["Id", "Name", "Blob", "Active", "Reason", "User Info"]; // add reason, userinfo, etc
+    var changesTableHeader = ["Id", "Nombre", "Cuerpo", "Activa", "Razón", "Info de usuario"];
 
     return (
       <div id="wrapper">
@@ -129,49 +143,58 @@ class RulesPage extends Component {
 
               <Header title={GlobalStrings.headerTitle} link="/"/>
 
-              <Banner title="RulesPage" subtitle="A free and fully responsive site template"
-              content="Hello, RulesPage"/>
+              <Banner title="Reglas de negocio" subtitle="Sistema de reglas para el cálculo del precio de un viaje"/>
+              <h3>Listado de reglas</h3>
               <RulesList header={tableHeader} rules={rules} />
               <br/>
-              <CollapseButton name="Add Rule">
+              <CollapseButton name="Agregar Regla">
                 <br/>
                 <form onSubmit={this.addRule.bind(this)}>
-                  <label>Name: <input type="text" ref="name" /></label>
-                  <label>Condition: <input type="text" ref="condition" /></label>
-                  <label>Consequence: <input type="text" ref="consequence" /></label>
-                  <label>Priority: <input type="text" ref="priority" /></label>
-                  <label>Language: <input type="text" ref="language" /></label>
-                  <label>Active: <input type="text" ref="active" /></label>
-                  <center><button type="submit">Add new Rule</button></center>
+                  <label>Nombre: <input type="text" ref="name" class="inputhover"/></label>
+                  <label>Condición: <input type="text" ref="condition" /></label>
+                  <label>Consecuencia: <input type="text" ref="consequence" /></label>
+                  <label>Prioridad: <input type="text" ref="priority" /></label>
+                  <label>Lenguaje: <input type="text" ref="language" /></label>
+                  <label>Activa: <input type="text" ref="active" /></label>
+                  <center><button type="submit">Agregar nueva Regla</button></center>
                 </form> 
               </CollapseButton>
               <br/><br/>
-              <CollapseButton name="Delete Rule">
+              <CollapseButton name="Borrar Regla">
               <br/>
               <form onSubmit={this.deleteRule.bind(this)}>
-                <label>Rule Name: <input type="text" ref="name" /></label>
-                <center><button type="submit">Delete Rule</button></center>
+                <label>Nombre: <input type="text" ref="name" /></label>
+                <center><button type="submit">Borrar Regla</button></center>
               </form>
             </CollapseButton>
             <br/><br/>
-            <CollapseButton name="Modify Rule">
+            <CollapseButton name="Modificar Regla">
               <br/>
               <form onSubmit={this.modifyRule.bind(this)}>
-                <label>Name: <input type="text" ref="name" /></label>
-                <label>Condition: <input type="text" ref="condition" /></label>
-                <label>Consequence: <input type="text" ref="consequence" /></label>
-                <label>Priority: <input type="text" ref="priority" /></label>
-                <label>Language: <input type="text" ref="language" /></label>
-                <label>Active: <input type="text" ref="active" /></label>
-                <center><button type="submit">Modify Rule</button></center>
+                <label>Nombre: <input type="text" ref="name" /></label>
+                <label>Condición: <input type="text" ref="condition" /></label>
+                <label>Consecuencia: <input type="text" ref="consequence" /></label>
+                <label>Prioridad: <input type="text" ref="priority" /></label>
+                <label>Lenguaje: <input type="text" ref="language" /></label>
+                <label>Activa: <input type="text" ref="active" /></label>
+                <center><button type="submit">Modificar Regla</button></center>
               </form> 
             </CollapseButton>
-            <br/><br/>
+            <br/><br/><br/>
+            <h3>Listado de commits de reglas</h3>
             <RuleChangesList header={changesTableHeader} rulechanges={ruleChanges} />
             <form onSubmit={this.getRuleChanges.bind(this)}>
-              <label>Name: <input type="text" ref="name" /></label>
-              <center><button type="submit">Get Changes</button></center>
-            </form> 
+              <label>Nombre: <input type="text" ref="name" /></label>
+              <center><button type="submit">Ver commits</button></center>
+            </form>
+            <br/><br/><br/>
+            <h3>Correr una regla</h3>
+            <form onSubmit={this.runRule.bind(this)}>
+              <label>Nombre: <input type="text" ref="name" /></label>
+              <label>Fact: <input type="text" ref="fact" /></label>
+              <center><button type="submit">Correr regla</button></center>
+            </form>
+            <br/><br/><br/>
           </div>
         </div>
         <div id="sidebar">

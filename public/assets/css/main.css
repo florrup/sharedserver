@@ -2107,13 +2107,13 @@
 		-ms-transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
 		transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
 		border-bottom: dotted 1px;
-		color: #f56a6a;
+		color: #ef4581;
 		text-decoration: none;
 	}
 
 		a:hover {
-			border-bottom-color: #f56a6a;
-			color: #f56a6a !important;
+			border-bottom-color: #ef4581;
+			color: #ef4581 !important;
 		}
 
 			a:hover strong {
@@ -2282,7 +2282,7 @@
 	}
 
 	header.major > :last-child {
-		border-bottom: solid 3px #f56a6a;
+		border-bottom: solid 3px #ef4581;
 		display: inline-block;
 		margin: 0 0 2em 0;
 		padding: 0 0.75em 0.5em 0;
@@ -2349,8 +2349,8 @@
 		input[type="url"]:focus,
 		select:focus,
 		textarea:focus {
-			border-color: #f56a6a;
-			box-shadow: 0 0 0 1px #f56a6a;
+			border-color: #ef4581;
+			box-shadow: 0 0 0 1px #ef4581;
 		}
 
 	.select-wrapper {
@@ -2463,8 +2463,8 @@
 
 		input[type="checkbox"]:focus + label:before,
 		input[type="radio"]:focus + label:before {
-			border-color: #f56a6a;
-			box-shadow: 0 0 0 1px #f56a6a;
+			border-color: #ef4581;
+			box-shadow: 0 0 0 1px #ef4581;
 		}
 
 	input[type="checkbox"] + label:before {
@@ -2697,7 +2697,7 @@
 				}
 
 				ul.contact li:before {
-					color: #f56a6a;
+					color: #ef4581;
 					display: inline-block;
 					font-size: 1.5em;
 					height: 1.125em;
@@ -2821,7 +2821,7 @@
 				}
 
 					ul.pagination li > .page.active {
-						background-color: #f56a6a;
+						background-color: #ef4581;
 						color: #ffffff !important;
 					}
 
@@ -2891,6 +2891,8 @@
 
 		table td {
 			padding: 0.75em 0.75em;
+			word-wrap: break-word;
+			max-width: 150px;
 		}
 
 		table th {
@@ -2899,6 +2901,8 @@
 			font-weight: 600;
 			padding: 0 0.75em 0.75em 0.75em;
 			text-align: left;
+			word-wrap: break-word;
+			max-width: 150px;
 		}
 
 		table thead {
@@ -2953,8 +2957,8 @@
 		background-color: transparent;
 		border-radius: 0.375em;
 		border: 0;
-		box-shadow: inset 0 0 0 2px #f56a6a;
-		color: #f56a6a !important;
+		box-shadow: inset 0 0 0 2px #f9a11f;
+		color: #f9a11f !important;
 		cursor: pointer;
 		display: inline-block;
 		font-family: "Roboto Slab", serif;
@@ -3027,7 +3031,7 @@
 		input[type="button"].special,
 		button.special,
 		.button.special {
-			background-color: #f56a6a;
+			background-color: #ef4581;
 			box-shadow: none;
 			color: #ffffff !important;
 		}
@@ -3037,7 +3041,7 @@
 			input[type="button"].special:hover,
 			button.special:hover,
 			.button.special:hover {
-				background-color: #f67878;
+				background-color: #f9a11f;
 			}
 
 			input[type="submit"].special:active,
@@ -3147,7 +3151,7 @@
 			}
 
 				.features article .icon:before {
-					color: #f56a6a;
+					color: #f9a11f;
 					font-size: 2.75rem;
 					position: relative;
 					top: 0.05em;
@@ -3587,7 +3591,7 @@
 		-webkit-transition: margin-left 0.5s ease, box-shadow 0.5s ease;
 		-ms-transition: margin-left 0.5s ease, box-shadow 0.5s ease;
 		transition: margin-left 0.5s ease, box-shadow 0.5s ease;
-		background-color: #f5f6f7;
+		background-color: #01848f;
 		font-size: 0.9em;
 		position: relative;
 		width: 26em;
@@ -3792,7 +3796,7 @@
 		display: -webkit-flex;
 		display: -ms-flex;
 		display: flex;
-		border-bottom: solid 5px #f56a6a;
+		border-bottom: solid 5px #ef4581;
 		padding: 6em 0 1em 0;
 		position: relative;
 	}
@@ -3952,7 +3956,7 @@
 /* Footer */
 
 	#footer .copyright {
-		color: #9fa3a6;
+		color: #d8dadb;
 		font-size: 0.9em;
 	}
 
@@ -3967,7 +3971,7 @@
 		-webkit-user-select: none;
 		-ms-user-select: none;
 		user-select: none;
-		color: #3d4449;
+		color: #d8dadb;
 		font-family: "Roboto Slab", serif;
 		font-family: 400;
 		letter-spacing: 0.075em;
@@ -3987,7 +3991,7 @@
 		}
 
 			#menu ul a:hover, #menu ul span:hover {
-				color: #f56a6a;
+				color: #ef4581;
 			}
 
 			#menu ul a.opener, #menu ul span.opener {
@@ -4021,7 +4025,7 @@
 				}
 
 				#menu ul a.opener:hover:before, #menu ul span.opener:hover:before {
-					color: #f56a6a;
+					color: #ef4581;
 				}
 
 				#menu ul a.opener.active + ul, #menu ul span.opener.active + ul {
@@ -4042,7 +4046,7 @@
 	}
 
 		#menu > ul > li > ul {
-			color: #9fa3a6;
+			color: #d8dadb;
 			display: none;
 			margin: 0.5em 0 1.5em 0;
 			padding-left: 1em;
@@ -4062,3 +4066,5 @@
 			margin-top: 0;
 			padding-top: 0;
 		}
+
+		

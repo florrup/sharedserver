@@ -32,7 +32,7 @@ export default (props) => {
           <span className="icon fa-signal"></span>
           <div className="content">
             <h3>Sustentabilidad</h3>
-            <p>Llevme! se mantiene con sus propios ingresos y genera beneficios a sus inversores.</p>
+            <p>Llevame! se mantiene con sus propios ingresos y genera beneficios a sus inversores.</p>
           </div>
         </article>
       </div>
