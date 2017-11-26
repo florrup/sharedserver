@@ -16,9 +16,11 @@ var BusinessUser = models.businessuser;
 var Verify = require('./verify');
 var RulesEngine = require('./rulesEngine');
 
-// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), active BOOLEAN);
+var DefaultRules = require('./defaultPricingRules');
 
-// CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser VARCHAR(255), userinfo VARCHAR(255));
+// CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(5000), blobConsequence VARCHAR(5000), blobPriority VARCHAR(20), active BOOLEAN);
+
+// CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(5000), blobConsequence VARCHAR(5000), blobPriority VARCHAR(20), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser VARCHAR(255), userinfo VARCHAR(255));
 
 /**
  *  Método para eliminar todas las reglas y commits asociados
@@ -39,6 +41,82 @@ router.get('/dropRuleTable', function(request, response) {
       return response.status(500).json({code: 0, message: "Unexpected error"});
     });
   /* } */
+});
+
+
+router.get('/setDefaultRules', function (request, response) {
+	
+	Rule.sync({force: true})
+		.then(RuleChange.sync({force: true}))
+		.then( ()=> {
+			// Rules and rule changes had been erased
+			var defaultRules = DefaultRules.defaultRules;
+			// console.log(defaultRules);
+			var promises = [];
+			
+			defaultRules.forEach(function(ruleToSet){
+				var rulePromise = new Promise((resolve, reject) => {
+						// setTimeout(resolve, 100, 'foo');
+						console.log('ref: '+ruleToSet._ref);
+						console.log('Name: '+ruleToSet.blob.name);
+						console.log('Language: '+ruleToSet.language);
+						console.log('BlobCondition: '+ruleToSet.blob.condition);
+						console.log('BlobConsequence: '+ruleToSet.blob.consequence);
+						console.log('blobPriority: '+ruleToSet.blob.priority);
+						console.log('Active: '+ruleToSet.active);
+						return Rule.create({
+							_ref: ruleToSet._ref,
+							name: ruleToSet.blob.name,
+							language: ruleToSet.language, 
+							blobCondition: ruleToSet.blob.condition,
+							blobConsequence: ruleToSet.blob.consequence,
+							blobPriority: ruleToSet.blob.priority,
+							active: ruleToSet.active
+						}).then(rule => {
+								return RuleChange.create({
+									_ref: rule._ref,
+									name: rule.name,
+									blobcondition: rule.blobCondition,
+									blobconsequence: rule.blobConsequence,
+									blobpriority: rule.blobPriority,
+									active: rule.active,
+									reason: 'Default Rule Creation',
+									time: new Date(),
+									businessuser: '0',
+									userinfo: 'Initial Default Rule Creation'
+								})
+								.then(ruleChange => {	
+									return resolve(true);
+								})
+								return resolve(true);
+							})
+						.then (() => {return resolve(true)});
+				});
+				promises.push( rulePromise );
+			});
+			
+			Promise.all(promises)
+				.then(()=>{
+					console.log('Default Rules have been loaded.');
+					Rule.findAll({
+						where: {}
+					})
+					.then( (rules) => {
+						console.log(rules);
+						return response.status(200).json({});
+					});
+					
+				})
+				.catch(error => {
+					var error_message = "Unexpected error: "+error;
+					return response.status(500).json({code: 0, message: error_message});
+				});
+			
+		})
+		.catch(error => {
+			var error_message = "Unexpected error: "+error;
+			return response.status(500).json({code: 0, message: error_message});
+		});
 });
 
 /**

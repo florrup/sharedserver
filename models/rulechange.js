@@ -23,10 +23,10 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     blobcondition: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING(5000)
     },
     blobconsequence: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING(5000)
     },
     blobpriority: {
       type: Sequelize.STRING

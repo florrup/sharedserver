@@ -135,132 +135,146 @@ describe('Trips', function()  {
 			var serversAPI = require('../routes/servers');
 			var tripsAPI = require('../routes/trips');
 			
-			usersAPI.clearUsersTable()
-			.then(function(fulfilled) {
-				tripsAPI.clearTripsTable()
-				.then(function(fulfilled) {
-					tripsAPI.clearTransactionsTable()
-					.then(function(fulfilled) {
-						serversAPI.clearServersTable()
+			chai.request(baseUrl)
+			.get('/business-users/initAndWriteDummyBusinessUser/')
+			.end((err, res) => {
+				chai.request(baseUrl)
+				.post('/token/')
+				.set('content-type', 'application/json')
+				.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
+				.end((err, res) => {
+					res.should.have.status(201);
+					var businessUserToken = res.body.token.token;
+					chai.request(baseUrl)
+					.get('/rules/setDefaultRules')
+					.set(token_header_flag, businessUserToken)
+					.end((err, res) => {
+						tripsAPI.clearTripsTable()
 						.then(function(fulfilled) {
-							chai.request(baseUrl)
-							.get('/servers/initAndWriteDummyServer/')
-							.end((err,res) => {
-								var token = res.body.serverToken;
-								usersAPI.clearUsersTable()
-								.then( function(fulfilled){
-									var firstUser = {
-											_ref: 'aaa',
-											type: 'conductor',
-											username: 'johnny',
-											password: 'aaaa',
-											fb: {
-												userId: '',
-												authToken: ''
-											},
-											firstName: 'John',
-											lastName: 'Hancock',
-											country: 'Argentina',
-											email: 'johnny123@gmail.com',
-											birthdate: '24/05/1992'
-									};
+							tripsAPI.clearTransactionsTable()
+							.then(function(fulfilled) {
+								serversAPI.clearServersTable()
+								.then(function(fulfilled) {
 									chai.request(baseUrl)
-									.post('/users/')
-									.set(token_header_flag, token)
-									.send(firstUser)
-									.end((err, res) => {
-										console.log(res.body);
-										res.should.have.status(201);
-										var userId1 = res.body.user.id;
-										// console.log('New User ID: '+userId1);
-										var secondUser = {
-												_ref: 'bbb',
-												type: 'pasajero',
-												username: 'tommy',
-												password: 'bbbb',
-												fb: {
-													userId: '',
-													authToken: ''
-												},
-												firstName: 'Tom',
-												lastName: 'Smith',
-												country: 'EEUU',
-												email: 'tommy@gmail.com',
-												birthdate: '29/01/1989'
-										};
-										chai.request(baseUrl)
-										.post('/users/')
-										.set(token_header_flag, token)
-										.send(secondUser)
-										.end((err, res) => {
-											var userId2 = res.body.user.id;
-											res.should.have.status(201);
-											
-											var tripParameters = {
-												trip: {
-													// id: 1, autoincremental local
-													applicationOwner: '',
-													driver: userId1,
-													passenger: userId2,
-													start: {
-														address: {
-															street: "Juncal 1234",
-															location: {
-																lat: -34.603722,
-																lon: -58.381592
-															}
-														},
-														timestamp: 9000000
+									.get('/servers/initAndWriteDummyServer/')
+									.end((err,res) => {
+										var token = res.body.serverToken;
+										usersAPI.clearUsersTable()
+										.then( function(fulfilled){
+											var firstUser = {
+													_ref: 'aaa',
+													type: 'conductor',
+													username: 'johnny',
+													password: 'aaaa',
+													fb: {
+														userId: '',
+														authToken: ''
 													},
-													end: {
-														address: {
-															street: "Malabia 4321",
-															location: {
-																lat: -34.603722,
-																lon: -59.381592
-															}
-														},
-														timestamp: 9002160
-													},
-													totalTime: 2160,
-													waitTime: 360,
-													travelTime: 1800,
-													distance: 1500,
-													route: 'Atajo'
-													// cost:
-												},
-												paymethod:  {
-													paymethod: 'card',
-													parameters: {
-														ccvv: 123,
-														expiration_month: 10,
-														expiration_year: 2018,
-														number: '1234-5678-8765-4321',
-														type: 'VISA'
-													}
-												}
+													firstName: 'John',
+													lastName: 'Hancock',
+													country: 'Argentina',
+													email: 'johnny123@gmail.com',
+													birthdate: '24/05/1992'
 											};
 											chai.request(baseUrl)
-											.post('/trips/')
+											.post('/users/')
 											.set(token_header_flag, token)
-											.send(tripParameters)
+											.send(firstUser)
 											.end((err, res) => {
+												console.log(res.body);
 												res.should.have.status(201);
+												var userId1 = res.body.user.id;
+												// console.log('New User ID: '+userId1);
+												var secondUser = {
+														_ref: 'bbb',
+														type: 'pasajero',
+														username: 'tommy',
+														password: 'bbbb',
+														fb: {
+															userId: '',
+															authToken: ''
+														},
+														firstName: 'Tom',
+														lastName: 'Smith',
+														country: 'EEUU',
+														email: 'tommy@gmail.com',
+														birthdate: '29/01/1989'
+												};
 												chai.request(baseUrl)
-												.get('/trips/')
+												.post('/users/')
 												.set(token_header_flag, token)
+												.send(secondUser)
 												.end((err, res) => {
-													res.should.have.status(200);
-													res.body.trips.length.should.be.eql(1);
+													var userId2 = res.body.user.id;
+													res.should.have.status(201);
+													
+													var tripParameters = {
+														trip: {
+															// id: 1, autoincremental local
+															applicationOwner: '',
+															driver: userId1,
+															passenger: userId2,
+															start: {
+																address: {
+																	street: "Juncal 1234",
+																	location: {
+																		lat: -34.603722,
+																		lon: -58.381592
+																	}
+																},
+																timestamp: 9000000
+															},
+															end: {
+																address: {
+																	street: "Malabia 4321",
+																	location: {
+																		lat: -34.603722,
+																		lon: -59.381592
+																	}
+																},
+																timestamp: 9002160
+															},
+															totalTime: 2160,
+															waitTime: 360,
+															travelTime: 1800,
+															distance: 1500,
+															route: 'Atajo'
+															// cost:
+														},
+														paymethod:  {
+															paymethod: 'card',
+															parameters: {
+																ccvv: 123,
+																expiration_month: 10,
+																expiration_year: 2018,
+																number: '1234-5678-8765-4321',
+																type: 'VISA'
+															}
+														}
+													};
 													chai.request(baseUrl)
-													.get('/users/'+userId1+'/transactions')
+													.post('/trips/')
 													.set(token_header_flag, token)
+													.send(tripParameters)
 													.end((err, res) => {
-														console.log('Transactions from User: '+userId1);
-														console.log(res.body);
-														res.should.have.status(200);
-														res.body.transactions.length.should.be.eql(1);
-														done();
+														res.should.have.status(201);
+														chai.request(baseUrl)
+														.get('/trips/')
+														.set(token_header_flag, token)
+														.end((err, res) => {
+															res.should.have.status(200);
+															res.body.trips.length.should.be.eql(1);
+															chai.request(baseUrl)
+															.get('/users/'+userId1+'/transactions')
+															.set(token_header_flag, token)
+															.end((err, res) => {
+																console.log('Transactions from User: '+userId1);
+																console.log(res.body);
+																res.should.have.status(200);
+																res.body.transactions.length.should.be.eql(1);
+																done();
+															});
+														});
 													});
 												});
 											});
@@ -271,7 +285,7 @@ describe('Trips', function()  {
 						});
 					});
 				});
-			})
+			});
 		});
 	});
 });
