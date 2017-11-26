@@ -1,6 +1,12 @@
-var BusinessUser = require('../models/businessuser');
+// var BusinessUser = require('../models/businessuser');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 // var config = require('../config.js');
+
+const Sequelize = require('sequelize');
+
+var models = require('../models/db'); // loads db.js
+var BusinessUser = models.businessuser;
+var Server = models.server;
 
 /**
  * Variable to track manually invalidated tokens
@@ -69,12 +75,64 @@ exports.reportActualState = function(){
 		validTokens = new Map();
 	}
 	
+	// var validServerIds = []; // userId of servers with valid tokens
+	var validServers = [];
+	var promises = []; // promises to be fulfilled wit al the b-users and servers data...
+
+	console.log('Valid Tokens: '+JSON.stringify(Array.from(validTokens)));
+	validTokens.forEach(function(validToken, serverName, map){
+		// try {
+			console.log('Valid Token?'+validToken);
+			var decoded = jwt.verify(validToken, process.env.TOKEN_SECRET_KEY);
+			var isAServer = decoded.appOk;
+			console.log('is '+serverName+' a server??');
+			if (isAServer){
+				// validServerIds.push(serverName);
+				console.log('is a Server!!: '+serverName);
+				var serverPromise = new Promise((resolve, reject) => {
+					return Server.find({
+						where: {
+							username: serverName
+						}
+					})
+					.then(serverFound => {
+						
+						var serverJSON = {
+							id: serverFound.id,
+							username: serverFound.username,
+							password: serverFound.password,
+							created_by: serverFound.createdBy,
+							created_time: serverFound.createdTime,
+							name: serverFound.name,
+							last_connection: serverFound.lastConnection
+						};
+						console.log('added server to JSON: '+serverJSON);
+						validServers.push(serverJSON);
+						return resolve(true);
+					});
+				});
+				console.log('added promise to array of promises');
+				promises.push(serverPromise);
+			};
+		/* };catch(serverName){
+			// Token is no longer valid, we remove it from the valid tokens map
+			map.delete(userId);
+		};*/
+	});
+	
+	return Promise.all(promises)
+		.then( () => {
+			console.log('Returning valid servers: '+validServers);
+			return validServers;
+		});
+		
+	/*
 	var jsonInResponse = {
-		'usersWithAuthorizedTokens': JSON.stringify(validTokens), // this structure is a map: key=username, value=token.
+		'usersWithAuthorizedTokens': JSON.stringify(Array.from(validTokens)), // this structure is a map: key=username, value=token.
 		'invalidatedTokens': JSON.stringify(Array.from(invalidatedTokens)) // this structure is a map: key=username, value=array of invalidated tokens from key username
 	};
-	
 	return jsonInResponse;
+	*/
 }
 
 /**
@@ -354,6 +412,28 @@ exports.verifyManagerOrAppRole = function (req, res, next) {
 	}
 	else{
 		var err = new Error('No MANAGER or APP privileges for this user!');
+		err.status = 401;
+		return next(err);
+	}
+};
+
+/**
+ * This method extracts the info from the decoded request field, wich was inserted by the previous verifyToken method
+ * If the decoded info:
+ * has the variable managerOk OR the variable adminOk
+ * ... the user has right privileges and this method authorizes the next middleware call
+ *
+ * PRE: the method verifyToken has to be called first
+**/
+exports.verifyManagerOrAdminRole = function (req, res, next) {
+	var adminOk = req.decoded.adminOk;
+	var managerOk = req.decoded.managerOk;
+	
+	if (adminOk || managerOk){
+		return next();
+	}
+	else{
+		var err = new Error('No MANAGER or ADMIN privileges for this user!');
 		err.status = 401;
 		return next(err);
 	}

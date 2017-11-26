@@ -72,6 +72,19 @@ router.get('/initAndWriteDummyServer', function(request, response) {
 });
 
 /**
+ *  Devuelve el estado actual de los servers con sesión válida
+ *
+ */
+router.get('/activeServers', Verify.verifyToken, Verify.verifyManagerOrAdminRole, function(request, response) {
+		var activeServersPromise = Verify.reportActualState()
+			.then (activeServers => {
+				console.log(activeServers);
+				return response.status(200).json(activeServers);
+			});
+		
+});
+
+/**
  *  Devuelve toda la información acerca de todos los application servers indicados.
  *
  */
