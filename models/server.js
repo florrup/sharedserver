@@ -13,9 +13,10 @@ var Sequelize = require("sequelize");
 module.exports = function(sequelize, DataTypes) {
   var Server = sequelize.define("server", {
     id: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
       primaryKey: true,
-      unique: true
+      unique: true,
+	  autoIncrement: true
     },
     username: { // field automatically added otherwise by passport-local-sequelize
       type: Sequelize.STRING,
@@ -27,18 +28,20 @@ module.exports = function(sequelize, DataTypes) {
     _ref: {
       type: Sequelize.STRING
     },
-    createdBy: {
+    createdby: {
       type: Sequelize.INTEGER
     },
-    createdTime: {
+    createdtime: {
       type: Sequelize.STRING
     },
     name: {
       type: Sequelize.STRING
     },
-    lastConnection: {
+    lastconnection: {
       type: Sequelize.INTEGER
     }
+  },{
+	  timestamps: false
   });
   
   return Server;

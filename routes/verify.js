@@ -15,12 +15,27 @@ var Server = models.server;
 **/
 var invalidatedTokens;
 
+// module.exports.invalidatedTokens;
+
 /**
  * Valid Tokens emmited by the shared server to application servers
  * This variable is a map structure: [key=username, value=validToken]
  * If a username has a valid token and a new one is emmited, the previous token will be added to the invalidatedTokens list
 **/
 var validTokens;
+
+// module.exports.validTokens;
+
+exports.clearHistory = function (){
+	if (typeof invalidatedTokens === "undefined") {
+		invalidatedTokens = new Map();
+	}
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	}
+	validTokens.clear();
+	invalidatedTokens.clear();
+};
 
 /**
  * Method for token generation. It consumes token secret and token expiration time from env configuration.
@@ -98,19 +113,22 @@ exports.reportActualState = function(){
 						}
 					})
 					.then(serverFound => {
-						
-						var serverJSON = {
-							id: serverFound.id,
-							username: serverFound.username,
-							password: serverFound.password,
-							created_by: serverFound.createdBy,
-							created_time: serverFound.createdTime,
-							name: serverFound.name,
-							last_connection: serverFound.lastConnection
-						};
-						console.log('added server to JSON: '+serverJSON);
-						validServers.push(serverJSON);
-						return resolve(true);
+						if (serverFound){
+							var serverJSON = {
+								id: serverFound.id,
+								username: serverFound.username,
+								password: serverFound.password,
+								created_by: serverFound.createdBy,
+								created_time: serverFound.createdTime,
+								name: serverFound.name,
+								last_connection: serverFound.lastConnection
+							};
+							console.log('added server to JSON: '+serverJSON);
+							validServers.push(serverJSON);
+							return resolve(true);
+						} else {
+							reject ("Server with name "+serverName+" was not found!!");
+						}
 					});
 				});
 				console.log('added promise to array of promises');
@@ -194,6 +212,22 @@ function isTokenInvalidated(token){
 	}
 };
 
+/*
+exports.invalidateTokenFromUser = function (username){
+	if (typeof invalidatedTokens === "undefined") {
+		invalidatedTokens = new Map();
+	};
+	if (typeof validTokens === "undefined") {
+		validTokens = new Map();
+	};
+	
+	validTokens.forEach(function(validToken, localUsername, map){
+		if (username == localUsername){
+			this.invalidateToken(validToken); // invalidate the token
+		}
+	});
+};
+*/
 
 /**
  * Invalidates a token
@@ -435,6 +469,7 @@ exports.verifyManagerOrAdminRole = function (req, res, next) {
 		return next();
 	}
 	else{
+		console.log('NOT OK ##########################################');
 		var err = new Error('No MANAGER or ADMIN privileges for this user!');
 		err.status = 401;
 		return next(err);

@@ -16,6 +16,7 @@ var should = chai.should();
 var expect = chai.expect;
 var util = require('util');
 var token_header_flag = 'x-access-token';
+var verify = require('../routes/verify');
 
 chai.use(chaiHttp);
 
@@ -65,7 +66,7 @@ describe('Servers', function()  {
 						var token = res.body.token.token;
 
 						var serverToGet = {
-							id: 12,
+							// id: 12,
 							_ref: 'abc12',
 							createdBy: 12,
 							createdTime: 'testTime12',
@@ -78,8 +79,9 @@ describe('Servers', function()  {
 						.set(token_header_flag, token)
 						.send(serverToGet)
 						.end((err, res) => {
+							var newServerId = res.body.server.server.id;
 							chai.request(baseUrl)
-							.get('/servers/' + serverToGet.id)
+							.get('/servers/' + newServerId) // serverToGet.id)
 							.set(token_header_flag, token)
 							.end((err, res) => {
 								res.should.have.status(200);
@@ -148,7 +150,7 @@ describe('Servers', function()  {
 						var token = res.body.token.token;
 
 						var newServer = {
-						 	"id": 10,
+						 	// "id": 10,
 							"_ref": "abc10",
 							"createdBy": 10,
 							"createdTime": "abc10",
@@ -197,7 +199,7 @@ describe('Servers', function()  {
 							_ref: '',
 							createdBy: 10,
 							createdTime: 'abc10',
-							name: '',
+							name: '', // this can't be empty as it is here
 							lastConnection: 10,
 							username: 'myAppServer'
 						};
@@ -253,8 +255,9 @@ describe('Servers', function()  {
 						.set(token_header_flag, token)
 						.send(serverToDelete)
 						.end((err, res) => {
+							var newServerId = res.body.server.server.id;
 							chai.request(baseUrl)
-							.delete('/servers/' + serverToDelete.id)
+							.delete('/servers/' + newServerId) // serverToDelete.id)
 							.set(token_header_flag, token)
 							.end((err, res) => {
 								res.should.have.status(204);
@@ -299,7 +302,7 @@ describe('Servers', function()  {
 	describe('/POST specific server', function() {
 
 		var serverToPost = {
-			id: 11,
+			// id: 11,
 			_ref: 'abc11',
 			createdBy: 11,
 			createdTime: 'testTime11',
@@ -308,38 +311,54 @@ describe('Servers', function()  {
 			username: 'myAppServer'
 		};
 
-	  	it('it should POST a server', function(done) {
-	  		this.timeout(15000);
+	  	it('it should POST a server and see it as active', function(done) {
+	  		this.timeout(20000);
 	  		serversAPI.clearServersTable()
 			.then( function(fulfilled){
 				
-				chai.request(baseUrl)
-				.get('/business-users/initAndWriteDummyBusinessUser/')
-				.end((err,res) => {
+				verify.clearHistory();
 				
+				serversAPI.clearServersTable()
+				.then( function(fulfilled){
 					chai.request(baseUrl)
-					.post('/token/')
-					.set('content-type', 'application/json')
-					.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
-					.end((err, res) => {
-						console.log('Is this body w token?: ', res.body);
-						var token = res.body.token.token;
-
+					.get('/business-users/initAndWriteDummyBusinessUser/')
+					.end((err,res) => {
+					
 						chai.request(baseUrl)
-						.post('/servers/')
-						.set(token_header_flag, token)
-						.send(serverToPost)
+						.post('/token/')
+						.set('content-type', 'application/json')
+						.send({"BusinessUserCredentials":{"username":"johnny", "password":"aaa"}})
 						.end((err, res) => {
+							console.log('Is this body w token?: ', res.body);
+							var token = res.body.token.token;
+
 							chai.request(baseUrl)
-							.post('/servers/' + serverToPost.id)
+							.post('/servers/')
 							.set(token_header_flag, token)
+							.send(serverToPost)
 							.end((err, res) => {
-								res.should.have.status(200);
-								res.body.should.have.property('metadata');
-								res.body.should.have.property('server');
-								res.body.server.token.should.have.property('token');
-								res.body.server.token.should.not.equal(token);
-								done();
+								console.log(res.body);
+								var newServerId = res.body.server.server.id;
+								chai.request(baseUrl)
+								.post('/servers/' + newServerId) // resetea token de servidor
+								.set(token_header_flag, token)
+								.end((err, res) => {
+									res.should.have.status(200);
+									res.body.should.have.property('metadata');
+									res.body.should.have.property('server');
+									res.body.server.token.should.have.property('token');
+									res.body.server.token.should.not.equal(token);
+									
+									chai.request(baseUrl)
+									.get('/servers/activeServers')
+									.set(token_header_flag, token)
+									.end((err, res) => {
+										res.should.have.status(200);
+										res.body.length.should.be.eql(1); // here is the state of active servers !!!
+										done();
+									});
+									
+								});
 							});
 						});
 					});
@@ -353,7 +372,7 @@ describe('Servers', function()  {
 			this.timeout(15000);
 
 			var serverToPost = {
-				id: 12,
+				// id: 12,
 				_ref: 'abc12',
 				createdBy: 12,
 				createdTime: 'testTime12',
@@ -381,20 +400,20 @@ describe('Servers', function()  {
 						.set(token_header_flag, token)
 						.send(serverToPost)
 						.end((err, res) => {
-
+							var newServerId = res.body.server.server.id;
 							serverToPost = {
-								id: 12,
+								// id: 12,
 								_ref: 'abc12',
 								createdBy: 12,
 								createdTime: 'testTime12',
-								name: 'ModifiedName',
+								name: 'ModifiedName', // this is changed to test put method
 								lastConnection: 12,
 								username: 'myAppServer',
 								password: 'aa'
 							};
 
 							chai.request(baseUrl)
-							.put('/servers/' + serverToPost.id)
+							.put('/servers/' + newServerId) // serverToPost.id)
 							.set(token_header_flag, token)
 							.send(serverToPost)
 							.end((err, res) => {
@@ -413,7 +432,7 @@ describe('Servers', function()  {
 			this.timeout(15000);
 
 			var serverToPut = {
-				id: 12,
+				// id: 12,
 				_ref: 'abc12',
 				createdBy: 12,
 				createdTime: 'testTime12',
@@ -438,7 +457,7 @@ describe('Servers', function()  {
 						var token = res.body.token.token;
 
 						chai.request(baseUrl)
-						.put('/servers/' + serverToPut.id)
+						.put('/servers/' + 999999) // fake Id// serverToPut.id)
 						.set(token_header_flag, token)
 						.send(serverToPut)
 						.end((err, res) => {
@@ -456,7 +475,7 @@ describe('Servers', function()  {
 			this.timeout(15000);
 
 			var serverToPost = {
-				id: 12,
+				// id: 12,
 				_ref: 'abc12',
 				createdBy: 12,
 				createdTime: 'testTime12',
@@ -482,9 +501,9 @@ describe('Servers', function()  {
 						.set(token_header_flag, token)
 						.send(serverToPost)
 						.end((err, res) => {
-
+							var newServerId = res.body.server.server.id;
 							serverToPost = {
-								id: 12,
+								// id: 12,
 								_ref: 'abc12',
 								createdBy: 12,
 								createdTime: '',
@@ -493,7 +512,7 @@ describe('Servers', function()  {
 							};
 
 							chai.request(baseUrl)
-							.put('/servers/' + serverToPost.id)
+							.put('/servers/' + newServerId) // serverToPost.id)
 							.set(token_header_flag, token)
 							.send(serverToPost)
 							.end((err, res) => {

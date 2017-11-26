@@ -14,7 +14,7 @@ var Server = models.server;       // the model keyed by its name
 var Verify = require('./verify');
 var api = require('./api');
 
-// CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
+// CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdby INT, createdtime VARCHAR(40), name VARCHAR(40), lastconnection INT);
 
 router.get('/reportActualState', function(request, response) {
 	var jsonInResponse = Verify.reportActualState()
@@ -42,10 +42,10 @@ router.get('/initAndWriteDummyServer', function(request, response) {
 		username: 'myDummyAppServer',
 		password: 'aaa',
 		_ref: 'abc',
-		createdBy: 66,
-		createdTime: 'abc',
+		createdby: 66,
+		createdtime: 'abc',
 		name: 'DummyServer',
-		lastConnection: 2
+		lastconnection: 2
 		};
 		
 		Server.create(dummyServer)
@@ -60,7 +60,7 @@ router.get('/initAndWriteDummyServer', function(request, response) {
 			};
 			var token = Verify.getToken(payload);
 			var responseJson = {
-				server: dummyServer,
+				server: dummyServer, // check createdBy for createdby & createdTime for createdtime
 				serverToken: token
 			}
 			return response.status(200).json(responseJson);
@@ -96,7 +96,7 @@ router.get('/activeServers', Verify.verifyToken, Verify.verifyManagerOrAdminRole
  */
 router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, response) {
 	Server.findAll({
-		attributes: ['id', 'username', 'password', '_ref', 'createdBy', 'createdTime', 'name', 'lastConnection']
+		attributes: ['id', 'username', 'password', '_ref', 'createdby', 'createdtime', 'name', 'lastconnection']
 	}).then(servers => {
 		/* istanbul ignore if  */
 		if (!servers) {
@@ -108,24 +108,24 @@ router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, res
 
 /**
  *  Da de alta un server.
- *  Se ignorarán los campos de id, _ref y lastConnection.
+ *  Se ignorarán los campos de id, _ref y lastconnection.
  *
  */
 router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
 	// si hay algún parámetro faltante
-	if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
+	if (/*api.isEmpty(request.body.id) || */api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
 		|| api.isEmpty(request.body.createdTime) || api.isEmpty(request.body.name)
 		|| api.isEmpty(request.body.lastConnection)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
 
 	Server.create({
-		id: request.body.id,
+		// id: request.body.id,
 		_ref: request.body._ref,
-		createdBy: request.body.createdBy,
-		createdTime: request.body.createdTime,
+		createdby: request.body.createdBy,
+		createdtime: request.body.createdTime,
 		name: request.body.name,
-		lastConnection: request.body.lastConnection,
+		lastconnection: request.body.lastConnection,
 		username: request.body.username,
 		password: request.body.password
 	}).then(server => {
@@ -135,11 +135,11 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 		} else {
 			// Now we generate and return a new fresh token with full lifetime length from now
 			var payload = {
-				username: request.decoded.username,
-				userOk: request.decoded.userOk,
-				appOk: request.decoded.appOk, // normally it would be false to business users
-				managerOk: request.decoded.managerOk,
-				adminOk: request.decoded.adminOk
+				username: server.username,
+				userOk: false,
+				appOk: true, // normally it would be false to business users
+				managerOk: false,
+				adminOk: false
 			};
 			var newToken = Verify.getToken(payload);
 			var jsonInResponse = {
@@ -203,10 +203,10 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
 					server: {
 						id: server.Id,
 						_ref: server._ref,
-						createdBy: server.createdBy,
-						createdTime: server.createdTime,
+						createdBy: server.createdby,
+						createdTime: server.createdtime,
 						name: server.name,
-						lastConnection: server.lastConnection
+						lastConnection: server.lastconnection
 					},
 					token: {
 						expiresAt: (new Date).getTime() + process.env.TOKEN_LIFETIME_IN_SECONDS * 1000,
@@ -231,7 +231,7 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
  */
 router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
 	// si hay algún parámetro faltante
-	if (api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
+	if (/*api.isEmpty(request.body.id) || */api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
 		|| api.isEmpty(request.body.createdTime) || api.isEmpty(request.body.name)
 		|| api.isEmpty(request.body.lastConnection)) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
@@ -246,10 +246,10 @@ router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(
 			server.updateAttributes({
 			    id: request.body.id,
 			    _ref: request.body._ref,
-			    createdBy: request.body.createdBy,
-			    createdTime: request.body.createdTime,
+			    createdby: request.body.createdBy,
+			    createdtime: request.body.createdTime,
 			    name: request.body.name,
-			    lastConnection: request.body.lastConnection
+			    lastconnection: request.body.lastConnection
 			}).then(updatedServer => {
 				var jsonInResponse = {
 					metadata: {
@@ -258,7 +258,7 @@ router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(
 					server: {
 						id: updatedServer.id,
 					    _ref: updatedServer._ref,
-					    createdBy: updatedServer.createdBy,
+					    createdBy: updatedServer.createdby,
 					    createdTime: 0,
 					    name: updatedServer.name,
 					    lastConnection: 0
@@ -315,7 +315,7 @@ router.get('/:serverId', Verify.verifyToken, Verify.verifyUserRole, function(req
 			server: {
 				id: server.id,
 			    _ref: server._ref,
-			    createdBy: server.createdBy,
+			    createdBy: server.createdby,
 			    createdTime: 0,
 			    name: server.name,
 			    lastConnection: 0
@@ -349,14 +349,16 @@ router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function
 
 		// Now we generate and return a new fresh token with full lifetime length from now
 		var payload = {
-			username: request.decoded.username,
-			userOk: request.decoded.userOk,
-			appOk: request.decoded.appOk, // normally it would be false to business users
-			managerOk: request.decoded.managerOk,
-			adminOk: request.decoded.adminOk
+			username: server.username,
+			userOk: false,
+			appOk: true, // it would be false to business users
+			managerOk: false,
+			adminOk: false
 		};
 		
-		Verify.invalidateActualValidTokenFromUser(request.decoded.username);
+		// Verify.invalidateActualValidTokenFromUser(request.decoded.username); // no! don't invalidate the business user token!!
+		Verify.invalidateActualValidTokenFromUser(server.username);
+		
 		var newToken = Verify.getToken(payload);
 
 		var responseJson = {
@@ -366,7 +368,7 @@ router.post('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function
 					server: {
 						id: server.id,
 					    _ref: server._ref,
-					    createdBy: server.createdBy,
+					    createdBy: server.createdby,
 					    createdTime: 0,
 					    name: server.name,
 					    lastConnection: 0

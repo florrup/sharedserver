@@ -4,7 +4,7 @@
 CREATE TABLE businessusers(id SERIAL PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), roles TEXT[]);
 
 // Servers
-CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
+CREATE TABLE servers(id SERIAL PRIMARY KEY, _ref VARCHAR(40),username VARCHAR(40),password VARCHAR(40),createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
 // Rules
 CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(5000), blobConsequence VARCHAR(5000), blobPriority VARCHAR(20), active BOOLEAN);
