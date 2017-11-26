@@ -7,10 +7,10 @@ CREATE TABLE businessusers(id SERIAL PRIMARY KEY, _ref VARCHAR(20), username VAR
 CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
 // Rules
-CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), active BOOLEAN);
+CREATE TABLE rules(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), language VARCHAR(40), blobCondition VARCHAR(5000), blobConsequence VARCHAR(5000), blobPriority VARCHAR(20), active BOOLEAN);
 
 // Rule Changes
-CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(255), blobConsequence VARCHAR(255), blobPriority VARCHAR(255), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser VARCHAR(255), userinfo VARCHAR(255));
+CREATE TABLE rulechanges(id SERIAL PRIMARY KEY, _ref VARCHAR(20), name VARCHAR(255), blobCondition VARCHAR(5000), blobConsequence VARCHAR(5000), blobPriority VARCHAR(20), reason VARCHAR(255), time DATE, active BOOLEAN, businessuser VARCHAR(255), userinfo VARCHAR(255));
 
 // Pending Payments
 CREATE TABLE pendingpayments(pendingtransactionid SERIAL PRIMARY KEY, _ref VARCHAR(20), originaltransactionid INT, userid INT NOT NULL, tripid INT NOT NULL, timestamp VARCHAR(30), costcurrency VARCHAR(20) NOT NULL, costvalue INT NOT NULL, description VARCHAR(200), paymethod VARCHAR(50), expiration_month INT, expiration_year INT, number VARCHAR(30), type VARCHAR(100));

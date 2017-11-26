@@ -251,14 +251,15 @@ function runEngine(rules, fact) {
 	console.log('RUNNING RULES ENGINE!  Listing Rules: ---------------------------------');
     // for (var rule in rules) { // this line didn't work as intended
 	rules.forEach(function(rule){
-		console.log(rule);
+		// console.log(rule);
         store.push(rule);
     });
-	console.log('---------------------------------');
 
-	console.log('Fact listing fatcs: -----------------------');
+	console.log('Facts Listing ##########################################');
 	console.log(fact);
-	console.log('-----------------------');
+	console.log('Rules Listing ##########################################');
+	console.log(store);
+	
     R2.fromJSON(store);
 
 	return new Promise((resolve, reject) => {

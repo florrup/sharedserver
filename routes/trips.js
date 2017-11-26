@@ -237,7 +237,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 				},
 				timestamp: item.endtimestamp
 			},
-			totalTime: item.totalTime,
+			totalTime: item.totaltime,
 			waitTime: item.waittime,
 			travelTime: item.traveltime,
 			distance: item.distance,
@@ -861,8 +861,8 @@ function getFacts(userId, typeOfUser, travelDistance){
 			}
 		})
 		.then( userFound => {
-			console.log('USER FOUND $ FACTS: '+userFound.id)
-			console.log(userFound); // ok
+			// console.log('USER FOUND $ FACTS: '+userFound.id)
+			// console.log(userFound); // ok
 			if (typeOfUser == 'pasajero'){
 				Trip.findAll({
 					where: {
@@ -902,16 +902,16 @@ function getFacts(userId, typeOfUser, travelDistance){
 				});
 			}
 			else if (typeOfUser == 'conductor') {
-				console.log('ASDFASDFASDFASDFASDF');
+				// console.log('ASDFASDFASDFASDFASDF');
 				Trip.findAll({
 					where: {
 						driverid: userFound.id
 					}
 				})
 				.then( trips => {
-					console.log('AAAAAAAA');
+					// console.log('AAAAAAAA');
 					if (trips){
-						console.log('TTTTTTTTTT');
+						// console.log('TTTTTTTTTT');
 						var viajesHoy = 0;
 						trips.forEach(function(singleTrip){
 							if (singleTrip.starttimestamp > epochToday){
@@ -939,20 +939,20 @@ function getFacts(userId, typeOfUser, travelDistance){
 						console.log(fact);
 						resolve(fact);
 					}
-				})/*
+				})
 				.catch(function (error) {
-					/* istanbul ignore next  */ /*
+					/* istanbul ignore next  */
 					console.log(error);
 					reject(false);
-				});*/
+				});
 			}
 			
-		});/*
+		})
 		.catch(function (error) {
-			/* istanbul ignore next  *//*
+			/* istanbul ignore next  */
 			console.log(error);
 			reject(false);
-		});*/
+		});
 			
 	});
 };
