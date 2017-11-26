@@ -43,6 +43,12 @@ class UsersPage extends Component {
     const {people} = this.state;
     var tableHeader = ["Id", "Username", "Tipo", "Nombre", "Apellido", "Email", "País", "Cumpleaños"];
   
+    var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
+
+    if (!isLoggedIn) {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    }
+
     let filteredUsers = this.state.people.filter(
       (user) => {
         return user.username.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1;

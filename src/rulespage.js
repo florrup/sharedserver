@@ -28,6 +28,9 @@ class RulesPage extends Component {
     .then((response) => {
       console.log(response.data.rules);
       this.setState( { rules: response.data.rules } )
+    })    
+    .catch(function (error) {
+      console.log(error);
     });
   }
 
@@ -43,7 +46,7 @@ class RulesPage extends Component {
       console.log('Commits are ' + response.data.commits);
       this.setState( { ruleChanges: [] } );
       this.setState( { ruleChanges: response.data.commits } );
-    });
+    })
   }
 
   /* Adds a new rule to the database */
@@ -150,6 +153,11 @@ class RulesPage extends Component {
     var exampleFact = {     "type": "pasajero",     "saldo": 15,    "email": "florencia@gmail.com",     "kmRecorridos": 2,    "costoTotal": 0,    "dia": "miercoles", "hora": "15:20:58",     "viajesHoy": 5,     "primerViaje": true,  };
     exampleFact = JSON.stringify(exampleFact);
 
+    var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
+
+    if (!isLoggedIn) {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    }
 
     return (
       <div id="wrapper">

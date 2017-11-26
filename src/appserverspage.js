@@ -37,6 +37,12 @@ class AppServersPage extends Component {
   render() {
     const {servers} = this.state;
     var tableHeader = ["Id", "Username", "Password", "Created By", "Created Time", "Name", "Last Connection"];
+    
+    var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
+
+    if (!isLoggedIn) {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    }
 
     return (
 
