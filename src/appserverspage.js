@@ -2,7 +2,7 @@ import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 
-import GlobalStrings from './components/GlobalStrings'
+import GlobalStrings from './components/GlobalStrings';
 
 import { Footer, Menu, Header, Banner, GeneralStats, ServerList } from './components';
 
@@ -26,7 +26,6 @@ class AppServersPage extends Component {
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);
-      //console.log('BusinessUsers' + response.data.businessUser);
       this.setState( { servers: response.data } )
     });
   }
@@ -38,6 +37,12 @@ class AppServersPage extends Component {
   render() {
     const {servers} = this.state;
     var tableHeader = ["Id", "Username", "Password", "Created By", "Created Time", "Name", "Last Connection"];
+    
+    var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
+
+    if (!isLoggedIn) {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    }
 
     return (
 

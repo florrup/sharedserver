@@ -562,7 +562,7 @@ router.put('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
  */
 router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
 	var fact = request.body.blob;
-	console.log(fact);
+	console.log("Fact " + fact);
 
 	Rule.find({
 		where: {
@@ -581,23 +581,30 @@ router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, functi
 			priority: rule.blobPriority
 		};
 		rulesToEngine.push(singleRule);
+
 		var rulesResult;
 		RulesEngine.runEngine(rulesToEngine, fact)
-			.then(data => {rulesResult = data})
-			.catch( function (error) {
-				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
-			});
+		.then(data => {
+			console.log("\n\n\n\nThe rule has run" + data.costoTotal);
+			console.log(JSON.stringify(data));
+			rulesResult = data;
+			console.log('\n\n\nRULES RESULT IS: ' + rulesResult);
+			var jsonInResponse = {
+			  metadata: {
+				version: api.apiVersion 
+			  },
+			  facts: {
+				language: request.body.language, 
+				blob: rulesResult
+			  }
+			};
+			return response.status(200).json(jsonInResponse);
+		})
+		.catch( function (error) {
+			return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
+		});
 
-		var jsonInResponse = {
-		  metadata: {
-			version: api.apiVersion 
-		  },
-		  facts: {
-			language: request.body.language, 
-			blob: request.body.blob			
-		  }
-		};
-		return response.status(200).json(jsonInResponse);
+
 	}).catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);

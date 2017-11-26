@@ -46,6 +46,7 @@ class Login extends React.Component {
       if (response.status == 201) {
         console.log(response.data.token.token); // this gets the token 
         localStorage.setItem('token', response.data.token.token);
+        localStorage.setItem('isLoggedIn', 'true'); // doesn't accept booleans
       } 
     })
     .catch(function(error) {

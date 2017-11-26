@@ -49,6 +49,10 @@ app.get('/rules', function(request, response) {
   response.render('pages/rules');
 });
 
+app.get('/logout', function(request, response) {
+  response.render('pages/logout');
+});
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

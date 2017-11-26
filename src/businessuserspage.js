@@ -98,6 +98,12 @@ class BusinessUsersPage extends Component {
   render() {
     const {businesspeople} = this.state;
     var tableHeader = ["Id", "Username", "Password", "Nombre", "Apellido", "Roles"];
+    
+    var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
+
+    if (!isLoggedIn) {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    }
 
     return (
       <div id="wrapper">

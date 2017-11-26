@@ -148,14 +148,14 @@ describe('Servers', function()  {
 						var token = res.body.token.token;
 
 						var newServer = {
-							id: 10,
-							_ref: 'abc10',
-							createdBy: 10,
-							createdTime: 'abc10',
-							name: 'Dummy10',
-							lastConnection: 10,
-							username: 'myAppServer'
-						};
+						 	"id": 10,
+							"_ref": "abc10",
+							"createdBy": 10,
+							"createdTime": "abc10",
+							"name": "Dummy10",
+							"lastConnection": 10,
+							"username": "myAppServer"
+						}
 
 						chai.request(baseUrl)
 						.post('/servers/')

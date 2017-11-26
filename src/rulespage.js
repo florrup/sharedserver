@@ -28,6 +28,9 @@ class RulesPage extends Component {
     .then((response) => {
       console.log(response.data.rules);
       this.setState( { rules: response.data.rules } )
+    })    
+    .catch(function (error) {
+      console.log(error);
     });
   }
 
@@ -43,7 +46,7 @@ class RulesPage extends Component {
       console.log('Commits are ' + response.data.commits);
       this.setState( { ruleChanges: [] } );
       this.setState( { ruleChanges: response.data.commits } );
-    });
+    })
   }
 
   /* Adds a new rule to the database */
@@ -115,14 +118,25 @@ class RulesPage extends Component {
   /* Runs a rule from the database */
   runRule(event) {
     event.preventDefault();
-    console.log(this.refs.name.value);
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
+
     var fact = this.refs.fact.value;
-    return axios.post('http://localhost:5000/api/rules/' + this.refs.name.value + '/run', fact, axiosHeader) 
+    var stringified = JSON.stringify(fact);
+    console.log('string \n\n' + stringified);
+    var stringifiedFact = fact.replace('\\','');
+    console.log('stringifiedFact \n\n' + stringifiedFact);
+
+    var JSONfact = {
+      language: this.refs.language.value,
+      blob: JSON.parse(stringifiedFact)
+    }
+    
+    return axios.post('http://localhost:5000/api/rules/' + this.refs.name.value + '/run', JSONfact, axiosHeader) 
     .then((response) => {
-      console.log(response);  
+      console.log(response);
+      this.refs.textarea.value = JSON.stringify(response.data.facts.blob);  
     });
   }
 
@@ -135,6 +149,15 @@ class RulesPage extends Component {
     var tableHeader = ["Id", "Nombre", "Lenguaje", "Cuerpo", "Activa"];
     const {ruleChanges} = this.state;
     var changesTableHeader = ["Id", "Nombre", "Cuerpo", "Activa", "Razón", "Info de usuario"];
+
+    var exampleFact = {     "type": "pasajero",     "saldo": 15,    "email": "florencia@gmail.com",     "kmRecorridos": 2,    "costoTotal": 0,    "dia": "miercoles", "hora": "15:20:58",     "viajesHoy": 5,     "primerViaje": true,  };
+    exampleFact = JSON.stringify(exampleFact);
+
+    var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
+
+    if (!isLoggedIn) {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    }
 
     return (
       <div id="wrapper">
@@ -150,7 +173,7 @@ class RulesPage extends Component {
               <CollapseButton name="Agregar Regla">
                 <br/>
                 <form onSubmit={this.addRule.bind(this)}>
-                  <label>Nombre: <input type="text" ref="name" class="inputhover"/></label>
+                  <label>Nombre: <input type="text" ref="name"/></label>
                   <label>Condición: <input type="text" ref="condition" /></label>
                   <label>Consecuencia: <input type="text" ref="consequence" /></label>
                   <label>Prioridad: <input type="text" ref="priority" /></label>
@@ -190,9 +213,14 @@ class RulesPage extends Component {
             <br/><br/><br/>
             <h3>Correr una regla</h3>
             <form onSubmit={this.runRule.bind(this)}>
+              <label>EJEMPLO BORRAR DSP: <input disabled type="text" value="50ARSMinimo"/></label>
               <label>Nombre: <input type="text" ref="name" /></label>
-              <label>Fact: <input type="text" ref="fact" /></label>
+              <label>Language: <input type="text" ref="language" /></label>
+              <label>EJEMPLO BORRAR DSP: <input disabled type="text" value={exampleFact}/></label>
+              <label>Fact: <textarea type="text" ref="fact" /></label>
               <center><button type="submit">Correr regla</button></center>
+              <br/>
+              <textarea id="noter-text-area" name="textarea" ref="textarea"></textarea>
             </form>
             <br/><br/><br/>
           </div>

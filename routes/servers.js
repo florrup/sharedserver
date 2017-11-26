@@ -16,6 +16,12 @@ var api = require('./api');
 
 // CREATE TABLE servers(id VARCHAR(10) PRIMARY KEY, _ref VARCHAR(40), createdBy INT, createdTime VARCHAR(40), name VARCHAR(40), lastConnection INT);
 
+router.get('/reportActualState', function(request, response) {
+	var jsonInResponse = Verify.reportActualState()
+	
+	return response.status(200).json(jsonInResponse);
+
+})
 /**
  * Test method to empty the servers database and create a dummy app server in order to make further tests
  * This method is available only when the ENVIRONMENT is set as 'development'

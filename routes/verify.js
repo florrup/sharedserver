@@ -74,6 +74,8 @@ exports.reportActualState = function(){
 	if (typeof validTokens === "undefined") {
 		validTokens = new Map();
 	}
+
+	console.log("Size of validTokens Map is" + validTokens.size)
 	
 	// var validServerIds = []; // userId of servers with valid tokens
 	var validServers = [];

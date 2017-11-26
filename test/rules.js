@@ -476,8 +476,8 @@ describe('Rules', function()  {
 							.send(rule)
 							.end((err, res) => {
 								res.should.have.status(201);
-
-								var fact = { // coincide con el fact de rulesEngine.js
+								// coincide con el fact de rulesEngine.js
+								var fact = { 
 									language: "asdf",
 									blob: {
 										"type": "pasajero",
@@ -490,7 +490,7 @@ describe('Rules', function()  {
 									    "viajesHoy": 5,
 									    "primerViaje": true
 									}
-								};
+								}
 								chai.request(baseUrl)
 								.post('/rules/' + blob.name + '/run/')
 								.send(fact)
