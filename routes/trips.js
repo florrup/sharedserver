@@ -49,6 +49,7 @@ var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script eve
 		// Proccess payments
 		var rejectedPayments = [];
 		var rejectedPaymentsData = [];
+		console.log('Processing Pending payments... a total of '+paymentsToBeProccessed.length+' previously rejected payments are being procesed again.');
 		paymentsToBeProccessed.forEach(function(payment) {
 			proccessedPayments = proccessedPayments + 1;
 			const optionsPayment = {
@@ -90,49 +91,21 @@ var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script eve
 						.then ( updatedUser => {
 							console.log('Updated balance in user for rejected transaction.');
 							console.log('User ID: '+ payment.userid + ' has now balance = ' + balanceToUpdate);
+							
+							PendingPayment.find({
+								pendingtransactionid: payment.pendingtransactionid
+							})
+							.then( pendingPaymentFulfilled => {
+								console.log('Fulfilled payment deleted from local pending payments database.');
+								pendingPaymentFulfilled.destroy({force: true});
+							});
 						});
 					});
 					
 				})
 				.catch (function(reason) {
 					console.log('Pending payment was rejected again, it will be saved for further processing...');
-					
-					var localTransaction = {
-						id: payment.originaltransactionid,
-						_ref: payment._ref,
-						remotetransactionid: '',
-						userid: payment.userid,
-						tripid: payment.tripid,
-						timestamp: payment.timestamp,
-						costcurrency: payment.costcurrency,
-						costvalue: payment.costvalue,
-						description: payment.description
-					};
-					
-					var paymentData = {
-						paymethod: payment.paymethod,
-						ccvv: '',
-						expiration_month: payment.expiration_month,
-						expiration_year: payment.expiration_year,
-						number: payment.number,
-						type: payment.type
-					};
-					rejectedPayments.push(localTransaction);
-					rejectedPaymentsData.push(paymentData);
 				});
-		});
-		
-		// We clean the pending payments and save again all the rejected payments (failed again after being in this list)...
-		clearPendingPaymentsTable()
-		.then( function(fulfilled){
-			var failedAgain = 0;
-			for (var i=0; i<rejectedPayments.length; i++) {
-				saveUnfulfilledPaymentData(rejectedPayments[i], rejectedPaymentsData[i]);
-				failedAgain = failedAgain + 1;
-			}
-			console.log('Finished to process rejected payments again.');
-			console.log(proccessedPayments + ' payments were proccessed in total');
-			console.log(failedAgain + ' payments failed again to be proccessed');
 		});
 		
 	})
