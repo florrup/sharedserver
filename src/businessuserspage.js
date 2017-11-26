@@ -97,7 +97,7 @@ class BusinessUsersPage extends Component {
 
   render() {
     const {businesspeople} = this.state;
-    var tableHeader = ["Id", "Username", "Password", "Name", "Surname", "Roles"];
+    var tableHeader = ["Id", "Username", "Password", "Nombre", "Apellido", "Roles"];
 
     return (
       <div id="wrapper">
@@ -107,44 +107,42 @@ class BusinessUsersPage extends Component {
 
             <Header title={GlobalStrings.headerTitle} link="/"/>
 
-            <Banner title="BusinessUsersPage" subtitle="A free and fully responsive site template"
-            content="Hello, BusinessUsers"/>
+            <Banner title="Usuarios de negocio" subtitle="Usuarios encargados de la administración de la aplicación"/>
             <BusinessUserList header={tableHeader} businesspeople={businesspeople} />
             <br/>
-            <div>{this.state.message}</div>
-            <br/>
-            <CollapseButton name="Add Businessuser">
+            <CollapseButton name="Agregar Usuario">
               <br/>
               <form onSubmit={this.addBusinessUser.bind(this)}>
                 <label>Username: <input type="text" ref="username" /></label>
                 <label>Password: <input type="text" ref="password" /></label>
-                <label>Name: <input type="text" ref="name" /></label>
-                <label>Surname: <input type="text" ref="surname" /></label>
+                <label>Nombre: <input type="text" ref="name" /></label>
+                <label>Apellido: <input type="text" ref="surname" /></label>
                 <label>Roles: <input type="text" ref="roles" /></label>
-                <center><button type="submit">Add new Business User</button></center>
+                <center><button type="submit">Agregar nuevo Usuario</button></center>
               </form> 
             </CollapseButton>
             <br/><br/>
-            <CollapseButton name="Delete Businessuser">
+            <CollapseButton name="Borrar Usuario">
               <br/>
               <form onSubmit={this.deleteBusinessUser.bind(this)}>
-                <label>BusinessUser ID: <input type="text" ref="id" /></label>
-                <center><button type="submit">Delete Business User</button></center>
+                <label>ID del Usuario: <input type="text" ref="id" /></label>
+                <center><button type="submit">Borrar Usuario</button></center>
               </form>
             </CollapseButton>
             <br/><br/>
-            <CollapseButton name="Modify Businessuser">
+            <CollapseButton name="Modificar Usuario">
               <br/>
               <form onSubmit={this.modifyBusinessUser.bind(this)}>
                 <label>Id: <input type="text" ref="id" /></label>
                 <label>Username: <input type="text" ref="username" /></label>
                 <label>Password: <input type="text" ref="password" /></label>
-                <label>Name: <input type="text" ref="name" /></label>
-                <label>Surname: <input type="text" ref="surname" /></label>
+                <label>Nombre: <input type="text" ref="name" /></label>
+                <label>Apellido: <input type="text" ref="surname" /></label>
                 <label>Roles: <input type="text" ref="roles" /></label>
-                <center><button type="submit">Modify Business User</button></center>
+                <center><button type="submit">Modificar Usuario</button></center>
               </form> 
             </CollapseButton>
+            <br/><br/><br/>
           </div>
         </div>
 

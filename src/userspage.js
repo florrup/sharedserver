@@ -41,7 +41,7 @@ class UsersPage extends Component {
 
   render() {
     const {people} = this.state;
-    var tableHeader = ["Id", "Username", "Type", "First Name", "Last Name", "Email", "Country", "Birthdate"];
+    var tableHeader = ["Id", "Username", "Tipo", "Nombre", "Apellido", "Email", "País", "Cumpleaños"];
   
     let filteredUsers = this.state.people.filter(
       (user) => {
@@ -55,11 +55,10 @@ class UsersPage extends Component {
           <div className="inner">
             <Header title={GlobalStrings.headerTitle} link="/"/>
 
-            <Banner title="UsersPage" subtitle="A free and fully responsive site template"
-            content="Hello, Users"/>
+            <Banner title="Usuarios de aplicación" subtitle="Usuarios que utilizan Llevame!"/>
             <UserList header={tableHeader} people={filteredUsers} />
             <label>
-              Filter by username: 
+              Filtrar por Username: 
               <input type="text"
                 value={this.state.search}
                 onChange={this.updateSearch.bind(this)} />
