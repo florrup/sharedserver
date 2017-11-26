@@ -68,6 +68,8 @@ exports.reportActualState = function(){
 	if (typeof validTokens === "undefined") {
 		validTokens = new Map();
 	}
+
+	console.log("Size of validTokens Map is" + validTokens.size)
 	
 	var jsonInResponse = {
 		'usersWithAuthorizedTokens': JSON.stringify(validTokens), // this structure is a map: key=username, value=token.

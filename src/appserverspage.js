@@ -2,7 +2,7 @@ import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 
-import GlobalStrings from './components/GlobalStrings'
+import GlobalStrings from './components/GlobalStrings';
 
 import { Footer, Menu, Header, Banner, GeneralStats, ServerList } from './components';
 
@@ -26,7 +26,6 @@ class AppServersPage extends Component {
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);
-      //console.log('BusinessUsers' + response.data.businessUser);
       this.setState( { servers: response.data } )
     });
   }
