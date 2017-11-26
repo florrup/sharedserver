@@ -28,6 +28,13 @@ class BusinessUsersPage extends Component {
       //console.log('Metadata' + response.data.metadata);
       //console.log('BusinessUsers' + response.data.businessUser);
       this.setState( { businesspeople: response.data.businessUser } )
+    })
+    .catch(function (error) {
+
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+
     });
   }
 
@@ -52,6 +59,12 @@ class BusinessUsersPage extends Component {
     return axios.post('http://localhost:5000/api/business-users', businessUserToPost, axiosHeader)
     .then((response) => {
       this.getBusinessPeople();  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 400) {
+        console.log(error.response.data.message);
+        alert(error.response.data.message);
+      }
     });
   }
 
@@ -65,6 +78,11 @@ class BusinessUsersPage extends Component {
     return axios.delete('http://localhost:5000/api/business-users/' + this.refs.id.value, axiosHeader) 
     .then((response) => {
       this.getBusinessPeople();  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 404) {
+        alert(error.response.data.message);
+      }
     });
   }
 
@@ -88,6 +106,15 @@ class BusinessUsersPage extends Component {
     return axios.put('http://localhost:5000/api/business-users/' + this.refs.id.value, businessUserToModify, axiosHeader) 
     .then((response) => {
       this.getBusinessPeople();  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 400) {
+        alert(error.response.data.message);
+      }
+
+      if (error.response.request.status == 404) {
+        alert(error.response.data.message);
+      }
     });
   }
 
@@ -123,7 +150,7 @@ class BusinessUsersPage extends Component {
                 <label>Password: <input type="text" ref="password" /></label>
                 <label>Nombre: <input type="text" ref="name" /></label>
                 <label>Apellido: <input type="text" ref="surname" /></label>
-                <label>Roles: <input type="text" ref="roles" /></label>
+                <label>Roles: <i>(separados por coma)</i> <input type="text" ref="roles" /></label>
                 <center><button type="submit">Agregar nuevo Usuario</button></center>
               </form> 
             </CollapseButton>
@@ -144,7 +171,7 @@ class BusinessUsersPage extends Component {
                 <label>Password: <input type="text" ref="password" /></label>
                 <label>Nombre: <input type="text" ref="name" /></label>
                 <label>Apellido: <input type="text" ref="surname" /></label>
-                <label>Roles: <input type="text" ref="roles" /></label>
+                <label>Roles: <i>(separados por coma)</i> <input type="text" ref="roles" /></label>
                 <center><button type="submit">Modificar Usuario</button></center>
               </form> 
             </CollapseButton>

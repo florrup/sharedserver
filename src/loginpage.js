@@ -33,8 +33,11 @@ class Login extends React.Component {
   }
 
   handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.username + ' with password' + this.state.password);
-    this.getToken();
+    alert('A name was submitted: ' + this.state.username + ' with password' + this.state.password);    
+    this.getToken()
+    .then(() => {
+      window.location.replace("/"); // if he's not logged in, redirect to homepage
+    });
     event.preventDefault();
   }
 
@@ -64,8 +67,8 @@ class Login extends React.Component {
 
               <Header title={GlobalStrings.headerTitle} link="/"/>
 
-              <Banner title="LoginPage" subtitle="A free and fully responsive site template"
-              content="Hello, log in"/>
+              <Banner title="Login" subtitle="Bienvenido a Llevame!"
+              content="¡Hola! Ingresa tu usuario y contraseña"/>
 
               <form onSubmit={this.handleSubmit}>
                 <label>
