@@ -82,12 +82,11 @@ router.get('/initAndWriteDummyServer', function(request, response) {
  *
  */
 router.get('/activeServers', Verify.verifyToken, Verify.verifyManagerOrAdminRole, function(request, response) {
-		var activeServersPromise = Verify.reportActualState()
-			.then (activeServers => {
-				console.log(activeServers);
-				return response.status(200).json(activeServers);
-			});
-		
+	var activeServersPromise = Verify.reportActualState()
+	.then (activeServers => {
+		console.log(activeServers);
+		return response.status(200).json(activeServers);
+	});
 });
 
 /**
@@ -223,6 +222,19 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error at PING: username not found. Error: "+error});
     });
+});
+
+/**
+ *  Hace que un server en estado activo pase a estar inactivo
+ *
+ */
+router.post('/deactivateServer', Verify.verifyToken, Verify.verifyManagerOrAdminRole, function(request, response) {
+	console.log("Deactivate adentro")
+	var deactivateServerPromise = Verify.invalidateActualValidTokenFromUser(request.body.name);
+	// then
+		console.log("Llego aca")
+		return response.status(200).json({message:"Server was deactivated"});
+
 });
 
 /**

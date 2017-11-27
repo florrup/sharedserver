@@ -164,26 +164,26 @@ class RulesPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title={GlobalStrings.headerTitle} link="/"/>
+            <Header title={GlobalStrings.headerTitle} link="/"/>
 
-              <Banner title="Reglas de negocio" subtitle="Sistema de reglas para el cálculo del precio de un viaje"/>
-              <h3>Listado de reglas</h3>
-              <RulesList header={tableHeader} rules={rules} />
+            <Banner title="Reglas de negocio" subtitle="Sistema de reglas para el cálculo del precio de un viaje"/>
+            <h3>Listado de reglas</h3>
+            <RulesList header={tableHeader} rules={rules} />
+            <br/>
+            <CollapseButton name="Agregar Regla">
               <br/>
-              <CollapseButton name="Agregar Regla">
-                <br/>
-                <form onSubmit={this.addRule.bind(this)}>
-                  <label>Nombre: <input type="text" ref="name"/></label>
-                  <label>Condición: <input type="text" ref="condition" /></label>
-                  <label>Consecuencia: <input type="text" ref="consequence" /></label>
-                  <label>Prioridad: <input type="text" ref="priority" /></label>
-                  <label>Lenguaje: <input type="text" ref="language" /></label>
-                  <label>Activa: <input type="text" ref="active" /></label>
-                  <center><button type="submit">Agregar nueva Regla</button></center>
-                </form> 
-              </CollapseButton>
-              <br/><br/>
-              <CollapseButton name="Borrar Regla">
+              <form onSubmit={this.addRule.bind(this)}>
+                <label>Nombre: <input type="text" ref="name"/></label>
+                <label>Condición: <input type="text" ref="condition" /></label>
+                <label>Consecuencia: <input type="text" ref="consequence" /></label>
+                <label>Prioridad: <input type="text" ref="priority" /></label>
+                <label>Lenguaje: <input type="text" ref="language" /></label>
+                <label>Activa: <input type="text" ref="active" /></label>
+                <center><button type="submit">Agregar nueva Regla</button></center>
+              </form> 
+            </CollapseButton>
+            <br/><br/>
+            <CollapseButton name="Borrar Regla">
               <br/>
               <form onSubmit={this.deleteRule.bind(this)}>
                 <label>Nombre: <input type="text" ref="name" /></label>

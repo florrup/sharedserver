@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import GlobalStrings from './components/GlobalStrings';
 
-import { Footer, Menu, Header, Banner, GeneralStats, ServerList } from './components';
+import { Footer, Menu, Header, Banner, GeneralStats, ServerList, CollapseButton } from './components';
 
 class AppServersPage extends Component {
 
@@ -29,13 +29,30 @@ class AppServersPage extends Component {
     });
   }
 
+  /* Deactivates an active server */
+  deactivateServer(event) {
+    event.preventDefault();
+    console.log(this.refs.name.value);
+
+    var serverToDeactivate = {
+      name: this.refs.name.value
+    }
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    return axios.post('http://localhost:5000/api/servers/deactivateServer', serverToDeactivate, axiosHeader) 
+    .then((response) => {
+      this.getServers();  
+    });
+  }
+
   componentDidMount() {
     this.getServers();
   }
 
   render() {
     const {servers} = this.state;
-    var tableHeader = ["Id", "Username", "Password", "Created By", "Created Time", "Name", "Last Connection"];
+    var tableHeader = ["Id", "Username", "Password", "Created By", "Created Time", "Nombre", "Última conexión"];
     
     var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
 
@@ -50,11 +67,19 @@ class AppServersPage extends Component {
         <div id="main">
           <div className="inner">
 
-              <Header title={GlobalStrings.headerTitle} link="/"/>
+            <Header title={GlobalStrings.headerTitle} link="/"/>
 
-              <Banner title="AppServersPage" subtitle="A free and fully responsive site template"
-              content="Hello, AppServersPage"/>
-              <ServerList header={tableHeader} servers={servers} />
+            <Banner title="Application Servers" subtitle="Administración de Application Servers"/>
+            <h3>Application Servers Autorizados</h3>
+            <ServerList header={tableHeader} servers={servers} />
+            <br/><br/>
+            <CollapseButton name="Desactivar Appserver">
+              <br/>
+              <form onSubmit={this.deactivateServer.bind(this)}>
+                <label>Nombre: <input type="text" ref="name" /></label>
+                <center><button type="submit">Desactivar Appserver</button></center>
+              </form>
+            </CollapseButton>
           </div>
         </div>
 
