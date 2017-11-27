@@ -21,16 +21,16 @@ export default (props) => {
           </tr>
           {
             servers.map((s) => {
-              console.log(s)
+              console.log(s);
               return (
                 <tr key={s.username}>
                   <td><strong>{s.id}</strong></td>
                   <td><strong>{s.username}</strong></td>
                   <td>{s.password}</td>
-                  <td>{s.createdBy}</td>
-                  <td>{s.createdTime}</td>
+                  <td>{s.created_by}</td>
+                  <td>{s.created_time}</td>
                   <td>{s.name}</td>
-                  <td>{s.lastConnection}</td>
+                  <td>{s.last_connection}</td>
                 </tr>
               )
             })

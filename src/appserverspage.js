@@ -22,11 +22,10 @@ class AppServersPage extends Component {
   getServers() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get('http://localhost:5000/api/servers', axiosHeader)
+    return axios.get('http://localhost:5000/api/servers/activeServers', axiosHeader)
     .then((response) => {
-      console.log(response.data)
-      //console.log('Metadata' + response.data.metadata);
-      this.setState( { servers: response.data } )
+      console.log(response);
+      this.setState( { servers: response.data } ); // array with active servers
     });
   }
 

@@ -33,7 +33,7 @@ class Login extends React.Component {
   }
 
   handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.username + ' with password' + this.state.password);    
+    alert('A name was submitted: ' + this.state.username + ' with password ' + this.state.password);    
     this.getToken()
     .then(() => {
       window.location.replace("/"); // if he's not logged in, redirect to homepage

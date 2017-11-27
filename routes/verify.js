@@ -118,10 +118,10 @@ exports.reportActualState = function(){
 								id: serverFound.id,
 								username: serverFound.username,
 								password: serverFound.password,
-								created_by: serverFound.createdBy,
-								created_time: serverFound.createdTime,
+								created_by: serverFound.createdby,
+								created_time: serverFound.createdtime,
 								name: serverFound.name,
-								last_connection: serverFound.lastConnection
+								last_connection: serverFound.lastconnection
 							};
 							console.log('added server to JSON: '+serverJSON);
 							validServers.push(serverJSON);
