@@ -8,6 +8,7 @@ import BusinessUserList from './BusinessUserList';
 import ServerList from './ServerList';
 import RulesList from './RulesList';
 import RuleChangesList from './RuleChangesList';
+import TripsList from './TripsList';
 import CollapseButton from './CollapseButton';
 
 export {
@@ -21,5 +22,6 @@ export {
 	CollapseButton,
 	ServerList,
 	RulesList,
-	RuleChangesList
+	RuleChangesList,
+	TripsList
 }

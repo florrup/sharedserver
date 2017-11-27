@@ -18,6 +18,7 @@ export default (props) => {
         <li><a href="/appservers">Application Servers</a></li>
         <li><a href="#">Reportes y Estadísticas</a></li>
         <li><a href="/rules">Reglas de Negocio</a></li>
+        <li><a href="/trips">Viajes</a></li>
         <br/><br/>
         <li><a href="/login">Login</a></li>
         <li><a href="/logout">Logout</a></li>

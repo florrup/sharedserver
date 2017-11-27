@@ -53,6 +53,10 @@ app.get('/logout', function(request, response) {
   response.render('pages/logout');
 });
 
+app.get('/trips', function(request, response) {
+  response.render('pages/trips');
+});
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

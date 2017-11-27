@@ -10,7 +10,8 @@ module.exports = {
 		appserverpage: './src/appserverspage.js',
 		loginpage: './src/loginpage.js',
 		rulespage: './src/rulespage.js',
-		logoutpage: './src/logoutpage.js'
+		logoutpage: './src/logoutpage.js',
+		tripspage: './src/tripspage.js'
 	},
 	output: {
 		path: path.join(__dirname, 'public'),
