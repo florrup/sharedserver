@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.INTEGER,
       primaryKey: true,
       unique: true,
-	  autoIncrement: true
+	    autoIncrement: true
     },
     username: { // field automatically added otherwise by passport-local-sequelize
       type: Sequelize.STRING,

@@ -46,6 +46,28 @@ class AppServersPage extends Component {
     });
   }
 
+  /* Adds a new appserver to the database */
+  addServer(event) {
+    event.preventDefault();
+    console.log(this.refs.name.value);
+
+    var newServer = {
+      createdBy: this.refs.createdBy.value,
+      createdTime: (new Date).getTime(),
+      name: this.refs.name.value,
+      username: this.refs.username.value,
+      password: this.refs.password.value
+    }
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    return axios.post('http://localhost:5000/api/servers', newServer, axiosHeader)
+    .then((response) => {
+      this.refs.textarea.value = JSON.stringify(response.data.server.token);  
+      this.getServers();
+    });
+  }
+
   componentDidMount() {
     this.getServers();
   }
@@ -80,6 +102,20 @@ class AppServersPage extends Component {
                 <center><button type="submit">Desactivar Appserver</button></center>
               </form>
             </CollapseButton>
+            <br/><br/>
+            <CollapseButton name="Agregar Appserver">
+              <br/>
+              <form onSubmit={this.addServer.bind(this)}>
+                <label>Nombre: <input type="text" ref="name"/></label>
+                <label>Username: <input type="text" ref="username" /></label>
+                <label>Password: <input type="text" ref="password" /></label>
+                <label>Creado por <i>(campo numérico)</i>: <input type="text" ref="createdBy" /></label>
+                <center><button type="submit">Agregar nuevo Appserver</button></center>
+                <br/>
+                <textarea id="noter-text-area" name="textarea" ref="textarea"></textarea>
+              </form> 
+            </CollapseButton>
+            <br/><br/>
           </div>
         </div>
 

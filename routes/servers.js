@@ -112,19 +112,19 @@ router.get('/', Verify.verifyToken, Verify.verifyUserRole, function(request, res
  */
 router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request, response) {
 	// si hay algún parámetro faltante
-	if (/*api.isEmpty(request.body.id) || */api.isEmpty(request.body._ref) || api.isEmpty(request.body.createdBy)
+	if (/*api.isEmpty(request.body.id) || api.isEmpty(request.body._ref) ||*/ api.isEmpty(request.body.createdBy)
 		|| api.isEmpty(request.body.createdTime) || api.isEmpty(request.body.name)
-		|| api.isEmpty(request.body.lastConnection)) {
+		/*|| api.isEmpty(request.body.lastConnection) */ ) {
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
 
 	Server.create({
 		// id: request.body.id,
-		_ref: request.body._ref,
+		_ref: '',
 		createdby: request.body.createdBy,
 		createdtime: request.body.createdTime,
 		name: request.body.name,
-		lastconnection: request.body.lastConnection,
+		lastconnection: 0,
 		username: request.body.username,
 		password: request.body.password
 	}).then(server => {
