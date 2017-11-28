@@ -30,7 +30,9 @@ class RulesPage extends Component {
       this.setState( { rules: response.data.rules } )
     })    
     .catch(function (error) {
-      console.log(error);
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 
@@ -47,6 +49,11 @@ class RulesPage extends Component {
       this.setState( { ruleChanges: [] } );
       this.setState( { ruleChanges: response.data.commits } );
     })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+    });
   }
 
   /* Adds a new rule to the database */
@@ -73,6 +80,14 @@ class RulesPage extends Component {
     return axios.post('http://localhost:5000/api/rules', ruleToPost, axiosHeader)
     .then((response) => {
       this.getRules();  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 400) {
+        alert(error.response.data.message);
+      }
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 
@@ -86,6 +101,14 @@ class RulesPage extends Component {
     return axios.delete('http://localhost:5000/api/rules/' + this.refs.name.value, axiosHeader) 
     .then((response) => {
       this.getRules();  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+      if (error.response.request.status == 404) {
+        alert(error.response.data.message);
+      }
     });
   }
 
@@ -112,6 +135,17 @@ class RulesPage extends Component {
     return axios.put('http://localhost:5000/api/rules/' + this.refs.name.value, ruleToModify, axiosHeader) 
     .then((response) => {
       this.getRules();  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 400) {
+        alert(error.response.data.message);
+      }
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+      if (error.response.request.status == 404) {
+        alert(error.response.data.message);
+      }
     });
   }
 
@@ -137,6 +171,46 @@ class RulesPage extends Component {
     .then((response) => {
       console.log(response);
       this.refs.textarea.value = JSON.stringify(response.data.facts.blob);  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+    });
+  }
+
+  /* Runs every rule from the database */
+  runRuleSet(event) {
+    event.preventDefault();
+
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+
+    var fact = this.refs.factSet.value;
+    var stringified = JSON.stringify(fact);
+    console.log('string \n\n' + stringified);
+    var stringifiedFact = fact.replace('\\','');
+    console.log('stringifiedFact \n\n' + stringifiedFact);
+
+    var JSONfact = {
+      facts: {
+        language: '',
+        blob: JSON.parse(stringifiedFact)
+      }
+    }
+    
+    return axios.post('http://localhost:5000/api/rules/run', JSONfact, axiosHeader) 
+    .then((response) => {
+      console.log(response);
+      this.refs.rulesettextarea.value = JSON.stringify(response.data.facts.blob);  
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+      if (error.response.request.status == 400) {
+        alert(error.response.data.message);
+      }
     });
   }
 
@@ -221,6 +295,16 @@ class RulesPage extends Component {
               <center><button type="submit">Correr regla</button></center>
               <br/>
               <textarea id="noter-text-area" name="textarea" ref="textarea"></textarea>
+            </form>
+            <br/><br/><br/>
+
+            <h3>Ejecutar un set de reglas</h3>
+            <form onSubmit={this.runRuleSet.bind(this)}>
+              <label>EJEMPLO BORRAR DSP: <input disabled type="text" value={exampleFact}/></label>
+              <label>Fact: <textarea type="text" ref="factSet" /></label>
+              <center><button type="submit">Correr set de reglas</button></center>
+              <br/>
+              <textarea id="noter-text-area" name="rulesettextarea" ref="rulesettextarea"></textarea>
             </form>
             <br/><br/><br/>
           </div>
