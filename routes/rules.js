@@ -292,21 +292,26 @@ router.post('/run', Verify.verifyToken, Verify.verifyManagerRole, function(reque
 		}
 		var rulesResult;
 		RulesEngine.runEngine(rulesToEngine, fact)
-			.then(data => {rulesResult = data})
-			.catch( function (error) {
-				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
-			});
+		.then(data => {
+			console.log("\n\n\n\nThe rule has run " + data.costoTotal);
+			rulesResult = data
+			
+			console.log("RulesResult is" + rulesResult);
 
-		var jsonInResponse = {
-		  metadata: {
-			version: api.apiVersion 
-		  },
-		  facts: {
-			language: request.body.facts.language, 
-			blob: fact			// TODO este debería ser el fact devuelto por el runEngine
-		  }
-		};
-		return response.status(200).json(jsonInResponse);
+			var jsonInResponse = {
+			  metadata: {
+				version: api.apiVersion 
+			  },
+			  facts: {
+				language: request.body.facts.language, 
+				blob: rulesResult			// TODO este debería ser el fact devuelto por el runEngine
+			  }
+			};
+			return response.status(200).json(jsonInResponse);
+		})
+		.catch( function (error) {
+			return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
+		});
 	}).catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);
