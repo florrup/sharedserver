@@ -61,10 +61,9 @@ class Logout extends React.Component {
         <div id="main">
           <div className="inner">
 
-              <Header title={GlobalStrings.headerTitle} link="/"/>
+            <Header title={GlobalStrings.headerTitle} link="/"/>
 
-              <Banner title="LogoutPage" subtitle="A free and fully responsive site template"
-              content="Hello, log out"/>
+            <Banner title="Logout" subtitle="¡Hasta la próxima!"/>
 
             <form onSubmit={this.runLogout.bind(this)}>
               <center><button type="submit">Logout</button></center>

@@ -65,6 +65,9 @@ class BusinessUsersPage extends Component {
         console.log(error.response.data.message);
         alert(error.response.data.message);
       }
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 
@@ -80,6 +83,9 @@ class BusinessUsersPage extends Component {
       this.getBusinessPeople();  
     })
     .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
       if (error.response.request.status == 404) {
         alert(error.response.data.message);
       }
@@ -111,7 +117,9 @@ class BusinessUsersPage extends Component {
       if (error.response.request.status == 400) {
         alert(error.response.data.message);
       }
-
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
       if (error.response.request.status == 404) {
         alert(error.response.data.message);
       }

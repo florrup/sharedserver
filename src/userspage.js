@@ -32,6 +32,11 @@ class UsersPage extends Component {
       //console.log('Metadata' + response.data.metadata);
       //console.log('Users' + response.data.users);
       this.setState( { people: response.data.users } )
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 

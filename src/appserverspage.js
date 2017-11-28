@@ -26,6 +26,11 @@ class AppServersPage extends Component {
     .then((response) => {
       console.log(response);
       this.setState( { servers: response.data } ); // array with active servers
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 
@@ -43,6 +48,11 @@ class AppServersPage extends Component {
     return axios.post('http://localhost:5000/api/servers/deactivateServer', serverToDeactivate, axiosHeader) 
     .then((response) => {
       this.getServers();  
+    })
+    .catch(function (error){
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 
@@ -65,6 +75,14 @@ class AppServersPage extends Component {
     .then((response) => {
       this.refs.textarea.value = JSON.stringify(response.data.server.token);  
       this.getServers();
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 400) {
+        alert(error.response.data.message);
+      }
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 

@@ -25,6 +25,11 @@ class TripsPage extends Component {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);
       this.setState( { trips: response.data.trips } )
+    })
+    .catch(function (error){
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
     });
   }
 
