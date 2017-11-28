@@ -64,6 +64,7 @@ router.get('/initAndWriteDummyUser', function(request, response) {
 					};
 					return response.status(200).json(dummyUserToAnswer);
 				})
+				/* istanbul ignore next  */
 				.catch(error => {
 					return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
 					// mhhh, wth!
@@ -81,7 +82,9 @@ router.get('/dropUserTable', function(request, response) {
   /* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') { */
     User.sync({force: true}).then(() => {
       return response.status(200).json({});
-    }).catch(function (error) {
+    })
+	/* istanbul ignore next  */
+	.catch(function (error) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
     });
@@ -94,7 +97,9 @@ router.get('/dropCarTable', function(request, response) {
   /* if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') { */
     Car.sync({force: true}).then(() => {
       return response.status(200).json({});
-    }).catch(function (error) {
+    })
+	/* istanbul ignore next  */
+	.catch(function (error) {
       /* istanbul ignore next  */
       return response.status(500).json({code: 0, message: "Unexpected error"});
     });
@@ -203,6 +208,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		};
 		return response.status(201).json(jsonInResponse);
 	  })
+	  /* istanbul ignore next  */
 	.catch(function (error) {
 			return response.status(409).json({code: 0, message: "Conflict: an user already exists with that username ("+request.body.username+")"});
 	});
@@ -248,6 +254,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		};
 		return response.status(201).json(jsonInResponse);
 	})
+	/* istanbul ignore next  */
 	.catch(function (error) {
 			return response.status(409).json({code: 0, message: "Conflict: an user already exists with that Facebook User ID ("+request.body.fb.userId+")"});
 	});
@@ -295,6 +302,7 @@ router.post('/validate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 			};
 			return response.status(200).json(jsonInResponse);
 		})
+		/* istanbul ignore next  */
 		.catch(function (error) {
 			return response.status(500).json({code: 0, message: "Unexpected error"});
 		});
@@ -377,7 +385,9 @@ router.delete('/:userId', Verify.verifyToken, Verify.verifyManagerOrAppRole, fun
       return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
     }
     return response.status(204).json({});
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -419,7 +429,9 @@ router.get('/:userId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
 		};
 
     return response.status(200).json(jsonInResponse);
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -511,7 +523,9 @@ router.put('/:userId', Verify.verifyToken, Verify.verifyAppRole, function(reques
       } else {
 		return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 	  }
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -585,7 +599,9 @@ router.get('/:userId/trips', Verify.verifyToken, Verify.verifyUserOrAppRole, fun
 				tripsArray.push(jsonTrip);
 			});
 			
-		}).catch(function (error) {
+		})
+		/* istanbul ignore next  */
+		.catch(function (error) {
 			return response.status(500).json({code: 0, message: "Unexpected error"});
 		});
 	/* istanbul ignore next */
@@ -661,13 +677,13 @@ router.get('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRo
 		if (!user){
 			return response.status(500).json({code: 0, message: "User does not exist, can't get its transactions"});
 		}
-		console.log('AAAAAAAAAAA');
+		// console.log('AAAAAAAAAAA');
 		Transaction.findAll({
 			where: {
 				userid: request.params.userId
 			}
 		}).then(transactions => {
-			console.log('BBBBBBBBBBBBBBb');
+			// console.log('BBBBBBBBBBBBBBb');
 			var arrayTransactions = [];
 			
 			transactions.forEach(function(item) {
@@ -696,6 +712,7 @@ router.get('/:userId/transactions', Verify.verifyToken, Verify.verifyUserOrAppRo
 			return response.status(500).json({code: 0, message: "Unexpected error"});
 		});*/
 	})
+	/* istanbul ignore next  */
 	.catch(function (error) {
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
@@ -782,7 +799,9 @@ router.get('/:userId/cars', Verify.verifyToken, Verify.verifyUserOrAppRole, func
       cars: carArray
     };
     return response.status(200).json(jsonInResponse); 
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });
@@ -817,7 +836,9 @@ router.post('/:userId/cars', Verify.verifyToken, Verify.verifyAppRole, function(
       }
     };
     return response.status(201).json(jsonInResponse);
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -838,7 +859,9 @@ router.delete('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyManagerOr
       return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
     }
     return response.status(204).json({});
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -871,7 +894,9 @@ router.get('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyUserOrAppRol
     } else {
       return response.status(404).json({code: 0, message: "Auto inexistente"});
     }
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     /* istanbul ignore next  */
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
@@ -917,7 +942,9 @@ router.put('/:userId/cars/:carId', Verify.verifyToken, Verify.verifyAppRole, fun
     } else {
       return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
     }
-  }).catch(function (error) {
+  })
+  /* istanbul ignore next  */
+  .catch(function (error) {
     return response.status(500).json({code: 0, message: "Unexpected error"});
   });
 });

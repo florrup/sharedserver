@@ -218,7 +218,9 @@ router.post('/ping', Verify.verifyToken, Verify.verifyAppRole, function(request,
 			/* istanbul ignore next  */
 			return response.status(500).json({code: 0, message: "Username does not exist"});
 		}
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error at PING: username not found. Error: "+error});
     });
@@ -281,7 +283,9 @@ router.put('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, function(
 		} else {
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
     });
@@ -301,7 +305,9 @@ router.delete('/:serverId', Verify.verifyToken, Verify.verifyManagerRole, functi
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
 		return response.status(204).json({});
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
   	});
@@ -334,7 +340,9 @@ router.get('/:serverId', Verify.verifyToken, Verify.verifyUserRole, function(req
 			}
 		};
 		return response.status(200).json(jsonInResponse);
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});

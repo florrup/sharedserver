@@ -1,7 +1,7 @@
 /**
  * Definition of main default rules for trip pricing
  **/
- 
+/* istanbul ignore next  */
  var defaultRules = [
 /**** Rule 1 (First for Passengers)****/
 {
@@ -94,7 +94,7 @@
 	"blob":{
 		"name": "50ARSMinimo",
 		"condition": "function(R) {R.when(this.type == 'pasajero' && this.costoTotal < 50);}",
-		"consequence": "function(R) {this.puedeViajar = true;this.reason = 'El costo minimo es de 50ARS';this.costoTotal = 50;console.log('Minimum cost rule proccessing...');R.stop();}",
+		"consequence": "function(R) {this.puedeViajar = true;this.reason = 'El costo minimo es de 50ARS';this.costoTotal = 50;this.minimumCost = 50;console.log('Minimum cost rule proccessing...');R.stop();}",
 		"priority": 1
 	},
 	"active": true

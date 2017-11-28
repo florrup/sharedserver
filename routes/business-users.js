@@ -40,6 +40,7 @@ router.get('/initAndWriteDummyBusinessUser', function(request, response) {
 			.then(() => {
 				return response.status(200).json(dummyBusinessUser);
 			})
+			/* istanbul ignore next  */
 			.catch(error => {
 				return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy user for testing."});
 				// mhhh, wth!
@@ -126,7 +127,9 @@ router.post('/', Verify.verifyToken, Verify.verifyAdminRole, function(request, r
 			}
 		};
 		return response.status(201).json(jsonInResponse);
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -164,7 +167,9 @@ router.get('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
 		} else {
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
@@ -205,6 +210,7 @@ router.put('/me', Verify.verifyToken, Verify.verifyUserRole, function(request, r
 				};
 				return response.status(200).json(jsonInResponse);
 			  })
+			  /* istanbul ignore next  */
 			  .catch(error => {
 			  	/* istanbul ignore next  */
 				return response.status(500).json({code: 0, message: "Unexpected error while trying to update business user by itself (/me)."});
@@ -230,7 +236,9 @@ router.delete('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, fu
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
 		return response.status(204).json({});
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
   	});
@@ -279,7 +287,9 @@ router.put('/:businessuserId', Verify.verifyToken, Verify.verifyAdminRole, funct
 		} else {
 			return response.status(404).json({code: 0, message: "No existe el recurso solicitado"});
 		}
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
@@ -313,7 +323,9 @@ router.get('/:businessuserId', Verify.verifyToken, Verify.verifyUserRole, functi
 			}
 		};
 		return response.status(200).json(jsonInResponse);
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
@@ -338,7 +350,9 @@ function clearBusinessUsersTable() {
 		  }
 		  resolve(true);
 		})
-	}).catch(function () {
+	})
+	/* istanbul ignore next  */
+	.catch(function () {
 		console.log("Promise Rejected");
 	});;
 }

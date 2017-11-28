@@ -107,12 +107,14 @@ router.get('/setDefaultRules', function (request, response) {
 					});
 					
 				})
+				/* istanbul ignore next  */
 				.catch(error => {
 					var error_message = "Unexpected error: "+error;
 					return response.status(500).json({code: 0, message: error_message});
 				});
 			
 		})
+		/* istanbul ignore next  */
 		.catch(error => {
 			var error_message = "Unexpected error: "+error;
 			return response.status(500).json({code: 0, message: error_message});
@@ -251,7 +253,9 @@ router.post('/', Verify.verifyToken, Verify.verifyManagerRole, function(request,
 				return response.status(201).json(jsonInResponse);
 			});
 		});
-	  }).catch(function (error) {
+	  })
+	  /* istanbul ignore next  */
+	  .catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -309,10 +313,13 @@ router.post('/run', Verify.verifyToken, Verify.verifyManagerRole, function(reque
 			};
 			return response.status(200).json(jsonInResponse);
 		})
+		/* istanbul ignore next  */
 		.catch( function (error) {
 			return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
 		});
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -367,12 +374,15 @@ router.delete('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function
 				userinfo: JSON.stringify(lastCommitJSON)
 			}).then(ruleChange => {
 				return response.status(204).json({});
-			}).catch(function (error) {
+			})
+			/* istanbul ignore next  */
+			.catch(function (error) {
 			/* istanbul ignore next  */
 			return response.status(500).json({code: 0, message: "Unexpected error. Couldn't delete the commit"});
 			});
 		});
 	})
+	/* istanbul ignore next  */
 	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -469,7 +479,9 @@ router.get('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
 				});
 			}
 		});
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);
 		return response.status(500).json({code: 0, message: "Unexpected error"});
@@ -556,7 +568,9 @@ router.put('/:ruleId', Verify.verifyToken, Verify.verifyManagerRole, function(re
 				});
 		  	});
 		});
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
@@ -605,6 +619,7 @@ router.post('/:ruleId/run', Verify.verifyToken, Verify.verifyManagerRole, functi
 			};
 			return response.status(200).json(jsonInResponse);
 		})
+		/* istanbul ignore next  */
 		.catch( function (error) {
 			return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
 		});
@@ -713,6 +728,7 @@ router.get('/:ruleId/commits/:commitId', Verify.verifyToken, Verify.verifyManage
 			return response.status(500).json({code: 0, message: "Unexpected error"});
 	    });
 	})
+	/* istanbul ignore next  */
 	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});

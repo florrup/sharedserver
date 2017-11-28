@@ -77,6 +77,7 @@ router.get('/', Verify.verifyToken, Verify.verifyUserOrAppRole, function(request
 					return response.status(500).json({code: 0, message: "Error while trying to get available payment methods."});
 				});*/
 		})
+	/* istanbul ignore next  */
 	.catch(function(reason) {
 		console.log('Error while trying to get available payment methods, could not get Payments API Token');
 		return response.status(500).json({code: 0, message: "Error while trying to get available payment methods."});

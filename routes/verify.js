@@ -24,8 +24,10 @@ var invalidatedTokens;
 **/
 var validTokens;
 
-// module.exports.validTokens;
-
+/**
+ * Clears tokens history (local method used for testing)
+ **/
+/* istanbul ignore next  */
 exports.clearHistory = function (){
 	if (typeof invalidatedTokens === "undefined") {
 		invalidatedTokens = new Map();
@@ -50,23 +52,7 @@ exports.getToken = function (payload) {
 	
     newToken = jwt.sign(payload, process.env.TOKEN_SECRET_KEY,{expiresIn: parseInt(process.env.TOKEN_LIFETIME_IN_SECONDS) /*3600*/});
 	
-	/*
-	if(validTokens.has(payload.username)){
-		var oldValidToken = validTokens.get(payload.username);
-		if (oldValidToken != newToken){
-			console.log('OLD TOKEN: ' +oldValidToken);
-			console.log('NEW TOKEN: ' + newToken);
-			
-			// ----------------------
-			// NOTE: this invalidation of old token cannot be made here because servers may create tokens for other servers and don't need their own token invalidated
-			// this.invalidateToken(oldValidToken); // invalidate old valid token
-			// ----------------------
-			validTokens.set(payload.username, newToken); // add new valid token
-		} else {
-			return newToken; // if old and new token are the same, leave the old token as valid
-		}
-	}
-	*/
+	/* istanbul ignore next  */
 	if(invalidatedTokens.has(payload.username)){
 		var index = invalidatedTokens.get(payload.username).indexOf(newToken);
 		if (index != -1){
@@ -256,7 +242,7 @@ exports.invalidateToken = function(token){
 				});
 			}
 			else {
-				console.log('INVALIDATING TOKEN: ' + token);
+				// console.log('INVALIDATING TOKEN: ' + token);
 				// invalidatedTokens.set(decoded.username, token);
 				if (invalidatedTokens.has(decoded.username)){
 					if (invalidatedTokens.get(decoded.username).indexOf(token) === -1 ) // we only add the token if the same token was not previously invalidated

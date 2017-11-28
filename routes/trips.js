@@ -103,13 +103,14 @@ var j = schedule.scheduleJob('15 * * * * *', function(){ // runs this script eve
 					});
 					
 				})
+				/* istanbul ignore next  */
 				.catch (function(reason) {
 					console.log('Pending payment was rejected again, it will be saved for further processing...');
 				});
 		});
 		
 	})
-	// Lets comment for now for more descriptive error messages ?
+	/* istanbul ignore next  */
 	.catch (function(reason) {
 		console.log('Error while trying to get available payment methods, could not get Payments API Token');
 	});
@@ -165,7 +166,9 @@ router.get('/initAndWriteDummyTrip', function(request, response) {
 		Trip.create(dummyTrip)
 		.then(() => {
 			return response.status(200).json(dummyTrip);
-			}).catch(error => {
+			})
+			/* istanbul ignore next  */
+			.catch(error => {
 			  	/* istanbul ignore next  */
 				return response.status(500).json({code: 0, message: "Unexpected error while trying to create new dummy trip for testing."});
 				// mhhh, wth!
@@ -273,7 +276,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 		||  api.isEmpty(request.body.trip.waitTime) || api.isEmpty(request.body.trip.travelTime) || api.isEmpty(request.body.trip.distance) || api.isEmpty(request.body.trip.route)
 		/*|| api.isEmpty(request.body.trip.cost.currency) || api.isEmpty(request.trip.cost.value)*/
 		|| api.isEmpty(request.body.paymethod.paymethod) || api.isEmpty(request.body.paymethod.parameters.ccvv)) {
-		
+		/* istanbul ignore next  */
 		return response.status(400).json({code: 0, message: "Incumplimiento de precondiciones (parámetros faltantes)"});
 	}
 	
@@ -416,9 +419,12 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 																						
 																						localTransactionPassenger.updateAttributes({
 																							remotetransactionid: passengerRemotePaymentId
-																						}).then(updatedLocalTransactionPassenger => {
+																						})
+																						.then(updatedLocalTransactionPassenger => {
 																							console.log('Remote payment ID updated for driver user: '+JSON.stringify(updatedLocalTransactionPassenger));
-																						}).catch (function(reason) {
+																						})
+																						/* istanbul ignore next  */
+																						.catch (function(reason) {
 																							console.log('Error saving locally remote payment ID for driver Payment ID is'+passengerRemotePaymentId);
 																						});
 																						
@@ -498,6 +504,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 																								}
 																								return response.status(201).json(jsonInResponse);
 																							})
+																							/* istanbul ignore next  */
 																							.catch (function(reason) {
 																								console.log('Error while trying to pay for the DRIVER');
 																								console.log('Saving Transactions INFO for further proccessing...');
@@ -507,6 +514,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 																								return response.status(500).json({code: 0, message: "Error while trying to pay to the DRIVER. PASSENGER was paid, driver payment data was saved for further proccessing"});
 																							});
 																				})
+																				/* istanbul ignore next  */
 																				.catch (function(reason) {
 																					console.log('Error while trying to pay for the PASSENGER');
 																					console.log('Saving Transactions INFO for further proccessing...');
@@ -519,6 +527,7 @@ router.post('/', Verify.verifyToken, Verify.verifyAppRole, function(request, res
 																					return response.status(500).json({code: 0, message: "Error while trying to pay to the PASSENGER. Payments to driver and from passenger will be proccessed later again."});
 																				});
 																			})
+																			/* istanbul ignore next  */
 																			.catch (function(reason) {
 																				console.log('Error while trying to get payments API Token');
 																				
@@ -593,6 +602,7 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 				// console.log('#################### Assigned costo por kilometro...??');
 				rulesResult = data;
 				pricePerKilometer = rulesResult.costoPorKilometro;
+				minimumPrice = rulesResult.minimumCost;
 				
 				console.log(rulesResult);
 				
@@ -613,6 +623,9 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 								
 								console.log('Costo por kilómetro traído de rules: ' + pricePerKilometer);
 								var valorEstimado = pricePerKilometer * tripDistanceKm ;
+								if (valorEstimado < minimumPrice){
+									valorEstimado = minimumPrice;
+								}
 								
 								var jsonInResponse = {
 									metadata: {
@@ -626,10 +639,12 @@ router.post('/estimate', Verify.verifyToken, Verify.verifyAppRole, function(requ
 								return response.status(200).json(jsonInResponse);
 							});
 			})
+			/* istanbul ignore next  */
 			.catch( function (error) {
 				return response.status(500).json({code: 0, message: "Promise from rules engine not fulfilled!"});
 			});
 	})
+	/* istanbul ignore next  */
 	.catch(function (error) {
 		/* istanbul ignore next  */
 		console.log(error);
@@ -693,7 +708,9 @@ router.get('/:tripId', Verify.verifyToken, Verify.verifyUserOrAppRole, function(
 			}
 		};
 		return response.status(200).json(jsonInResponse);
-	}).catch(function (error) {
+	})
+	/* istanbul ignore next  */
+	.catch(function (error) {
 		/* istanbul ignore next  */
 		return response.status(500).json({code: 0, message: "Unexpected error"});
 	});
@@ -895,6 +912,7 @@ function getFacts(userId, typeOfUser, travelDistance){
 					};
 					resolve(fact);
 				})
+				/* istanbul ignore next  */
 				.catch(function (error) {
 					/* istanbul ignore next  */
 					console.log(error);
@@ -940,6 +958,7 @@ function getFacts(userId, typeOfUser, travelDistance){
 						resolve(fact);
 					}
 				})
+				/* istanbul ignore next  */
 				.catch(function (error) {
 					/* istanbul ignore next  */
 					console.log(error);
@@ -948,6 +967,7 @@ function getFacts(userId, typeOfUser, travelDistance){
 			}
 			
 		})
+		/* istanbul ignore next  */
 		.catch(function (error) {
 			/* istanbul ignore next  */
 			console.log(error);
