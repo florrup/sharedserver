@@ -1,4 +1,7 @@
 // Sentencias SQL para inicializar una base de datos
+// ////////////////////////////////////////////////////////////////////////////
+// IMPORTANTE: Tras crear las tablas recordar cargar las rules
+// ////////////////////////////////////////////////////////////////////////////
 
 // Business Users
 CREATE TABLE businessusers(id SERIAL PRIMARY KEY, _ref VARCHAR(20), username VARCHAR(40), password VARCHAR(40), name VARCHAR(40), surname VARCHAR(40), roles TEXT[]);
