@@ -287,10 +287,10 @@ class RulesPage extends Component {
             <br/><br/><br/>
             <h3>Correr una regla</h3>
             <form onSubmit={this.runRule.bind(this)}>
-              <label>EJEMPLO BORRAR DSP: <input disabled type="text" value="50ARSMinimo"/></label>
+              <label>EJEMPLO: <input disabled type="text" value="50ARSMinimo"/></label>
               <label>Nombre: <input type="text" ref="name" /></label>
               <label>Language: <input type="text" ref="language" /></label>
-              <label>EJEMPLO BORRAR DSP: <input disabled type="text" value={exampleFact}/></label>
+              <label>EJEMPLO: <input disabled type="text" value={exampleFact}/></label>
               <label>Fact: <textarea type="text" ref="fact" /></label>
               <center><button type="submit">Correr regla</button></center>
               <br/>
@@ -300,7 +300,7 @@ class RulesPage extends Component {
 
             <h3>Ejecutar un set de reglas</h3>
             <form onSubmit={this.runRuleSet.bind(this)}>
-              <label>EJEMPLO BORRAR DSP: <input disabled type="text" value={exampleFact}/></label>
+              <label>EJEMPLO: <input disabled type="text" value={exampleFact}/></label>
               <label>Fact: <textarea type="text" ref="factSet" /></label>
               <center><button type="submit">Correr set de reglas</button></center>
               <br/>
