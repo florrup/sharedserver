@@ -22,7 +22,7 @@ class AppServersPage extends Component {
   getServers() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get('http://localhost:5000/api/servers/activeServers', axiosHeader)
+    return axios.get(process.env.FRONTEND + '/api/servers/activeServers', axiosHeader)
     .then((response) => {
       console.log(response);
       this.setState( { servers: response.data } ); // array with active servers
@@ -45,7 +45,7 @@ class AppServersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.post('http://localhost:5000/api/servers/deactivateServer', serverToDeactivate, axiosHeader) 
+    return axios.post(process.env.FRONTEND + '/api/servers/deactivateServer', serverToDeactivate, axiosHeader) 
     .then((response) => {
       this.getServers();  
     })
@@ -71,7 +71,7 @@ class AppServersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.post('http://localhost:5000/api/servers', newServer, axiosHeader)
+    return axios.post(process.env.FRONTEND + '/api/servers', newServer, axiosHeader)
     .then((response) => {
       this.refs.textarea.value = JSON.stringify(response.data.server.token);  
       this.getServers();

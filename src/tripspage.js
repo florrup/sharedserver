@@ -20,7 +20,7 @@ class TripsPage extends Component {
   getTrips() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get('http://localhost:5000/api/trips', axiosHeader)
+    return axios.get(process.env.FRONTEND + '/api/trips', axiosHeader)
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);

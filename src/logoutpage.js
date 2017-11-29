@@ -21,7 +21,7 @@ class Logout extends React.Component {
   getToken() {
     var infoToSend = {BusinessUserCredentials:{ username: this.state.username, password: this.state.password }};
 
-    return axios.post('http://localhost:5000/api/token', infoToSend)
+    return axios.post(process.env.FRONTEND + '/api/token', infoToSend)
     .then((response) => {
       if (response.status == 201) {
         console.log(response.data.token.token); // this gets the token 

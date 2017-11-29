@@ -26,7 +26,7 @@ class UsersPage extends Component {
   getPeople() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get('http://localhost:5000/api/users', axiosHeader)
+    return axios.get(process.env.FRONTEND + '/api/users', axiosHeader)
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);
