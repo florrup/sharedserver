@@ -1,0 +1,10 @@
+-[report]		
+ -omit =  		
+ -    models/*		
+ -    views/*		
+ -    public/*
+ -    utils/*
+ -    src/*
+ -    public/*
+ -    out/*
+ -    node_modules/*
