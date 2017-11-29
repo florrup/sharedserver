@@ -50,6 +50,7 @@ class Login extends React.Component {
         console.log(response.data.token.token); // this gets the token 
         localStorage.setItem('token', response.data.token.token);
         localStorage.setItem('isLoggedIn', 'true'); // doesn't accept booleans
+        localStorage.setItem('username', this.state.username);
       } 
     })
     .catch(function(error) {
