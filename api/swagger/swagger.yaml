@@ -666,31 +666,6 @@ paths:
           schema:
             $ref: "#/definitions/Error"
       summary: Listado de transacciones de un usuario
-    post:
-      tags:
-        - app
-      security:
-        - ApplicationToken: []
-      description: |
-        Realiza un pago por parte del usuario. Como se esta cobrando al finalizar el viaje, este endpoint se debería usar solo si el pago falló, así se puede normalizar el saldo del usuario.
-      responses:
-        200:
-          description: Transacción realizada correctamente
-          schema:
-            properties:
-              metadata:
-                $ref: '#/definitions/EntityMetadata'
-              transaction:
-                $ref: '#/definitions/Transaction'
-        401:
-          description: Unauthorized
-          schema:
-              $ref: '#/definitions/Error'
-        500:
-          description: "Unexpected error"
-          schema:
-            $ref: "#/definitions/Error"
-      summary: Realizar un pago por parte de un usuario
   /users/{userId}/trips:
     parameters:
       - description: "Identificador del usuario"
