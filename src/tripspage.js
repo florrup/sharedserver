@@ -5,6 +5,8 @@ import { Footer, Menu, Header, Banner, GeneralStats, UserList, TripsList } from 
 
 import GlobalStrings from './components/GlobalStrings'
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 class TripsPage extends Component {
 
  constructor(props) {
@@ -20,7 +22,7 @@ class TripsPage extends Component {
   getTrips() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get(process.env.FRONTEND + '/api/trips', axiosHeader)
+    return axios.get(path + '/api/trips', axiosHeader)
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);

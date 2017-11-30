@@ -23890,7 +23890,7 @@ exports.default = new GlobalStrings();
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
+
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -23920,6 +23920,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 var AppServersPage = function (_Component) {
   _inherits(AppServersPage, _Component);
 
@@ -23929,10 +23931,12 @@ var AppServersPage = function (_Component) {
     var _this = _possibleConstructorReturn(this, (AppServersPage.__proto__ || Object.getPrototypeOf(AppServersPage)).call(this, props));
 
     _this.state = { // populate state with data that comes from api
-      servers: []
+      servers: [],
+      inactiveServers: []
     };
 
     _this.getServers = _this.getServers.bind(_this);
+    _this.getInactiveServers = _this.getInactiveServers.bind(_this);
     return _this;
   }
 
@@ -23946,9 +23950,29 @@ var AppServersPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.get(process.env.FRONTEND + '/api/servers/activeServers', axiosHeader).then(function (response) {
+      return _axios2.default.get(path + '/api/servers/activeServers', axiosHeader).then(function (response) {
         console.log(response);
         _this2.setState({ servers: response.data }); // array with active servers
+      }).catch(function (error) {
+        if (error.response.request.status == 401) {
+          alert(error.response.request.statusText);
+        }
+      });
+    }
+
+    /* Displays inactive servers on screen */
+
+  }, {
+    key: 'getInactiveServers',
+    value: function getInactiveServers() {
+      var _this3 = this;
+
+      var localToken = localStorage.getItem('token');
+      var axiosHeader = { headers: { 'x-access-token': localToken } };
+      console.log('Inside inactive servers');
+      return _axios2.default.get(path + '/api/servers/inactiveServers', axiosHeader).then(function (response) {
+        console.log('Inactive servers are: ' + response);
+        _this3.setState({ inactiveServers: response.data }); // array with inactive servers
       }).catch(function (error) {
         if (error.response.request.status == 401) {
           alert(error.response.request.statusText);
@@ -23961,7 +23985,7 @@ var AppServersPage = function (_Component) {
   }, {
     key: 'deactivateServer',
     value: function deactivateServer(event) {
-      var _this3 = this;
+      var _this4 = this;
 
       event.preventDefault();
       console.log(this.refs.name.value);
@@ -23972,8 +23996,8 @@ var AppServersPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.post(process.env.FRONTEND + '/api/servers/deactivateServer', serverToDeactivate, axiosHeader).then(function (response) {
-        _this3.getServers();
+      return _axios2.default.post(path + '/api/servers/deactivateServer', serverToDeactivate, axiosHeader).then(function (response) {
+        _this4.getServers();
       }).catch(function (error) {
         if (error.response.request.status == 401) {
           alert(error.response.request.statusText);
@@ -23986,7 +24010,7 @@ var AppServersPage = function (_Component) {
   }, {
     key: 'addServer',
     value: function addServer(event) {
-      var _this4 = this;
+      var _this5 = this;
 
       event.preventDefault();
       console.log(this.refs.name.value);
@@ -24001,9 +24025,9 @@ var AppServersPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.post(process.env.FRONTEND + '/api/servers', newServer, axiosHeader).then(function (response) {
-        _this4.refs.textarea.value = JSON.stringify(response.data.server.token);
-        _this4.getServers();
+      return _axios2.default.post(path + '/api/servers', newServer, axiosHeader).then(function (response) {
+        _this5.refs.textarea.value = JSON.stringify(response.data.server.token);
+        _this5.getServers();
       }).catch(function (error) {
         if (error.response.request.status == 400) {
           alert(error.response.data.message);
@@ -24022,6 +24046,7 @@ var AppServersPage = function (_Component) {
     key: 'render',
     value: function render() {
       var servers = this.state.servers;
+      var inactiveServers = this.state.inactiveServers;
 
       var tableHeader = ["Id", "Username", "Password", "Created By", "Created Time", "Nombre", "Última conexión"];
 
@@ -24074,6 +24099,14 @@ var AppServersPage = function (_Component) {
                 )
               )
             ),
+            _react2.default.createElement('br', null),
+            _react2.default.createElement('br', null),
+            _react2.default.createElement(
+              'h3',
+              null,
+              'Application Servers Invalidados'
+            ),
+            _react2.default.createElement(_components.ServerList, { header: tableHeader, servers: inactiveServers }),
             _react2.default.createElement('br', null),
             _react2.default.createElement('br', null),
             _react2.default.createElement(
@@ -24148,7 +24181,6 @@ var AppServersPage = function (_Component) {
 }(_react.Component);
 
 _reactDom2.default.render(_react2.default.createElement(AppServersPage, null), document.getElementById('appserverspage'));
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ })
 /******/ ]);

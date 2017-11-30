@@ -6,6 +6,8 @@ import GlobalStrings from './components/GlobalStrings'
 
 import { Footer, Menu, Header, Banner, GeneralStats, RulesList, CollapseButton, RuleChangesList } from './components';
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 class RulesPage extends Component {
 
  constructor(props) {
@@ -24,7 +26,7 @@ class RulesPage extends Component {
   getRules() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get(process.env.FRONTEND + '/api/rules', axiosHeader)
+    return axios.get(path + '/api/rules', axiosHeader)
     .then((response) => {
       console.log(response.data.rules);
       this.setState( { rules: response.data.rules } )
@@ -43,7 +45,7 @@ class RulesPage extends Component {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
     console.log(this.refs.name.value);
-    return axios.get(process.env.FRONTEND + '/api/rules/' + this.refs.name.value + '/commits', axiosHeader)
+    return axios.get(path + '/api/rules/' + this.refs.name.value + '/commits', axiosHeader)
     .then((response) => {
       console.log('Commits are ' + response.data.commits);
       this.setState( { ruleChanges: [] } );
@@ -77,7 +79,7 @@ class RulesPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.post(process.env.FRONTEND + '/api/rules', ruleToPost, axiosHeader)
+    return axios.post(path + '/api/rules', ruleToPost, axiosHeader)
     .then((response) => {
       this.getRules();  
     })
@@ -98,7 +100,7 @@ class RulesPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.delete(process.env.FRONTEND + '/api/rules/' + this.refs.name.value, axiosHeader) 
+    return axios.delete(path + '/api/rules/' + this.refs.name.value, axiosHeader) 
     .then((response) => {
       this.getRules();  
     })
@@ -132,7 +134,7 @@ class RulesPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.put(process.env.FRONTEND + '/api/rules/' + this.refs.name.value, ruleToModify, axiosHeader) 
+    return axios.put(path + '/api/rules/' + this.refs.name.value, ruleToModify, axiosHeader) 
     .then((response) => {
       this.getRules();  
     })
@@ -167,7 +169,7 @@ class RulesPage extends Component {
       blob: JSON.parse(stringifiedFact)
     }
     
-    return axios.post(process.env.FRONTEND + '/api/rules/' + this.refs.name.value + '/run', JSONfact, axiosHeader) 
+    return axios.post(path + '/api/rules/' + this.refs.name.value + '/run', JSONfact, axiosHeader) 
     .then((response) => {
       console.log(response);
       this.refs.textarea.value = JSON.stringify(response.data.facts.blob);  
@@ -199,7 +201,7 @@ class RulesPage extends Component {
       }
     }
     
-    return axios.post(process.env.FRONTEND + '/api/rules/run', JSONfact, axiosHeader) 
+    return axios.post(path + '/api/rules/run', JSONfact, axiosHeader) 
     .then((response) => {
       console.log(response);
       this.refs.rulesettextarea.value = JSON.stringify(response.data.facts.blob);  

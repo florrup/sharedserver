@@ -10,7 +10,6 @@ import { Footer, Menu, Header, Banner, GeneralStats } from './components';
 // El index se va a ir actualizando solito
 
 class App extends Component {
-
 	render() {
 		return (
       <div id="wrapper">

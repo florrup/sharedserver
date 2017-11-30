@@ -5,6 +5,8 @@ import { Footer, Menu, Header, Banner, GeneralStats, BusinessUserList, CollapseB
 
 import GlobalStrings from './components/GlobalStrings'
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 class BusinessUsersPage extends Component {
 
   constructor(props) {
@@ -22,7 +24,7 @@ class BusinessUsersPage extends Component {
   getBusinessPeople() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get(process.env.FRONTEND + '/api/business-users', axiosHeader)
+    return axios.get(path + '/api/business-users', axiosHeader)
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);
@@ -56,7 +58,7 @@ class BusinessUsersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.post(process.env.FRONTEND + '/api/business-users', businessUserToPost, axiosHeader)
+    return axios.post(path + '/api/business-users', businessUserToPost, axiosHeader)
     .then((response) => {
       this.getBusinessPeople();  
     })
@@ -78,7 +80,7 @@ class BusinessUsersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.delete(process.env.FRONTEND + '/api/business-users/' + this.refs.id.value, axiosHeader) 
+    return axios.delete(path + '/api/business-users/' + this.refs.id.value, axiosHeader) 
     .then((response) => {
       this.getBusinessPeople();  
     })
@@ -109,7 +111,7 @@ class BusinessUsersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.put(process.env.FRONTEND + '/api/business-users/' + this.refs.id.value, businessUserToModify, axiosHeader) 
+    return axios.put(path + '/api/business-users/' + this.refs.id.value, businessUserToModify, axiosHeader) 
     .then((response) => {
       this.getBusinessPeople();  
     })

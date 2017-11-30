@@ -6,6 +6,8 @@ import GlobalStrings from './components/GlobalStrings';
 
 import { Footer, Menu, Header, Banner, GeneralStats, ServerList, CollapseButton } from './components';
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 class AppServersPage extends Component {
 
  constructor(props) {
@@ -13,19 +15,38 @@ class AppServersPage extends Component {
 
     this.state = {// populate state with data that comes from api
       servers: [],
+      inactiveServers: [],
     } 
 
     this.getServers = this.getServers.bind(this);
+    this.getInactiveServers = this.getInactiveServers.bind(this);
   }
 
   /* Displays servers on screen */
   getServers() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get(process.env.FRONTEND + '/api/servers/activeServers', axiosHeader)
+    return axios.get(path + '/api/servers/activeServers', axiosHeader)
     .then((response) => {
       console.log(response);
       this.setState( { servers: response.data } ); // array with active servers
+    })
+    .catch(function (error) {
+      if (error.response.request.status == 401) {
+        alert(error.response.request.statusText);
+      }
+    });
+  }
+
+  /* Displays inactive servers on screen */
+  getInactiveServers() {
+    var localToken = localStorage.getItem('token');
+    var axiosHeader = { headers: {'x-access-token': localToken} };
+    console.log('Inside inactive servers');
+    return axios.get(path + '/api/servers/inactiveServers', axiosHeader)
+    .then((response) => {
+      console.log('Inactive servers are: ' + response);
+      this.setState( { inactiveServers: response.data } ); // array with inactive servers
     })
     .catch(function (error) {
       if (error.response.request.status == 401) {
@@ -45,7 +66,7 @@ class AppServersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.post(process.env.FRONTEND + '/api/servers/deactivateServer', serverToDeactivate, axiosHeader) 
+    return axios.post(path + '/api/servers/deactivateServer', serverToDeactivate, axiosHeader) 
     .then((response) => {
       this.getServers();  
     })
@@ -71,7 +92,7 @@ class AppServersPage extends Component {
 
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.post(process.env.FRONTEND + '/api/servers', newServer, axiosHeader)
+    return axios.post(path + '/api/servers', newServer, axiosHeader)
     .then((response) => {
       this.refs.textarea.value = JSON.stringify(response.data.server.token);  
       this.getServers();
@@ -92,6 +113,7 @@ class AppServersPage extends Component {
 
   render() {
     const {servers} = this.state;
+    const {inactiveServers} = this.state;
     var tableHeader = ["Id", "Username", "Password", "Created By", "Created Time", "Nombre", "Última conexión"];
     
     var isLoggedIn = (localStorage.getItem('isLoggedIn') == 'true');
@@ -120,6 +142,9 @@ class AppServersPage extends Component {
                 <center><button type="submit">Desactivar Appserver</button></center>
               </form>
             </CollapseButton>
+            <br/><br/>
+            <h3>Application Servers Invalidados</h3>
+            <ServerList header={tableHeader} servers={inactiveServers} />
             <br/><br/>
             <CollapseButton name="Agregar Appserver">
               <br/>

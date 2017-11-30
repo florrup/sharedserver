@@ -5,6 +5,8 @@ import { Footer, Menu, Header, Banner, GeneralStats, UserList } from './componen
 
 import GlobalStrings from './components/GlobalStrings'
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 class UsersPage extends Component {
 
  constructor(props) {
@@ -26,7 +28,7 @@ class UsersPage extends Component {
   getPeople() {
     var localToken = localStorage.getItem('token');
     var axiosHeader = { headers: {'x-access-token': localToken} };
-    return axios.get(process.env.FRONTEND + '/api/users', axiosHeader)
+    return axios.get(path + '/api/users', axiosHeader)
     .then((response) => {
       console.log(response.data)
       //console.log('Metadata' + response.data.metadata);

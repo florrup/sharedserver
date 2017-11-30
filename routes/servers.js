@@ -90,6 +90,41 @@ router.get('/activeServers', Verify.verifyToken, Verify.verifyManagerOrAdminRole
 });
 
 /**
+ *  Devuelve el estado actual de los servers con sesión inválida
+ *
+ */
+router.get('/inactiveServers', Verify.verifyToken, Verify.verifyManagerOrAdminRole, function(request, response) {
+	var inactiveServers = [];
+	var activeServersPromise = Verify.reportActualState()
+	.then (activeServers => {
+		Server.findAll({
+			attributes: ['id', 'username', 'password', '_ref', 'createdby', 'createdtime', 'name', 'lastconnection']
+		}).then(servers => {
+			/* istanbul ignore if  */
+			if (!servers) {
+				return response.status(500).json({code: 0, message: "Unexpected error"});
+			}
+
+			for (var i = 0; i < servers.length; i++) {
+				if (!activeServers.includes(servers[i])) {
+					var serverJSON = {
+						id: servers[i].id,
+						username: servers[i].username,
+						password: servers[i].password,
+						created_by: servers[i].createdby,
+						created_time: servers[i].createdtime,
+						name: servers[i].name,
+						last_connection: servers[i].lastconnection
+					};
+					inactiveServers.push(serverJSON)
+				}
+			}
+			return response.status(200).json(inactiveServers);
+		})
+	});
+});
+
+/**
  *  Devuelve toda la información acerca de todos los application servers indicados.
  *
  */

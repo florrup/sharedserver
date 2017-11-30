@@ -6,6 +6,8 @@ import { Footer, Menu, Header, Banner, GeneralStats } from './components';
 
 import GlobalStrings from './components/GlobalStrings'
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 class Login extends React.Component {
 
   constructor(props) {
@@ -44,7 +46,7 @@ class Login extends React.Component {
   getToken() {
     var infoToSend = {BusinessUserCredentials:{ username: this.state.username, password: this.state.password }};
 
-    return axios.post(process.env.FRONTEND + '/api/token', infoToSend)
+    return axios.post(path + '/api/token', infoToSend)
     .then((response) => {
       if (response.status == 201) {
         console.log(response.data.token.token); // this gets the token 

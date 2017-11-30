@@ -23892,7 +23892,7 @@ exports.default = new GlobalStrings();
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
+
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -23922,6 +23922,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var path = 'https://serene-peak-94842.herokuapp.com';
+
 var RulesPage = function (_Component) {
   _inherits(RulesPage, _Component);
 
@@ -23950,7 +23952,7 @@ var RulesPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.get(process.env.FRONTEND + '/api/rules', axiosHeader).then(function (response) {
+      return _axios2.default.get(path + '/api/rules', axiosHeader).then(function (response) {
         console.log(response.data.rules);
         _this2.setState({ rules: response.data.rules });
       }).catch(function (error) {
@@ -23972,7 +23974,7 @@ var RulesPage = function (_Component) {
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
       console.log(this.refs.name.value);
-      return _axios2.default.get(process.env.FRONTEND + '/api/rules/' + this.refs.name.value + '/commits', axiosHeader).then(function (response) {
+      return _axios2.default.get(path + '/api/rules/' + this.refs.name.value + '/commits', axiosHeader).then(function (response) {
         console.log('Commits are ' + response.data.commits);
         _this3.setState({ ruleChanges: [] });
         _this3.setState({ ruleChanges: response.data.commits });
@@ -24009,7 +24011,7 @@ var RulesPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.post(process.env.FRONTEND + '/api/rules', ruleToPost, axiosHeader).then(function (response) {
+      return _axios2.default.post(path + '/api/rules', ruleToPost, axiosHeader).then(function (response) {
         _this4.getRules();
       }).catch(function (error) {
         if (error.response.request.status == 400) {
@@ -24033,7 +24035,7 @@ var RulesPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.delete(process.env.FRONTEND + '/api/rules/' + this.refs.name.value, axiosHeader).then(function (response) {
+      return _axios2.default.delete(path + '/api/rules/' + this.refs.name.value, axiosHeader).then(function (response) {
         _this5.getRules();
       }).catch(function (error) {
         if (error.response.request.status == 401) {
@@ -24070,7 +24072,7 @@ var RulesPage = function (_Component) {
 
       var localToken = localStorage.getItem('token');
       var axiosHeader = { headers: { 'x-access-token': localToken } };
-      return _axios2.default.put(process.env.FRONTEND + '/api/rules/' + this.refs.name.value, ruleToModify, axiosHeader).then(function (response) {
+      return _axios2.default.put(path + '/api/rules/' + this.refs.name.value, ruleToModify, axiosHeader).then(function (response) {
         _this6.getRules();
       }).catch(function (error) {
         if (error.response.request.status == 400) {
@@ -24108,7 +24110,7 @@ var RulesPage = function (_Component) {
         blob: JSON.parse(stringifiedFact)
       };
 
-      return _axios2.default.post(process.env.FRONTEND + '/api/rules/' + this.refs.name.value + '/run', JSONfact, axiosHeader).then(function (response) {
+      return _axios2.default.post(path + '/api/rules/' + this.refs.name.value + '/run', JSONfact, axiosHeader).then(function (response) {
         console.log(response);
         _this7.refs.textarea.value = JSON.stringify(response.data.facts.blob);
       }).catch(function (error) {
@@ -24143,7 +24145,7 @@ var RulesPage = function (_Component) {
         }
       };
 
-      return _axios2.default.post(process.env.FRONTEND + '/api/rules/run', JSONfact, axiosHeader).then(function (response) {
+      return _axios2.default.post(path + '/api/rules/run', JSONfact, axiosHeader).then(function (response) {
         console.log(response);
         _this8.refs.rulesettextarea.value = JSON.stringify(response.data.facts.blob);
       }).catch(function (error) {
@@ -24472,7 +24474,6 @@ var RulesPage = function (_Component) {
 }(_react.Component);
 
 _reactDom2.default.render(_react2.default.createElement(RulesPage, null), document.getElementById('rulespage'));
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ })
 /******/ ]);
